@@ -1,1 +1,1 @@
-# business-management-application
+# React + TypeScript + Vite

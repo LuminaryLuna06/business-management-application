@@ -1,24 +1,9 @@
-// enum Gender {
-//   Male = "Nam",
-//   Female = "Nữ",
-//   Other = "Khác",
-// }
-// enum IdentificationType {
-//   CitizenID = "CCCD",
-//   Passport = "Hộ chiếu",
-//   Other = "Khác",
-// }
-// export enum BusinessType {
-//   Individual = "Cá nhân",
-//   LLC = "Công ty TNHH",
-//   JSC = "Công ty Cổ phần",
-// }
-enum Gender {
+export enum Gender {
   Male = 1,
   Female = 2,
   Other = 3,
 }
-enum IdentificationType {
+export enum IdentificationType {
   CitizenID = 1,
   Passport = 2,
   Other = 3,
@@ -31,16 +16,16 @@ export enum BusinessType {
 
 export type BaseBusiness = {
   business_id: string;
+  business_code: string;
   business_name: string;
+  business_type: BusinessType;
+  industry: string;
+  issue_date: Date;
   address: string;
   phone_number?: string;
   email?: string;
   fax?: string;
   website?: string;
-  industry: string;
-  business_type: BusinessType;
-  issue_date: Date;
-  business_code: string;
   created_at: Date;
   updated_at?: Date;
 };

@@ -14,7 +14,7 @@ import {
   IconUser,
   IconCertificate,
   IconCalendar,
-  IconAlertTriangle,
+  // IconAlertTriangle,
 } from "@tabler/icons-react";
 import { Outlet, useParams } from "react-router";
 import { NavLink as RouterNavLink } from "react-router-dom";
@@ -112,7 +112,7 @@ export default function BusinessPage() {
             />
           }
         />
-        <NavLink
+        {/* <NavLink
           component={RouterNavLink}
           to={`/business/${businessId}/violations`}
           label="Kết quả vi phạm"
@@ -124,7 +124,7 @@ export default function BusinessPage() {
               className="mantine-rotate-rtl"
             />
           }
-        />
+        /> */}
       </AppShell.Navbar>
 
       <AppShell.Main>

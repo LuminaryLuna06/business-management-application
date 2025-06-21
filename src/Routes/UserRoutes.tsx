@@ -7,7 +7,7 @@ import EmployeesPage from "../pages/Business/components/Employees";
 import SubLicenses from "../pages/Business/components/Sub-Licenses";
 import DashboardPage from "../pages/Business/components/Dashboard";
 import InspectionPage from "../pages/Business/components/Inspection-Schedule";
-import ViolationPage from "../pages/Business/components/Violations";
+// import ViolationPage from "../pages/Business/components/Violations";
 
 export default function UserRoutes() {
   return (
@@ -20,7 +20,7 @@ export default function UserRoutes() {
           <Route path="employees" element={<EmployeesPage />} />
           <Route path="sub-licenses" element={<SubLicenses />} />
           <Route path="inspection-schedule" element={<InspectionPage />} />
-          <Route path="violations" element={<ViolationPage />} />
+          {/* <Route path="violations" element={<ViolationPage />} /> */}
         </Route>
       </Route>
     </Routes>

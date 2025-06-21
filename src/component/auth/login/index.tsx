@@ -76,9 +76,9 @@ export default function LoginPage() {
   };
 
   // Handle navigation to signup page
-  const handleCreateAccount = () => {
-    navigate("/signup");
-  };
+  // const handleCreateAccount = () => {
+  //   navigate("/signup");
+  // };
 
   return (
     <Paper

@@ -33,6 +33,8 @@ import {
 import { NavLink as RouterNavLink, useNavigate } from "react-router-dom";
 import { dantoc } from "../../data/dantoc";
 import { quoctich } from "../../data/quoctich";
+import tree from "../../data/tree.json";
+import { useMemo } from "react";
 
 function TestPage() {
   const [opened, { toggle }] = useDisclosure();
@@ -152,6 +154,8 @@ function TestPage() {
             .min(2, "Chức vụ phải có ít nhất 2 ký tự")
         : schema
     ),
+    province: Yup.string().required("Tỉnh/TP không được để trống"),
+    ward: Yup.string().required("Xã/Phường không được để trống"),
   });
 
   // Khởi tạo form với useForm và validate bằng Yup
@@ -190,6 +194,8 @@ function TestPage() {
       position: "",
       created_at: Timestamp.fromDate(new Date()),
       updated_at: Timestamp.fromDate(new Date()),
+      province: "",
+      ward: "",
     },
     validate: (values) => {
       try {
@@ -209,6 +215,20 @@ function TestPage() {
       }
     },
   });
+
+  // Province/Ward options
+  const provinceOptions = useMemo(
+    () => tree.map((p) => ({ value: p.name, label: p.name })),
+    []
+  );
+  const selectedProvince = tree.find((p) => p.name === form.values.province);
+  const wardOptions = useMemo(
+    () =>
+      selectedProvince
+        ? selectedProvince.wards.map((w) => ({ value: w.name, label: w.name }))
+        : [],
+    [form.values.province]
+  );
 
   // Hàm xử lý gửi dữ liệu lên Firebase
   const handleSubmit = async (values: typeof form.values) => {
@@ -394,6 +414,25 @@ function TestPage() {
                 placeholder="Chọn loại hình"
                 mb="sm"
                 key={`business_type-${form.values.business_type}`}
+              />
+              <Select
+                label="Tỉnh/Thành phố"
+                data={provinceOptions}
+                placeholder="Chọn tỉnh/thành phố"
+                {...form.getInputProps("province")}
+                searchable
+                clearable
+                mb="sm"
+              />
+              <Select
+                label="Xã/Phường"
+                data={wardOptions}
+                placeholder="Chọn xã/phường"
+                {...form.getInputProps("ward")}
+                searchable
+                clearable
+                mb="sm"
+                disabled={!form.values.province}
               />
               <TextInput
                 label="Địa chỉ"

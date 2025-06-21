@@ -16,14 +16,7 @@ import {
   SimpleGrid,
   Divider,
 } from "@mantine/core";
-import {
-  collection,
-  addDoc,
-  Timestamp,
-  doc,
-  getDoc,
-  setDoc,
-} from "firebase/firestore";
+import { Timestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import * as Yup from "yup";
@@ -623,7 +616,9 @@ function TestPage() {
                   onClick={() => {
                     if (form.isValid()) {
                       console.log("Form values:", form.values);
-                      navigate(`/business/${form.values.business_id}/dashboard`);
+                      navigate(
+                        `/business/${form.values.business_id}/dashboard`
+                      );
                     }
                   }}
                 >

@@ -1,4 +1,12 @@
-import { Box, Text, Button, Modal, Group } from "@mantine/core";
+import {
+  Box,
+  Text,
+  Button,
+  Modal,
+  Group,
+  Card,
+  SimpleGrid,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -139,14 +147,55 @@ function Employees() {
     close();
   };
 
+  // Thống kê số lượng
+  const insuranceCount = workers.filter((w) => w.insurance_status).length;
+  const foodSafetyCount = workers.filter((w) => w.food_safety_training).length;
+  const fireSafetyCount = workers.filter((w) => w.fire_safety_training).length;
+
   return (
     <Box p="md">
       <Text size="xl" fw={700} mb="md">
         Danh Sách Nhân Sự
       </Text>
-      <Button onClick={open} mb="md">
-        Thêm nhân viên
-      </Button>
+      {/* Thống kê nhanh */}
+      <SimpleGrid cols={{ base: 1, sm: 4 }} mb="md">
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <Text size="lg" fw={500}>
+            Tổng số nhân sự
+          </Text>
+          <Text size="2rem" fw={700} color="violet" mt="xs">
+            {workers.length}
+          </Text>
+        </Card>
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <Text size="lg" fw={500}>
+            Đã đóng bảo hiểm
+          </Text>
+          <Text size="2rem" fw={700} color="blue" mt="xs">
+            {insuranceCount}
+          </Text>
+        </Card>
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <Text size="lg" fw={500}>
+            Đào tạo ATTP
+          </Text>
+          <Text size="2rem" fw={700} color="green" mt="xs">
+            {foodSafetyCount}
+          </Text>
+        </Card>
+        <Card shadow="sm" padding="lg" radius="md" withBorder>
+          <Text size="lg" fw={500}>
+            Đào tạo PCCC
+          </Text>
+          <Text size="2rem" fw={700} color="red" mt="xs">
+            {fireSafetyCount}
+          </Text>
+        </Card>
+      </SimpleGrid>
+      <Group mb="md">
+        <Button onClick={open}>Thêm nhân viên</Button>
+        <Button variant="outline">Import dữ liệu</Button>
+      </Group>
       <MantineReactTable
         columns={columns}
         data={workers}

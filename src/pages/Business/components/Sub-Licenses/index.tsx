@@ -168,12 +168,16 @@ function SubLicenses() {
 
   return (
     <Box p="md">
-      <Text size="xl" fw={700} mb="md">
+      <Text size="xl" fw={700} mb="xs">
         Danh Sách Giấy Phép Con
       </Text>
-      <Button onClick={open} mb="md">
-        Thêm giấy phép
-      </Button>
+      <Text size="sm" color="dimmed" mb="md">
+        Tổng số giấy phép con: {licenses.length}
+      </Text>
+      <Group mb="md">
+        <Button onClick={open}>Thêm giấy phép</Button>
+        <Button variant="outline">Import dữ liệu</Button>
+      </Group>
       <MantineReactTable
         columns={columns}
         data={licenses}

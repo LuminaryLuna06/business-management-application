@@ -11,7 +11,7 @@
     "release": "standard-version"
   },
   "dependencies": {
-    "@mantine/charts": "^7.17.5",
+    "@mantine/charts": "^7.17.8",
     "@mantine/core": "^7.17.8",
     "@mantine/dates": "^7.17.8",
     "@mantine/form": "^8.0.0",

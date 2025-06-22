@@ -71,6 +71,9 @@ function InspectionSchedulePage() {
   const [selectedDecision, setSelectedDecision] =
     useState<PenaltyDecision | null>(null);
   const [showAddViolation, setShowAddViolation] = useState(false);
+  const [showAddPenalty, setShowAddPenalty] = useState(false);
+  const [selectedViolationForPenalty, setSelectedViolationForPenalty] =
+    useState<ViolationWithDecision | null>(null);
 
   // Mock data init
   useEffect(() => {
@@ -180,6 +183,18 @@ function InspectionSchedulePage() {
     validate: yupResolver(violationSchema),
   });
 
+  // Form for adding penalty decision
+  const penaltyForm = useForm({
+    initialValues: {
+      decision_number: "",
+      issue_date: new Date(),
+      penalty_status: "pending" as const,
+      fix_status: "not_fixed" as const,
+      officer_signed: "",
+    },
+    validate: yupResolver(violationSchema),
+  });
+
   function handleAddInspection(values: typeof form.values) {
     const newSchedule: InspectionSchedule = {
       schedule_id: crypto.randomUUID(),
@@ -217,6 +232,39 @@ function InspectionSchedulePage() {
     setShowAddViolation(false);
     violationForm.reset();
     closeViolation();
+  }
+
+  function handleAddPenalty(values: typeof penaltyForm.values) {
+    if (!selectedViolationForPenalty || !selectedScheduleId) return;
+
+    const newPenalty: PenaltyDecision = {
+      id: crypto.randomUUID(),
+      violation_id: selectedViolationForPenalty.violation_id,
+      decision_number: values.decision_number,
+      issue_date: values.issue_date,
+      penalty_status: values.penalty_status,
+      fix_status: values.fix_status,
+      officer_signed: values.officer_signed,
+    };
+
+    // Update the violation with the penalty decision
+    setViolations((prev) => ({
+      ...prev,
+      [selectedScheduleId]: prev[selectedScheduleId].map((violation) =>
+        violation.violation_id === selectedViolationForPenalty.violation_id
+          ? { ...violation, penalty_decision: newPenalty }
+          : violation
+      ),
+    }));
+
+    setShowAddPenalty(false);
+    setSelectedViolationForPenalty(null);
+    penaltyForm.reset();
+  }
+
+  function handleAddPenaltyDecision(violation: ViolationWithDecision) {
+    setSelectedViolationForPenalty(violation);
+    setShowAddPenalty(true);
   }
 
   return (
@@ -330,8 +378,34 @@ function InspectionSchedulePage() {
             columns={[
               { accessorKey: "violation_number", header: "Số quyết định" },
               { accessorKey: "violation_desc", header: "Mô tả vi phạm" },
-              { accessorKey: "violation_status", header: "Trạng thái xử phạt" },
-              { accessorKey: "fix_status", header: "Trạng thái khắc phục" },
+              {
+                accessorKey: "violation_status",
+                header: "Trạng thái xử phạt",
+                Cell: ({ cell }) => {
+                  const status = cell.getValue<string>();
+                  if (status === "pending")
+                    return <Badge color="yellow">Chưa xử phạt</Badge>;
+                  if (status === "paid")
+                    return <Badge color="green">Đã xử phạt</Badge>;
+                  if (status === "dismissed")
+                    return <Badge color="gray">Đã miễn</Badge>;
+                  return status;
+                },
+              },
+              {
+                accessorKey: "fix_status",
+                header: "Trạng thái khắc phục",
+                Cell: ({ cell }) => {
+                  const status = cell.getValue<string>();
+                  if (status === "not_fixed")
+                    return <Badge color="red">Chưa khắc phục</Badge>;
+                  if (status === "fixed")
+                    return <Badge color="green">Đã khắc phục</Badge>;
+                  if (status === "in_progress")
+                    return <Badge color="blue">Đang xử lý</Badge>;
+                  return status;
+                },
+              },
               {
                 header: "Quyết định xử phạt",
                 Cell: ({ row }: { row: { original: ViolationWithDecision } }) =>
@@ -345,9 +419,13 @@ function InspectionSchedulePage() {
                       Xem quyết định
                     </Button>
                   ) : (
-                    <Text size="xs" color="dimmed">
-                      Chưa có
-                    </Text>
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      onClick={() => handleAddPenaltyDecision(row.original)}
+                    >
+                      Thêm quyết định
+                    </Button>
                   ),
               },
             ]}
@@ -446,6 +524,61 @@ function InspectionSchedulePage() {
           <Group justify="right">
             <Button type="submit">Lưu</Button>
             <Button onClick={close} variant="outline">
+              Hủy
+            </Button>
+          </Group>
+        </form>
+      </Modal>
+
+      {/* Modal thêm quyết định xử phạt */}
+      <Modal
+        opened={showAddPenalty}
+        onClose={() => setShowAddPenalty(false)}
+        title="Thêm quyết định xử phạt"
+      >
+        <form onSubmit={penaltyForm.onSubmit(handleAddPenalty)}>
+          <TextInput
+            label="Số quyết định"
+            {...penaltyForm.getInputProps("decision_number")}
+            mb="sm"
+          />
+          <DateInput
+            label="Ngày ban hành"
+            {...penaltyForm.getInputProps("issue_date")}
+            mb="sm"
+          />
+          <Select
+            label="Trạng thái xử phạt"
+            {...penaltyForm.getInputProps("penalty_status")}
+            data={[
+              { value: "pending", label: "Chưa xử phạt" },
+              { value: "paid", label: "Đã xử phạt" },
+              { value: "dismissed", label: "Đã miễn" },
+            ]}
+            mb="sm"
+          />
+          <Select
+            label="Trạng thái khắc phục"
+            {...penaltyForm.getInputProps("fix_status")}
+            data={[
+              { value: "not_fixed", label: "Chưa khắc phục" },
+              { value: "fixed", label: "Đã khắc phục" },
+              { value: "in_progress", label: "Đang xử lý" },
+            ]}
+            mb="sm"
+          />
+          <TextInput
+            label="Cán bộ ký"
+            {...penaltyForm.getInputProps("officer_signed")}
+            mb="sm"
+          />
+          <Group justify="right">
+            <Button type="submit">Lưu</Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowAddPenalty(false)}
+            >
               Hủy
             </Button>
           </Group>

@@ -13,6 +13,10 @@ import {
   Grid,
   Paper,
   useMantineColorScheme,
+  Loader,
+  Center,
+  Alert,
+  Skeleton,
 } from "@mantine/core";
 import { BarChart, PieChart } from "@mantine/charts";
 import {
@@ -29,13 +33,18 @@ import {
   IconChevronDown,
   IconChevronUp,
   IconEdit,
+  IconAlertCircle,
+  IconRefresh,
 } from "@tabler/icons-react";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useGetBusinessById } from "../../../../tanstack/useBusinessQueries";
+import { BusinessType } from "../../../../types/business";
 
 // Mock business info
-const business = {
+const mockBusiness = {
   business_name: "CÔNG TY THỊNH PHÁT",
   business_code: "010204567",
   business_type: "Công ty Cổ phần",
@@ -43,7 +52,8 @@ const business = {
   phone_number: "0912 345 678",
   email: "info@thinhphat.com",
   website: "www.thinhphat.com",
-  established: "2015-08-20",
+  fax: "-",
+  issue_date: "2015-08-20",
   province: "Hà Nội",
   ward: "Phường Bạch Mai",
 };
@@ -113,13 +123,112 @@ const violationColumns: MRT_ColumnDef<(typeof violationHistory)[0]>[] = [
   { accessorKey: "fix", header: "Khắc phục" },
 ];
 
+const getBusinessTypeLabel = (businessType: BusinessType) => {
+  switch (businessType) {
+    case BusinessType.Individual:
+      return "Hộ kinh doanh";
+    case BusinessType.LLC:
+      return "Công ty TNHH";
+    case BusinessType.JSC:
+      return "Công ty Cổ phần";
+    default:
+      return "Không xác định";
+  }
+};
+
 function DashboardPage() {
+  const { businessId } = useParams();
+  const {
+    data: businessData,
+    isLoading,
+    error,
+    isError,
+    refetch,
+  } = useGetBusinessById(businessId || "");
   const { colorScheme } = useMantineColorScheme();
   const isDark = colorScheme === "dark";
   // Badge variant
   const badgeVariant = isDark ? "filled" : "light";
   const [showMore, setShowMore] = useState(false);
   const navigate = useNavigate();
+  const business = useMemo((): typeof mockBusiness => {
+    if (businessData) {
+      return {
+        business_name: businessData.business_name,
+        business_code: businessData.business_code,
+        business_type: getBusinessTypeLabel(businessData.business_type),
+        address: businessData.address,
+        province: businessData.province,
+        ward: businessData.ward,
+        phone_number: businessData.phone_number || "-",
+        email: businessData.email || "-",
+        website: businessData.website || "-",
+        fax: businessData.fax || "-",
+        issue_date: businessData.issue_date
+          ? new Date(businessData.issue_date).toLocaleDateString("vi-VN")
+          : "-",
+      };
+    }
+    return mockBusiness;
+  }, [businessData]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Box p="md">
+        <Paper
+          shadow="lg"
+          radius="xl"
+          p={{ base: "md", sm: "xl" }}
+          mb="md"
+          withBorder
+        >
+          <Group justify="space-between" align="flex-start" mb={16}>
+            <Skeleton height={32} width={300} />
+            <Group>
+              <Skeleton height={32} width={120} />
+              <Skeleton height={32} width={120} />
+            </Group>
+          </Group>
+          <Skeleton height={180} mb="xl" />
+
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md" mb="xl">
+            <Skeleton height={150} />
+            <Skeleton height={150} />
+            <Skeleton height={150} />
+            <Skeleton height={150} />
+          </SimpleGrid>
+          <Skeleton height={300} />
+        </Paper>
+      </Box>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <Box p="md">
+        <Alert
+          icon={<IconAlertCircle size={24} />}
+          title="Lỗi khi tải dữ liệu doanh nghiệp"
+          color="red"
+          mb="md"
+        >
+          {error?.message || "Đã xảy ra lỗi không xác định."}
+          <Button
+            mt="md"
+            leftSection={<IconRefresh size={16} />}
+            onClick={() => refetch()}
+            variant="light"
+            color="red"
+            size="xs"
+          >
+            Thử lại
+          </Button>
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box p="md">
@@ -309,7 +418,7 @@ function DashboardPage() {
                           Ngày thành lập:
                         </Text>
                         <Text size="sm" fw={500}>
-                          {business.established}
+                          {business.issue_date}
                         </Text>
                       </Group>
                     </Grid.Col>

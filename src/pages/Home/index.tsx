@@ -4,6 +4,11 @@ import {
   useMantineColorScheme,
   ActionIcon,
   NavLink,
+  Text,
+  Alert,
+  Loader,
+  Center,
+  Badge,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -11,81 +16,63 @@ import {
   IconMoon,
   IconHome2,
   IconChevronRight,
+  IconAlertCircle,
 } from "@tabler/icons-react";
-import { NavLink as RouterNavLink } from "react-router-dom";
+import { NavLink as RouterNavLink, useNavigate } from "react-router-dom";
 import { MantineReactTable } from "mantine-react-table";
 import { useMemo } from "react";
+import { useGetAllBusinesses } from "../../tanstack/useBusinessQueries";
+import { BusinessType } from "../../types/business";
 
 function HomePage() {
   const [opened, { toggle }] = useDisclosure();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-  const data = useMemo(
-    () => [
-      {
-        business_id: "business_001",
-        business_code: "410803796",
-        business_name: "QUÁN BÌNH THANH",
-        business_type: "Cá nhân",
-        business_address: "649/205 Điện Biên Phủ, Q. Bình Thạnh",
-        business_industry: "Kinh doanh ăn uống",
-      },
-      {
-        business_id: "business_002",
-        business_code: "031457155",
-        business_name: "CÔNG TY TRƯỜNG VẬN",
-        business_type: "Công ty TNHH",
-        business_address: "175D Nguyễn Thái Học, Q. 1",
-        business_industry: "Vận tải hàng hóa",
-      },
-      {
-        business_id: "business_003",
-        business_code: "010204567",
-        business_name: "CÔNG TY THỊNH PHÁT",
-        business_type: "Công ty Cổ phần",
-        business_address: "12 Lý Thường Kiệt, Q. Hoàn Kiếm",
-        business_industry: "Bán lẻ điện tử",
-      },
-      {
-        business_id: "business_004",
-        business_code: "540908123",
-        business_name: "QUÁN CƠM NHÀ LÀNH",
-        business_type: "Cá nhân",
-        business_address: "45 Trần Phú, Q. Hải Châu",
-        business_industry: "Kinh doanh ăn uống",
-      },
-      {
-        business_id: "business_005",
-        business_code: "081305678",
-        business_name: "CÔNG TY XÂY DỰNG AN PHÚ",
-        business_type: "Công ty TNHH",
-        business_address: "78 Nguyễn Huệ, Q. 1",
-        business_industry: "Xây dựng",
-      },
-      {
-        business_id: "business_006",
-        business_code: "091406789",
-        business_name: "SIÊU THỊ MINH ANH",
-        business_type: "Công ty Cổ phần",
-        business_address: "101 Hùng Vương, Q. 5",
-        business_industry: "Bán lẻ thực phẩm",
-      },
-      {
-        business_id: "business_007",
-        business_code: "110507890",
-        business_name: "TRUNG TÂM ĐÀO TẠO ABC",
-        business_type: "Cá nhân",
-        business_address: "23 Lê Lợi, Q. 3",
-        business_industry: "Giáo dục",
-      },
-    ],
-    []
-  );
+  const navigate = useNavigate();
+
+  // Sử dụng TanStack Query để lấy dữ liệu doanh nghiệp
+  const { data: businesses, isLoading, error, isError } = useGetAllBusinesses();
+  console.log("Businesses data:", businesses);
+
+  // Helper function để chuyển đổi BusinessType enum thành label
+  const getBusinessTypeLabel = (businessType: BusinessType) => {
+    switch (businessType) {
+      case BusinessType.Individual:
+        return "Hộ kinh doanh";
+      case BusinessType.LLC:
+        return "Công ty TNHH";
+      case BusinessType.JSC:
+        return "Công ty Cổ phần";
+      default:
+        return "Không xác định";
+    }
+  };
+  // Chuyển đổi dữ liệu từ Firebase để phù hợp với bảng
+  const tableData = useMemo(() => {
+    if (!businesses) return [];
+
+    return businesses.map((business) => ({
+      business_id: business.business_id,
+      business_code: business.business_code,
+      business_name: business.business_name,
+      business_type: getBusinessTypeLabel(business.business_type),
+      business_address: business.address,
+      business_industry: business.industry,
+      phone_number: business.phone_number || "-",
+      email: business.email || "-",
+      issue_date: business.issue_date?.toLocaleDateString("vi-VN") || "-",
+      province: business.province,
+      ward: business.ward,
+      // owner_name: business.owner?.name || "-",
+    }));
+  }, [businesses]);
+
   const columns = useMemo(
     () => [
       {
         accessorKey: "business_id",
         header: "Mã ID",
-        size: 100,
+        size: 120,
+        enableColumnFilter: false,
       },
       {
         accessorKey: "business_code",
@@ -94,13 +81,25 @@ function HomePage() {
       },
       {
         accessorKey: "business_name",
-        header: "Tên",
-        size: 200,
+        header: "Tên doanh nghiệp",
+        size: 250,
       },
       {
         accessorKey: "business_type",
         header: "Loại hình",
         size: 150,
+        Cell: ({ cell }: { cell: any }) => {
+          const type = cell.getValue() as string;
+          const color =
+            type === "Hộ kinh doanh"
+              ? "blue"
+              : type === "Công ty TNHH"
+              ? "green"
+              : type === "Công ty Cổ phần"
+              ? "violet"
+              : "gray";
+          return <Badge color={color}>{type}</Badge>;
+        },
       },
       {
         accessorKey: "business_address",
@@ -108,13 +107,199 @@ function HomePage() {
         size: 300,
       },
       {
+        accessorKey: "province",
+        header: "Tỉnh/Thành phố",
+        size: 180,
+      },
+      { accessorKey: "ward", header: "Xã/Phường", size: 150 },
+      {
         accessorKey: "business_industry",
         header: "Ngành nghề",
         size: 200,
       },
+      {
+        accessorKey: "phone_number",
+        header: "Số điện thoại",
+        size: 150,
+      },
+      {
+        accessorKey: "email",
+        header: "Email",
+        size: 200,
+      },
+      {
+        accessorKey: "issue_date",
+        header: "Ngày cấp",
+        size: 120,
+      },
+      // {
+      //   accessorKey: "owner_name",
+      //   header: "Chủ sở hữu",
+      //   size: 180,
+      // },
     ],
     []
   );
+
+  // Hiển thị trạng thái loading
+  if (isLoading) {
+    return (
+      <AppShell
+        header={{ height: 60 }}
+        navbar={{
+          width: 300,
+          breakpoint: "sm",
+          collapsed: { mobile: !opened },
+        }}
+        padding="md"
+      >
+        <AppShell.Header style={{ display: "flex", alignItems: "center" }}>
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+          <div
+            style={{
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+              paddingLeft: "1rem",
+            }}
+          >
+            Quản Lý
+          </div>
+          <ActionIcon
+            variant="default"
+            onClick={() => toggleColorScheme()}
+            size="lg"
+            style={{ marginLeft: "auto", marginRight: "1rem" }}
+          >
+            {colorScheme === "dark" ? (
+              <IconSun size="1.2rem" />
+            ) : (
+              <IconMoon size="1.2rem" />
+            )}
+          </ActionIcon>
+        </AppShell.Header>
+
+        <AppShell.Navbar p="md">
+          <NavLink
+            component={RouterNavLink}
+            to={"/"}
+            label="Hộ kinh doanh / doanh nghiệp"
+            leftSection={<IconHome2 size={16} stroke={1.5} />}
+            rightSection={
+              <IconChevronRight
+                size={12}
+                stroke={1.5}
+                className="mantine-rotate-rtl"
+              />
+            }
+          />
+          <NavLink
+            component={RouterNavLink}
+            to={"/test"}
+            label="Test Page"
+            leftSection={<IconHome2 size={16} stroke={1.5} />}
+            rightSection={
+              <IconChevronRight
+                size={12}
+                stroke={1.5}
+                className="mantine-rotate-rtl"
+              />
+            }
+          />
+        </AppShell.Navbar>
+
+        <AppShell.Main>
+          <Center style={{ height: "50vh" }}>
+            <Loader size="lg" />
+            <Text ml="md">Đang tải dữ liệu doanh nghiệp...</Text>
+          </Center>
+        </AppShell.Main>
+      </AppShell>
+    );
+  }
+
+  // Hiển thị lỗi
+  if (isError) {
+    return (
+      <AppShell
+        header={{ height: 60 }}
+        navbar={{
+          width: 300,
+          breakpoint: "sm",
+          collapsed: { mobile: !opened },
+        }}
+        padding="md"
+      >
+        <AppShell.Header style={{ display: "flex", alignItems: "center" }}>
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+          <div
+            style={{
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+              paddingLeft: "1rem",
+            }}
+          >
+            Quản Lý
+          </div>
+          <ActionIcon
+            variant="default"
+            onClick={() => toggleColorScheme()}
+            size="lg"
+            style={{ marginLeft: "auto", marginRight: "1rem" }}
+          >
+            {colorScheme === "dark" ? (
+              <IconSun size="1.2rem" />
+            ) : (
+              <IconMoon size="1.2rem" />
+            )}
+          </ActionIcon>
+        </AppShell.Header>
+
+        <AppShell.Navbar p="md">
+          <NavLink
+            component={RouterNavLink}
+            to={"/"}
+            label="Hộ kinh doanh / doanh nghiệp"
+            leftSection={<IconHome2 size={16} stroke={1.5} />}
+            rightSection={
+              <IconChevronRight
+                size={12}
+                stroke={1.5}
+                className="mantine-rotate-rtl"
+              />
+            }
+          />
+          <NavLink
+            component={RouterNavLink}
+            to={"/test"}
+            label="Test Page"
+            leftSection={<IconHome2 size={16} stroke={1.5} />}
+            rightSection={
+              <IconChevronRight
+                size={12}
+                stroke={1.5}
+                className="mantine-rotate-rtl"
+              />
+            }
+          />
+        </AppShell.Navbar>
+
+        <AppShell.Main>
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            title="Lỗi tải dữ liệu"
+            color="red"
+          >
+            <Text>Không thể tải dữ liệu doanh nghiệp từ Firebase.</Text>
+            <Text size="sm" mt="xs">
+              Lỗi: {error?.message || "Unknown error"}
+            </Text>
+          </Alert>
+        </AppShell.Main>
+      </AppShell>
+    );
+  }
+
+  // Hiển thị dữ liệu thành công
   return (
     <AppShell
       header={{ height: 60 }}
@@ -132,7 +317,9 @@ function HomePage() {
             fontSize: "1.5rem",
             fontWeight: "bold",
             paddingLeft: "1rem",
+            cursor: "pointer",
           }}
+          onClick={() => navigate("/")}
         >
           Quản Lý
         </div>
@@ -180,17 +367,51 @@ function HomePage() {
       </AppShell.Navbar>
 
       <AppShell.Main>
+        {/* Hiển thị thông tin tổng quan */}
+        <div style={{ marginBottom: "1rem" }}>
+          <Text size="lg" fw={600} mb="xs">
+            Danh sách doanh nghiệp
+          </Text>
+          <Text size="sm" color="dimmed">
+            Tổng số: {businesses?.length || 0} doanh nghiệp
+          </Text>
+        </div>
+
+        {/* Sử dụng dữ liệu từ Firebase */}
         <MantineReactTable
           columns={columns}
-          data={data}
+          data={tableData}
           enablePagination
           enableSorting
+          enableColumnResizing
+          enableDensityToggle={false}
+          enableTopToolbar
+          columnFilterDisplayMode={"popover"}
           enableColumnFilters
-          initialState={{ pagination: { pageSize: 10, pageIndex: 0 } }}
+          enableGlobalFilter
+          enableStickyHeader
+          initialState={{
+            pagination: { pageSize: 10, pageIndex: 0 },
+            density: "xs",
+          }}
           mantineTableProps={{
             striped: true,
             highlightOnHover: true,
           }}
+          mantineTableContainerProps={{
+            style: { maxHeight: "70vh" },
+          }}
+          enableRowSelection
+          enableSelectAll
+          mantineTableBodyRowProps={({ row }) => ({
+            onClick: () => {
+              // Có thể thêm navigation đến trang chi tiết doanh nghiệp
+              const businessId = row.original.business_id;
+              console.log("Selected business:", row.original);
+              navigate(`/business/${businessId}/dashboard`);
+            },
+            style: { cursor: "pointer" },
+          })}
         />
       </AppShell.Main>
     </AppShell>

@@ -22,6 +22,8 @@ export type BaseBusiness = {
   industry: string;
   issue_date: Date;
   address: string;
+  province: string;
+  ward: string;
   phone_number?: string;
   email?: string;
   fax?: string;

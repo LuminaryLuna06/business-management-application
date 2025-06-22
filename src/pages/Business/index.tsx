@@ -14,15 +14,17 @@ import {
   IconUser,
   IconCertificate,
   IconCalendar,
+  IconAlertTriangle,
   // IconAlertTriangle,
 } from "@tabler/icons-react";
-import { Outlet, useParams } from "react-router";
+import { Outlet, useNavigate, useParams } from "react-router";
 import { NavLink as RouterNavLink } from "react-router-dom";
 
 export default function BusinessPage() {
   const [opened, { toggle }] = useDisclosure();
   const { businessId } = useParams();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const navigate = useNavigate();
 
   return (
     <AppShell
@@ -41,7 +43,9 @@ export default function BusinessPage() {
             fontSize: "1.5rem",
             fontWeight: "bold",
             paddingLeft: "1rem",
+            cursor: "pointer",
           }}
+          onClick={() => navigate("/")}
         >
           Quản Lý
         </div>
@@ -112,19 +116,7 @@ export default function BusinessPage() {
             />
           }
         />
-        {/* <NavLink
-          component={RouterNavLink}
-          to={`/business/${businessId}/violations`}
-          label="Kết quả vi phạm"
-          leftSection={<IconAlertTriangle size={16} stroke={1.5} />}
-          rightSection={
-            <IconChevronRight
-              size={12}
-              stroke={1.5}
-              className="mantine-rotate-rtl"
-            />
-          }
-        /> */}
+
       </AppShell.Navbar>
 
       <AppShell.Main>

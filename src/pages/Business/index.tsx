@@ -14,8 +14,6 @@ import {
   IconUser,
   IconCertificate,
   IconCalendar,
-  IconAlertTriangle,
-  // IconAlertTriangle,
 } from "@tabler/icons-react";
 import { Outlet, useNavigate, useParams } from "react-router";
 import { NavLink as RouterNavLink } from "react-router-dom";
@@ -116,7 +114,6 @@ export default function BusinessPage() {
             />
           }
         />
-
       </AppShell.Navbar>
 
       <AppShell.Main>

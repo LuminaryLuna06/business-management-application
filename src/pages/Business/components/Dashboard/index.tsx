@@ -13,8 +13,6 @@ import {
   Grid,
   Paper,
   useMantineColorScheme,
-  Loader,
-  Center,
   Alert,
   Skeleton,
 } from "@mantine/core";

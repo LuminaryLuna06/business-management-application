@@ -20,7 +20,7 @@ import {
   IconFileReport,
   IconAlertTriangle,
 } from "@tabler/icons-react";
-import { doc, setDoc, Timestamp } from "firebase/firestore";
+import { doc, setDoc, Timestamp, addDoc, collection } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import { BusinessType, Gender, IdentificationType } from "../../types/business";
@@ -204,26 +204,20 @@ const generateMockBusinesses = () => [
   },
 ];
 
-const generateMockLicenses = (businessId: string) => [
+const generateMockLicenses = () => [
   {
-    license_id: uuidv4(),
-    business_id: businessId,
     license_type: LicenseType.FireSafety,
     license_number: "PCCC-2024-001",
     issue_date: new Date("2024-01-15"),
     expiration_date: new Date("2025-01-15"),
   },
   {
-    license_id: uuidv4(),
-    business_id: businessId,
     license_type: LicenseType.FoodSafety,
     license_number: "ATTP-2024-002",
     issue_date: new Date("2024-02-20"),
     expiration_date: new Date("2025-02-20"),
   },
   {
-    license_id: uuidv4(),
-    business_id: businessId,
     license_type: LicenseType.PublicOrder,
     license_number: "ANTT-2024-003",
     issue_date: new Date("2024-03-10"),
@@ -231,10 +225,8 @@ const generateMockLicenses = (businessId: string) => [
   },
 ];
 
-const generateMockEmployees = (businessId: string) => [
+const generateMockEmployees = () => [
   {
-    worker_id: uuidv4(),
-    business_id: businessId,
     worker_name: "Nguyen Van A",
     birth_date: new Date("1990-05-15"),
     gender: Gender.Male,
@@ -243,8 +235,6 @@ const generateMockEmployees = (businessId: string) => [
     food_safety_training: false,
   },
   {
-    worker_id: uuidv4(),
-    business_id: businessId,
     worker_name: "Tran Thi B",
     birth_date: new Date("1992-08-22"),
     gender: Gender.Female,
@@ -253,8 +243,6 @@ const generateMockEmployees = (businessId: string) => [
     food_safety_training: true,
   },
   {
-    worker_id: uuidv4(),
-    business_id: businessId,
     worker_name: "Le Van C",
     birth_date: new Date("1985-03-10"),
     gender: Gender.Male,
@@ -264,43 +252,33 @@ const generateMockEmployees = (businessId: string) => [
   },
 ];
 
-const generateMockInspections = (businessId: string) => [
+const generateMockInspections = () => [
   {
-    schedule_id: uuidv4(),
-    business_code: businessId,
     inspection_date: new Date("2024-03-15"),
     inspector_description: "Kiểm tra định kỳ quý 1",
     inspector_status: "completed" as const,
   },
   {
-    schedule_id: uuidv4(),
-    business_code: businessId,
     inspection_date: new Date("2024-06-10"),
     inspector_description: "Kiểm tra đột xuất an toàn thực phẩm",
     inspector_status: "pending" as const,
   },
   {
-    schedule_id: uuidv4(),
-    business_code: businessId,
     inspection_date: new Date("2024-09-20"),
     inspector_description: "Kiểm tra định kỳ quý 3",
     inspector_status: "completed" as const,
   },
 ];
 
-const generateMockReports = (scheduleId: string) => [
+const generateMockReports = () => [
   {
-    report_id: uuidv4(),
-    schedule_id: scheduleId,
     report_description: "Báo cáo kết quả kiểm tra định kỳ",
     report_status: "finalized" as const,
   },
 ];
 
-const generateMockViolations = (reportId: string) => [
+const generateMockViolations = () => [
   {
-    violation_id: uuidv4(),
-    report_id: reportId,
     violation_number: "QD-2024-001",
     issue_date: new Date("2024-03-16"),
     violation_status: "paid" as const,
@@ -308,8 +286,6 @@ const generateMockViolations = (reportId: string) => [
     officer_signed: "Nguyen Van A",
   },
   {
-    violation_id: uuidv4(),
-    report_id: reportId,
     violation_number: "QD-2024-002",
     issue_date: new Date("2024-03-16"),
     violation_status: "pending" as const,
@@ -421,26 +397,17 @@ function Index2() {
         );
 
         // Upload licenses
-        const mockLicenses = generateMockLicenses(business.business_id);
+        const mockLicenses = generateMockLicenses();
         for (const license of mockLicenses) {
           try {
             const licenseData = {
-              license_id: license.license_id,
-              business_id: license.business_id,
               license_type: license.license_type,
               license_number: license.license_number,
               issue_date: Timestamp.fromDate(license.issue_date),
               expiration_date: Timestamp.fromDate(license.expiration_date),
             };
-
-            await setDoc(
-              doc(
-                db,
-                "businesses",
-                business.business_id,
-                "licenses",
-                license.license_id
-              ),
+            await addDoc(
+              collection(db, "businesses", business.business_id, "licenses"),
               licenseData
             );
             updateStatus("licenses", true);
@@ -454,12 +421,10 @@ function Index2() {
         }
 
         // Upload employees
-        const mockEmployees = generateMockEmployees(business.business_id);
+        const mockEmployees = generateMockEmployees();
         for (const employee of mockEmployees) {
           try {
             const employeeData = {
-              worker_id: employee.worker_id,
-              business_id: employee.business_id,
               worker_name: employee.worker_name,
               birth_date: Timestamp.fromDate(employee.birth_date),
               gender: employee.gender,
@@ -467,15 +432,8 @@ function Index2() {
               fire_safety_training: employee.fire_safety_training,
               food_safety_training: employee.food_safety_training,
             };
-
-            await setDoc(
-              doc(
-                db,
-                "businesses",
-                business.business_id,
-                "employees",
-                employee.worker_id
-              ),
+            await addDoc(
+              collection(db, "businesses", business.business_id, "employees"),
               employeeData
             );
             updateStatus("employees", true);
@@ -489,25 +447,16 @@ function Index2() {
         }
 
         // Upload inspections
-        const mockInspections = generateMockInspections(business.business_id);
+        const mockInspections = generateMockInspections();
         for (const inspection of mockInspections) {
           try {
             const inspectionData = {
-              schedule_id: inspection.schedule_id,
-              business_code: inspection.business_code,
               inspection_date: Timestamp.fromDate(inspection.inspection_date),
               inspector_description: inspection.inspector_description,
               inspector_status: inspection.inspector_status,
             };
-
-            await setDoc(
-              doc(
-                db,
-                "businesses",
-                business.business_id,
-                "inspections",
-                inspection.schedule_id
-              ),
+            const inspectionRef = await addDoc(
+              collection(db, "businesses", business.business_id, "inspections"),
               inspectionData
             );
             updateStatus("inspections", true);
@@ -516,25 +465,21 @@ function Index2() {
             );
 
             // Upload reports for this inspection
-            const mockReports = generateMockReports(inspection.schedule_id);
+            const mockReports = generateMockReports();
             for (const report of mockReports) {
               try {
                 const reportData = {
-                  report_id: report.report_id,
-                  schedule_id: report.schedule_id,
                   report_description: report.report_description,
                   report_status: report.report_status,
                 };
-
-                await setDoc(
-                  doc(
+                const reportRef = await addDoc(
+                  collection(
                     db,
                     "businesses",
                     business.business_id,
                     "inspections",
-                    inspection.schedule_id,
-                    "reports",
-                    report.report_id
+                    inspectionRef.id,
+                    "reports"
                   ),
                   reportData
                 );
@@ -542,30 +487,26 @@ function Index2() {
                 addLog(`    ✓ Upload báo cáo: ${report.report_description}`);
 
                 // Upload violations for this report
-                const mockViolations = generateMockViolations(report.report_id);
+                const mockViolations = generateMockViolations();
                 for (const violation of mockViolations) {
                   try {
                     const violationData = {
-                      violation_id: violation.violation_id,
-                      report_id: violation.report_id,
                       violation_number: violation.violation_number,
                       issue_date: Timestamp.fromDate(violation.issue_date),
                       violation_status: violation.violation_status,
                       fix_status: violation.fix_status,
                       officer_signed: violation.officer_signed,
                     };
-
-                    await setDoc(
-                      doc(
+                    await addDoc(
+                      collection(
                         db,
                         "businesses",
                         business.business_id,
                         "inspections",
-                        inspection.schedule_id,
+                        inspectionRef.id,
                         "reports",
-                        report.report_id,
-                        "violations",
-                        violation.violation_id
+                        reportRef.id,
+                        "violations"
                       ),
                       violationData
                     );

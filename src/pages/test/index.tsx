@@ -7,11 +7,6 @@ import {
   Group,
   Title,
   NumberInput,
-  AppShell,
-  Burger,
-  useMantineColorScheme,
-  ActionIcon,
-  NavLink,
   Stack,
   SimpleGrid,
   Divider,
@@ -23,22 +18,15 @@ import * as Yup from "yup";
 import type { BusinessOwner } from "../../types/business";
 import { BusinessType, Gender, IdentificationType } from "../../types/business";
 import { DateInput } from "@mantine/dates";
-import { useDisclosure } from "@mantine/hooks";
-import {
-  IconSun,
-  IconMoon,
-  IconHome2,
-  IconChevronRight,
-} from "@tabler/icons-react";
-import { NavLink as RouterNavLink, useNavigate } from "react-router-dom";
+
+import { useNavigate } from "react-router-dom";
 import { dantoc } from "../../data/dantoc";
 import { quoctich } from "../../data/quoctich";
 import tree from "../../data/tree.json";
+import industry from "../../data/industry.json";
 import { useMemo } from "react";
 
 function TestPage() {
-  const [opened, { toggle }] = useDisclosure();
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const navigate = useNavigate();
 
   // Định nghĩa schema validation với Yup
@@ -118,9 +106,6 @@ function TestPage() {
         : schema
     ),
     owner_id: Yup.string().required("Mã chủ sở hữu không được để trống"),
-    owner_name_owner: Yup.string()
-      .required("Tên chủ sở hữu không được để trống")
-      .min(2, "Tên phải có ít nhất 2 ký tự"),
     gender: Yup.mixed<string>()
       .required("Giới tính không được để trống")
       .oneOf(["1", "2", "3"], "Giới tính không hợp lệ"),
@@ -164,7 +149,7 @@ function TestPage() {
       business_id: uuidv4(),
       business_code: "",
       business_name: "",
-      business_type: "" as string, // Sẽ được ép kiểu sau khi chọn
+      business_type: "" as string,
       address: "",
       industry: "",
       issue_date: null as Date | null,
@@ -172,7 +157,6 @@ function TestPage() {
       email: "",
       fax: "",
       website: "",
-      owner_name: "",
       citizen_id: "",
       registered_capital: 0,
       tax_code: "",
@@ -180,12 +164,12 @@ function TestPage() {
       share_price: 0,
       total_shares: 0,
       owner_id: uuidv4(),
-      owner_name_owner: "",
-      gender: "" as string, // Sẽ được ép kiểu sau khi chọn
+      owner_name: "",
+      gender: "" as string,
       ethnicity: "",
       nationality: "",
       birthdate: null as Date | null,
-      identification_type: "" as string, // Sẽ được ép kiểu sau khi chọn
+      identification_type: "" as string,
       identification_number: "",
       license_date: null as Date | null,
       place_of_licensing: "",
@@ -228,6 +212,10 @@ function TestPage() {
         ? selectedProvince.wards.map((w) => ({ value: w.name, label: w.name }))
         : [],
     [form.values.province]
+  );
+  const industryOptions = useMemo(
+    () => industry.map((ind) => ({ value: ind.code, label: ind.name })),
+    []
   );
 
   // Hàm xử lý gửi dữ liệu lên Firebase
@@ -273,7 +261,7 @@ function TestPage() {
 
       const ownerData: BusinessOwner = {
         id: values.owner_id,
-        name: values.owner_name_owner,
+        name: values.owner_name,
         gender: values.gender as unknown as Gender,
         ethnicity: values.ethnicity,
         nationality: values.nationality,
@@ -312,237 +300,156 @@ function TestPage() {
   };
 
   return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{
-        width: 300,
-        breakpoint: "sm",
-        collapsed: { mobile: !opened },
-      }}
-      padding="md"
-    >
-      <AppShell.Header style={{ display: "flex", alignItems: "center" }}>
-        <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <div
-          style={{
-            fontSize: "1.5rem",
-            fontWeight: "bold",
-            paddingLeft: "1rem",
-          }}
-        >
-          Quản Lý
-        </div>
-        <ActionIcon
-          variant="default"
-          onClick={() => toggleColorScheme()}
-          size="lg"
-          style={{ marginLeft: "auto", marginRight: "1rem" }}
-        >
-          {colorScheme === "dark" ? (
-            <IconSun size="1.2rem" />
-          ) : (
-            <IconMoon size="1.2rem" />
+    <Box m="md">
+      <Stack gap="md">
+        <Title order={2} mb="md">
+          Thêm Dữ Liệu Doanh Nghiệp
+        </Title>
+        <Title order={3} mb="md">
+          Thông Tin Doanh Nghiệp
+        </Title>
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+          <TextInput
+            label="Mã ID"
+            {...form.getInputProps("business_id")}
+            disabled
+            mb="sm"
+          />
+          <TextInput
+            label="Mã số"
+            {...form.getInputProps("business_code")}
+            placeholder="Nhập mã số kinh doanh"
+            mb="sm"
+          />
+          <TextInput
+            label="Tên doanh nghiệp"
+            {...form.getInputProps("business_name")}
+            placeholder="Nhập tên doanh nghiệp"
+            mb="sm"
+          />
+          <Select
+            label="Loại hình"
+            {...form.getInputProps("business_type")}
+            data={[
+              { value: "1", label: "Cá nhân" },
+              { value: "2", label: "Công ty TNHH" },
+              { value: "3", label: "Công ty Cổ phần" },
+            ]}
+            placeholder="Chọn loại hình"
+            mb="sm"
+            key={`business_type-${form.values.business_type}`}
+          />
+          <Select
+            label="Tỉnh/Thành phố"
+            data={provinceOptions}
+            placeholder="Chọn tỉnh/thành phố"
+            {...form.getInputProps("province")}
+            searchable
+            clearable
+            mb="sm"
+          />
+          <Select
+            label="Xã/Phường"
+            data={wardOptions}
+            placeholder="Chọn xã/phường"
+            {...form.getInputProps("ward")}
+            searchable
+            clearable
+            mb="sm"
+            disabled={!form.values.province}
+          />
+          <TextInput
+            label="Địa chỉ"
+            {...form.getInputProps("address")}
+            placeholder="Nhập địa chỉ"
+            mb="sm"
+          />
+          <Select
+            label="Ngành nghề"
+            searchable
+            data={industryOptions}
+            placeholder="Chọn ngành nghề"
+            {...form.getInputProps("industry")}
+            mb="sm"
+            key={`industry-${form.values.industry}`}
+          />
+          <DateInput
+            label="Ngày cấp"
+            {...form.getInputProps("issue_date")}
+            placeholder="Chọn ngày cấp"
+            mb="sm"
+          />
+          <TextInput
+            label="Số điện thoại"
+            {...form.getInputProps("phone_number")}
+            placeholder="Nhập số điện thoại"
+            mb="sm"
+          />
+          <TextInput
+            label="Email"
+            {...form.getInputProps("email")}
+            placeholder="Nhập email"
+            mb="sm"
+          />
+          <TextInput
+            label="Fax"
+            {...form.getInputProps("fax")}
+            placeholder="Nhập số fax"
+            mb="sm"
+          />
+          <TextInput
+            label="Website"
+            {...form.getInputProps("website")}
+            placeholder="Nhập URL website"
+            mb="sm"
+          />
+          {/* Dữ liệu theo loại hình */}
+          {form.values.business_type === "1" && (
+            <NumberInput
+              label="Vốn đăng ký"
+              {...form.getInputProps("registered_capital")}
+              placeholder="Nhập vốn đăng ký (VNĐ)"
+              mb="sm"
+            />
           )}
-        </ActionIcon>
-      </AppShell.Header>
+          {(form.values.business_type === "2" ||
+            form.values.business_type === "3") && (
+            <>
+              <TextInput
+                label="Mã số thuế"
+                {...form.getInputProps("tax_code")}
+                placeholder="Nhập mã số thuế"
+                mb="sm"
+              />
+              <NumberInput
+                label="Vốn đăng ký"
+                {...form.getInputProps("registered_capital")}
+                placeholder="Nhập vốn đăng ký (VNĐ)"
+                mb="sm"
+              />
+              {form.values.business_type === "3" && (
+                <>
+                  <NumberInput
+                    label="Giá cổ phiếu"
+                    {...form.getInputProps("share_price")}
+                    placeholder="Nhập giá cổ phiếu (VNĐ)"
+                    mb="sm"
+                  />
+                  <NumberInput
+                    label="Tổng số cổ phần"
+                    {...form.getInputProps("total_shares")}
+                    placeholder="Nhập tổng số cổ phần"
+                    mb="sm"
+                  />
+                </>
+              )}
+            </>
+          )}
+        </SimpleGrid>
 
-      <AppShell.Navbar p="md">
-        <NavLink
-          component={RouterNavLink}
-          to={"/"}
-          label="Hộ kinh doanh / doanh nghiệp"
-          leftSection={<IconHome2 size={16} stroke={1.5} />}
-          rightSection={
-            <IconChevronRight
-              size={12}
-              stroke={1.5}
-              className="mantine-rotate-rtl"
-            />
-          }
-        />
-        <NavLink
-          component={RouterNavLink}
-          to={"/test"}
-          label="Test Page"
-          leftSection={<IconHome2 size={16} stroke={1.5} />}
-          rightSection={
-            <IconChevronRight
-              size={12}
-              stroke={1.5}
-              className="mantine-rotate-rtl"
-            />
-          }
-        />
-      </AppShell.Navbar>
-
-      <AppShell.Main>
-        <Box m="md">
-          <Stack gap="md">
-            <Title order={2} mb="md">
-              Thêm Dữ Liệu Doanh Nghiệp
-            </Title>
-            <Title order={3} mb="md">
-              Thông Tin Doanh Nghiệp
-            </Title>
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-              <TextInput
-                label="Mã ID"
-                {...form.getInputProps("business_id")}
-                disabled
-                mb="sm"
-              />
-              <TextInput
-                label="Mã số"
-                {...form.getInputProps("business_code")}
-                placeholder="Nhập mã số kinh doanh"
-                mb="sm"
-              />
-              <TextInput
-                label="Tên doanh nghiệp"
-                {...form.getInputProps("business_name")}
-                placeholder="Nhập tên doanh nghiệp"
-                mb="sm"
-              />
-              <Select
-                label="Loại hình"
-                {...form.getInputProps("business_type")}
-                data={[
-                  { value: "1", label: "Cá nhân" },
-                  { value: "2", label: "Công ty TNHH" },
-                  { value: "3", label: "Công ty Cổ phần" },
-                ]}
-                placeholder="Chọn loại hình"
-                mb="sm"
-                key={`business_type-${form.values.business_type}`}
-              />
-              <Select
-                label="Tỉnh/Thành phố"
-                data={provinceOptions}
-                placeholder="Chọn tỉnh/thành phố"
-                {...form.getInputProps("province")}
-                searchable
-                clearable
-                mb="sm"
-              />
-              <Select
-                label="Xã/Phường"
-                data={wardOptions}
-                placeholder="Chọn xã/phường"
-                {...form.getInputProps("ward")}
-                searchable
-                clearable
-                mb="sm"
-                disabled={!form.values.province}
-              />
-              <TextInput
-                label="Địa chỉ"
-                {...form.getInputProps("address")}
-                placeholder="Nhập địa chỉ"
-                mb="sm"
-              />
-              <TextInput
-                label="Ngành nghề"
-                {...form.getInputProps("industry")}
-                placeholder="Nhập ngành nghề"
-                mb="sm"
-              />
-              <DateInput
-                label="Ngày cấp"
-                {...form.getInputProps("issue_date")}
-                placeholder="Chọn ngày cấp"
-                mb="sm"
-              />
-              <TextInput
-                label="Số điện thoại"
-                {...form.getInputProps("phone_number")}
-                placeholder="Nhập số điện thoại"
-                mb="sm"
-              />
-              <TextInput
-                label="Email"
-                {...form.getInputProps("email")}
-                placeholder="Nhập email"
-                mb="sm"
-              />
-              <TextInput
-                label="Fax"
-                {...form.getInputProps("fax")}
-                placeholder="Nhập số fax"
-                mb="sm"
-              />
-              <TextInput
-                label="Website"
-                {...form.getInputProps("website")}
-                placeholder="Nhập URL website"
-                mb="sm"
-              />
-            </SimpleGrid>
-
-            {/* Dữ liệu theo loại hình */}
-            {form.values.business_type === "1" && (
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                <TextInput
-                  label="Tên chủ hộ"
-                  {...form.getInputProps("owner_name")}
-                  placeholder="Nhập tên chủ hộ"
-                  mb="sm"
-                />
-                <TextInput
-                  label="CMND/CCCD"
-                  {...form.getInputProps("citizen_id")}
-                  placeholder="Nhập CMND/CCCD (9-12 số)"
-                  mb="sm"
-                />
-                <NumberInput
-                  label="Vốn đăng ký"
-                  {...form.getInputProps("registered_capital")}
-                  placeholder="Nhập vốn đăng ký (VNĐ)"
-                  mb="sm"
-                />
-              </SimpleGrid>
-            )}
-            {(form.values.business_type === "2" ||
-              form.values.business_type === "3") && (
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-                <TextInput
-                  label="Mã số thuế"
-                  {...form.getInputProps("tax_code")}
-                  placeholder="Nhập mã số thuế"
-                  mb="sm"
-                />
-                <NumberInput
-                  label="Vốn đăng ký"
-                  {...form.getInputProps("registered_capital")}
-                  placeholder="Nhập vốn đăng ký (VNĐ)"
-                  mb="sm"
-                />
-                <TextInput
-                  label="Người đại diện pháp luật"
-                  {...form.getInputProps("legal_representative")}
-                  placeholder="Nhập tên người đại diện"
-                  mb="sm"
-                />
-                {form.values.business_type === "3" && (
-                  <>
-                    <NumberInput
-                      label="Giá cổ phiếu"
-                      {...form.getInputProps("share_price")}
-                      placeholder="Nhập giá cổ phiếu (VNĐ)"
-                      mb="sm"
-                    />
-                    <NumberInput
-                      label="Tổng số cổ phần"
-                      {...form.getInputProps("total_shares")}
-                      placeholder="Nhập tổng số cổ phần"
-                      mb="sm"
-                    />
-                  </>
-                )}
-              </SimpleGrid>
-            )}
-
-            <Divider my="md" />
-
+        <Divider my="md" />
+        {form.values.business_type === "1" && (
+          <>
             <Title order={3} mb="md">
               Thông Tin Chủ Sở Hữu
             </Title>
@@ -555,7 +462,7 @@ function TestPage() {
               />
               <TextInput
                 label="Tên chủ sở hữu"
-                {...form.getInputProps("owner_name_owner")}
+                {...form.getInputProps("owner_name")}
                 placeholder="Nhập tên chủ sở hữu"
                 mb="sm"
               />
@@ -637,38 +544,133 @@ function TestPage() {
                 placeholder="Nhập địa chỉ"
                 mb="sm"
               />
-              {(form.values.business_type === "2" ||
-                form.values.business_type === "3") && (
-                <TextInput
-                  label="Chức vụ"
-                  {...form.getInputProps("position")}
-                  placeholder="Nhập chức vụ"
-                  mb="sm"
-                />
-              )}
             </SimpleGrid>
+          </>
+        )}
+        {(form.values.business_type == "2" ||
+          form.values.business_type == "3") && (
+          <>
+            <Title order={3} mb="md">
+              Thông Tin Người Đại Diện
+            </Title>
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+              <TextInput
+                label="Mã người đại diện"
+                {...form.getInputProps("owner_id")}
+                disabled
+                mb="sm"
+              />
+              <TextInput
+                label="Tên người đại diện"
+                {...form.getInputProps("owner_name")}
+                placeholder="Nhập tên người đại diện"
+                mb="sm"
+              />
+              <Select
+                label="Giới tính"
+                {...form.getInputProps("gender")}
+                data={[
+                  { value: "1", label: "Nam" },
+                  { value: "2", label: "Nữ" },
+                  { value: "3", label: "Khác" },
+                ]}
+                placeholder="Chọn giới tính"
+                mb="sm"
+                key={`gender-${form.values.gender}`}
+              />
+              <TextInput
+                label="Chức danh"
+                {...form.getInputProps("position")}
+                placeholder="Nhập chức danh"
+                mb="sm"
+              />
+              <Select
+                label="Dân tộc"
+                searchable
+                data={dantoc}
+                placeholder="Chọn dân tộc"
+                {...form.getInputProps("ethnicity")}
+                mb="sm"
+                key={`ethnicity-${form.values.ethnicity}`}
+              />
+              <Select
+                label="Quốc tịch"
+                searchable
+                data={quoctich}
+                placeholder="Chọn quốc tịch"
+                {...form.getInputProps("nationality")}
+                mb="sm"
+                key={`nationality-${form.values.nationality}`}
+              />
+              <DateInput
+                label="Ngày sinh"
+                {...form.getInputProps("birthdate")}
+                placeholder="Chọn ngày sinh"
+                mb="sm"
+              />
+              <Select
+                label="Loại giấy tờ"
+                {...form.getInputProps("identification_type")}
+                data={[
+                  { value: "1", label: "CMND/CCCD" },
+                  { value: "2", label: "Hộ chiếu" },
+                  { value: "3", label: "Khác" },
+                ]}
+                placeholder="Chọn loại giấy tờ"
+                mb="sm"
+                key={`identification_type-${form.values.identification_type}`}
+              />
+              <TextInput
+                label="Số giấy tờ"
+                {...form.getInputProps("identification_number")}
+                placeholder="Nhập số CMND/CCCD (9-12 số)"
+                mb="sm"
+              />
+              <DateInput
+                label="Ngày cấp giấy phép"
+                {...form.getInputProps("license_date")}
+                placeholder="Chọn ngày cấp giấy phép"
+                mb="sm"
+              />
+              <TextInput
+                label="Nơi cấp giấy phép"
+                {...form.getInputProps("place_of_licensing")}
+                placeholder="Nhập nơi cấp giấy phép"
+                mb="sm"
+              />
+              <TextInput
+                label="Hộ khẩu thường trú"
+                {...form.getInputProps("permanent_residence")}
+                placeholder="Nhập hộ khẩu thường trú"
+                mb="sm"
+              />
+              <TextInput
+                label="Địa chỉ"
+                {...form.getInputProps("address_owner")}
+                placeholder="Nhập địa chỉ"
+                mb="sm"
+              />
+            </SimpleGrid>
+          </>
+        )}
 
-            <form onSubmit={form.onSubmit(handleSubmit)}>
-              <Group justify="end" mt="md">
-                <Button
-                  type="submit"
-                  onClick={() => {
-                    if (form.isValid()) {
-                      console.log("Form values:", form.values);
-                      navigate(
-                        `/business/${form.values.business_id}/dashboard`
-                      );
-                    }
-                  }}
-                >
-                  Thêm Dữ Liệu
-                </Button>
-              </Group>
-            </form>
-          </Stack>
-        </Box>
-      </AppShell.Main>
-    </AppShell>
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <Group justify="end" mt="md">
+            <Button
+              type="submit"
+              onClick={() => {
+                if (form.isValid()) {
+                  console.log("Form values:", form.values);
+                  navigate(`/business/${form.values.business_id}/dashboard`);
+                }
+              }}
+            >
+              Thêm Dữ Liệu
+            </Button>
+          </Group>
+        </form>
+      </Stack>
+    </Box>
   );
 }
 

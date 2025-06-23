@@ -40,8 +40,6 @@ function Employees() {
   useEffect(() => {
     const sampleWorkers: Worker[] = [
       {
-        worker_id: crypto.randomUUID(),
-        business_id: businessId || "",
         worker_name: "Nguyen Van A",
         birth_date: new Date("1990-05-15"),
         gender: Gender.Male,
@@ -50,8 +48,6 @@ function Employees() {
         food_safety_training: false,
       },
       {
-        worker_id: crypto.randomUUID(),
-        business_id: businessId || "",
         worker_name: "Tran Thi B",
         birth_date: new Date("1992-08-22"),
         gender: Gender.Female,
@@ -60,8 +56,6 @@ function Employees() {
         food_safety_training: true,
       },
       {
-        worker_id: crypto.randomUUID(),
-        business_id: businessId || "",
         worker_name: "Le Van C",
         birth_date: new Date("1985-03-10"),
         gender: Gender.Male,
@@ -70,8 +64,6 @@ function Employees() {
         food_safety_training: true,
       },
       {
-        worker_id: crypto.randomUUID(),
-        business_id: businessId || "",
         worker_name: "Pham Thi D",
         birth_date: new Date("1995-11-30"),
         gender: Gender.Female,
@@ -80,8 +72,6 @@ function Employees() {
         food_safety_training: false,
       },
       {
-        worker_id: crypto.randomUUID(),
-        business_id: businessId || "",
         worker_name: "Hoang Van E",
         birth_date: new Date("1988-07-05"),
         gender: Gender.Male,
@@ -94,7 +84,6 @@ function Employees() {
   }, [businessId]);
 
   const columns: MRT_ColumnDef<Worker>[] = [
-    { accessorKey: "worker_id", header: "Mã nhân viên" },
     { accessorKey: "worker_name", header: "Tên nhân viên" },
     {
       accessorKey: "birth_date",
@@ -127,8 +116,6 @@ function Employees() {
   // Form với useForm và Yup
   const form = useForm({
     initialValues: {
-      worker_id: crypto.randomUUID(),
-      business_id: businessId || "",
       worker_name: "",
       birth_date: new Date(),
       gender: Gender.Male,
@@ -142,8 +129,6 @@ function Employees() {
   const handleAddWorker = (values: typeof form.values) => {
     setWorkers([...workers, values as Worker]);
     form.reset();
-    form.setFieldValue("worker_id", crypto.randomUUID());
-    form.setFieldValue("business_id", businessId || "");
     close();
   };
 

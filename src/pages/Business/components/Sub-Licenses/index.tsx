@@ -43,40 +43,30 @@ function SubLicenses() {
   useEffect(() => {
     const sampleLicenses: License[] = [
       {
-        license_id: crypto.randomUUID(),
-        business_id: businessId || "",
         license_type: LicenseType.FireSafety,
         license_number: "PCCC-2024-001",
         issue_date: new Date("2024-01-15"),
         expiration_date: new Date("2025-01-15"),
       },
       {
-        license_id: crypto.randomUUID(),
-        business_id: businessId || "",
         license_type: LicenseType.FoodSafety,
         license_number: "ATTP-2024-002",
         issue_date: new Date("2024-02-20"),
         expiration_date: new Date("2025-02-20"),
       },
       {
-        license_id: crypto.randomUUID(),
-        business_id: businessId || "",
         license_type: LicenseType.PublicOrder,
         license_number: "ANTT-2024-003",
         issue_date: new Date("2024-03-10"),
         expiration_date: new Date("2025-03-10"),
       },
       {
-        license_id: crypto.randomUUID(),
-        business_id: businessId || "",
         license_type: LicenseType.Environmental,
         license_number: "BVMT-2024-004",
         issue_date: new Date("2024-04-05"),
         expiration_date: new Date("2025-04-05"),
       },
       {
-        license_id: crypto.randomUUID(),
-        business_id: businessId || "",
         license_type: LicenseType.ConstructionSafety,
         license_number: "ATXD-2024-005",
         issue_date: new Date("2024-05-12"),
@@ -108,7 +98,6 @@ function SubLicenses() {
   };
 
   const columns: MRT_ColumnDef<License>[] = [
-    { accessorKey: "license_id", header: "Mã giấy phép" },
     { accessorKey: "license_number", header: "Số giấy phép" },
     {
       accessorKey: "license_type",
@@ -148,8 +137,6 @@ function SubLicenses() {
   // Form với useForm và Yup
   const form = useForm({
     initialValues: {
-      license_id: crypto.randomUUID(),
-      business_id: businessId || "",
       license_number: "",
       license_type: LicenseType.FireSafety,
       issue_date: new Date(),
@@ -161,8 +148,6 @@ function SubLicenses() {
   const handleAddLicense = (values: typeof form.values) => {
     setLicenses([...licenses, values as License]);
     form.reset();
-    form.setFieldValue("license_id", crypto.randomUUID());
-    form.setFieldValue("business_id", businessId || "");
     close();
   };
 

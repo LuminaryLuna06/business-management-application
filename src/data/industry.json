@@ -1,0 +1,1182 @@
+[
+  {
+    "code": "1",
+    "name": "Sản xuất con dấu",
+    "conditional": true
+  },
+  {
+    "code": "2",
+    "name": "Kinh doanh công cụ hỗ trợ (bao gồm cả sửa chữa)",
+    "conditional": true
+  },
+  {
+    "code": "3",
+    "name": "Kinh doanh các loại pháo, trừ pháo nổ",
+    "conditional": true
+  },
+  {
+    "code": "4",
+    "name": "Kinh doanh thiết bị, phần mềm ngụy trang dùng để ghi âm, ghi hình, định vị",
+    "conditional": true
+  },
+  {
+    "code": "5",
+    "name": "Kinh doanh súng bắn sơn",
+    "conditional": true
+  },
+  {
+    "code": "6",
+    "name": "Kinh doanh quân trang, quân dụng cho lực lượng vũ trang, vũ khí quân dụng, trang thiết bị, kỹ thuật, khí tài, phương tiện chuyên dùng quân sự, công an; linh kiện, bộ phận, phụ tùng, vật tư và trang thiết bị đặc chủng, công nghệ chuyên dùng chế tạo chúng",
+    "conditional": true
+  },
+  {
+    "code": "7",
+    "name": "Kinh doanh dịch vụ cầm đồ",
+    "conditional": true
+  },
+  {
+    "code": "8",
+    "name": "Kinh doanh dịch vụ xoa bóp",
+    "conditional": true
+  },
+  {
+    "code": "9",
+    "name": "Kinh doanh thiết bị phát tín hiệu của xe được quyền ưu tiên",
+    "conditional": true
+  },
+  {
+    "code": "10",
+    "name": "Kinh doanh dịch vụ bảo vệ",
+    "conditional": true
+  },
+  {
+    "code": "12",
+    "name": "Hành nghề luật sư",
+    "conditional": true
+  },
+  {
+    "code": "13",
+    "name": "Hành nghề công chứng",
+    "conditional": true
+  },
+  {
+    "code": "14",
+    "name": "Hành nghề giám định tư pháp trong các lĩnh vực tài chính, ngân hàng, xây dựng, cổ vật, di vật, bản quyền tác giả",
+    "conditional": true
+  },
+  {
+    "code": "15",
+    "name": "Hành nghề đấu giá tài sản",
+    "conditional": true
+  },
+  {
+    "code": "16",
+    "name": "Hành nghề thừa phát lại",
+    "conditional": true
+  },
+  {
+    "code": "17",
+    "name": "Hành nghề quản lý, thanh lý tài sản của doanh nghiệp, hợp tác xã trong quá trình giải quyết phá sản",
+    "conditional": true
+  },
+  {
+    "code": "18",
+    "name": "Kinh doanh dịch vụ kế toán",
+    "conditional": true
+  },
+  {
+    "code": "19",
+    "name": "Kinh doanh dịch vụ kiểm toán",
+    "conditional": true
+  },
+  {
+    "code": "20",
+    "name": "Kinh doanh dịch vụ làm thủ tục về thuế",
+    "conditional": true
+  },
+  {
+    "code": "21",
+    "name": "Kinh doanh dịch vụ làm thủ tục hải quan",
+    "conditional": true
+  },
+  {
+    "code": "22",
+    "name": "Kinh doanh hàng miễn thuế",
+    "conditional": true
+  },
+  {
+    "code": "23",
+    "name": "Kinh doanh kho ngoại quan, địa điểm thu gom hàng lẻ",
+    "conditional": true
+  },
+  {
+    "code": "24",
+    "name": "Kinh doanh địa điểm làm thủ tục hải quan, tập kết, kiểm tra, giám sát hải quan",
+    "conditional": true
+  },
+  {
+    "code": "25",
+    "name": "Kinh doanh chứng khoán",
+    "conditional": true
+  },
+  {
+    "code": "26",
+    "name": "Kinh doanh dịch vụ đăng ký, lưu ký, bù trừ và thanh toán chứng khoán của Tổng công ty lưu ký và bù trừ chứng khoán Việt Nam, tổ chức thị trường giao dịch chứng khoán niêm yết và các loại chứng khoán khác",
+    "conditional": true
+  },
+  {
+    "code": "27",
+    "name": "Kinh doanh bảo hiểm",
+    "conditional": true
+  },
+  {
+    "code": "28",
+    "name": "Kinh doanh tái bảo hiểm",
+    "conditional": true
+  },
+  {
+    "code": "29",
+    "name": "Môi giới bảo hiểm, hoạt động phụ trợ bảo hiểm",
+    "conditional": true
+  },
+  {
+    "code": "29a",
+    "name": "Dịch vụ phụ trợ bảo hiểm",
+    "conditional": true
+  },
+  {
+    "code": "30",
+    "name": "Đại lý bảo hiểm",
+    "conditional": true
+  },
+  {
+    "code": "31",
+    "name": "Kinh doanh dịch vụ thẩm định giá",
+    "conditional": true
+  },
+  {
+    "code": "32",
+    "name": "Kinh doanh xổ số",
+    "conditional": true
+  },
+  {
+    "code": "33",
+    "name": "Kinh doanh trò chơi điện tử có thưởng dành cho người nước ngoài",
+    "conditional": true
+  },
+  {
+    "code": "34",
+    "name": "Kinh doanh dịch vụ xếp hạng tín nhiệm",
+    "conditional": true
+  },
+  {
+    "code": "35",
+    "name": "Kinh doanh ca-si-nô (casino)",
+    "conditional": true
+  },
+  {
+    "code": "36",
+    "name": "Kinh doanh đặt cược",
+    "conditional": true
+  },
+  {
+    "code": "37",
+    "name": "Kinh doanh dịch vụ quản lý quỹ hưu trí tự nguyện",
+    "conditional": true
+  },
+  {
+    "code": "38",
+    "name": "Kinh doanh xăng dầu",
+    "conditional": true
+  },
+  {
+    "code": "39",
+    "name": "Kinh doanh khí",
+    "conditional": true
+  },
+  {
+    "code": "40",
+    "name": "Kinh doanh dịch vụ giám định thương mại",
+    "conditional": true
+  },
+  {
+    "code": "41",
+    "name": "Kinh doanh vật liệu nổ công nghiệp (bao gồm cả hoạt động tiêu hủy)",
+    "conditional": true
+  },
+  {
+    "code": "42",
+    "name": "Kinh doanh tiền chất thuốc nổ",
+    "conditional": true
+  },
+  {
+    "code": "43",
+    "name": "Kinh doanh ngành, nghề có sử dụng vật liệu nổ công nghiệp và tiền chất thuốc nổ",
+    "conditional": true
+  },
+  {
+    "code": "44",
+    "name": "Kinh doanh dịch vụ nổ mìn",
+    "conditional": true
+  },
+  {
+    "code": "45",
+    "name": "Kinh doanh hóa chất, trừ hóa chất bị cấm theo Công ước quốc tế về cấm phát triển, sản xuất, tàng trữ, sử dụng và phá hủy vũ khí hóa học",
+    "conditional": true
+  },
+  {
+    "code": "46",
+    "name": "Kinh doanh rượu",
+    "conditional": true
+  },
+  {
+    "code": "47",
+    "name": "Kinh doanh sản phẩm thuốc lá, nguyên liệu thuốc lá, máy móc, thiết bị thuộc chuyên ngành thuốc lá",
+    "conditional": true
+  },
+  {
+    "code": "48",
+    "name": "Kinh doanh thực phẩm thuộc lĩnh vực quản lý chuyên ngành của Bộ Công Thương",
+    "conditional": true
+  },
+  {
+    "code": "49",
+    "name": "Hoạt động Sở Giao dịch hàng hóa",
+    "conditional": true
+  },
+  {
+    "code": "50",
+    "name": "Hoạt động phát điện, truyền tải điện, phân phối điện, bán buôn điện, bán lẻ điện",
+    "conditional": true
+  },
+  {
+    "code": "51",
+    "name": "Xuất khẩu gạo",
+    "conditional": true
+  },
+  {
+    "code": "52",
+    "name": "Kinh doanh tạm nhập, tái xuất hàng hóa có thuế tiêu thụ đặc biệt",
+    "conditional": true
+  },
+  {
+    "code": "53",
+    "name": "Kinh doanh tạm nhập, tái xuất hàng thực phẩm đông lạnh",
+    "conditional": true
+  },
+  {
+    "code": "54",
+    "name": "Kinh doanh tạm nhập, tái xuất hàng hóa thuộc Danh mục hàng hóa đã qua sử dụng",
+    "conditional": true
+  },
+  {
+    "code": "55",
+    "name": "Kinh doanh khoáng sản",
+    "conditional": true
+  },
+  {
+    "code": "56",
+    "name": "Kinh doanh tiền chất công nghiệp",
+    "conditional": true
+  },
+  {
+    "code": "57",
+    "name": "Hoạt động mua bán hàng hóa và các hoạt động liên quan trực tiếp đến hoạt động mua bán hàng hóa của nhà cung cấp dịch vụ nước ngoài tại Việt Nam",
+    "conditional": true
+  },
+  {
+    "code": "58",
+    "name": "Kinh doanh theo phương thức bán hàng đa cấp",
+    "conditional": true
+  },
+  {
+    "code": "59",
+    "name": "Hoạt động thương mại điện tử",
+    "conditional": true
+  },
+  {
+    "code": "60",
+    "name": "Hoạt động dầu khí",
+    "conditional": true
+  },
+  {
+    "code": "61",
+    "name": "Kiểm toán năng lượng",
+    "conditional": true
+  },
+  {
+    "code": "62",
+    "name": "Hoạt động giáo dục nghề nghiệp",
+    "conditional": true
+  },
+  {
+    "code": "63",
+    "name": "Kiểm định chất lượng giáo dục nghề nghiệp",
+    "conditional": true
+  },
+  {
+    "code": "64",
+    "name": "Kinh doanh dịch vụ đánh giá kỹ năng nghề",
+    "conditional": true
+  },
+  {
+    "code": "65",
+    "name": "Kinh doanh dịch vụ kiểm định kỹ thuật an toàn lao động",
+    "conditional": true
+  },
+  {
+    "code": "66",
+    "name": "Kinh doanh dịch vụ huấn luyện an toàn lao động, vệ sinh lao động",
+    "conditional": true
+  },
+  {
+    "code": "67",
+    "name": "Kinh doanh dịch vụ việc làm",
+    "conditional": true
+  },
+  {
+    "code": "68",
+    "name": "Kinh doanh dịch vụ đưa người lao động đi làm việc ở nước ngoài",
+    "conditional": true
+  },
+  {
+    "code": "69",
+    "name": "Kinh doanh dịch vụ cai nghiện ma túy tự nguyện, cai nghiện thuốc lá, điều trị HIV/AIDS, chăm sóc người cao tuổi, người khuyết tật, trẻ em",
+    "conditional": true
+  },
+  {
+    "code": "70",
+    "name": "Kinh doanh dịch vụ cho thuê lại lao động",
+    "conditional": true
+  },
+  {
+    "code": "71",
+    "name": "Kinh doanh vận tải đường bộ",
+    "conditional": true
+  },
+  {
+    "code": "72",
+    "name": "Kinh doanh dịch vụ bảo hành, bảo dưỡng xe ô tô",
+    "conditional": true
+  },
+  {
+    "code": "73",
+    "name": "Sản xuất, lắp ráp, nhập khẩu xe ô tô",
+    "conditional": true
+  },
+  {
+    "code": "74",
+    "name": "Kinh doanh dịch vụ kiểm định xe cơ giới",
+    "conditional": true
+  },
+  {
+    "code": "75",
+    "name": "Kinh doanh dịch vụ đào tạo lái xe ô tô",
+    "conditional": true
+  },
+  {
+    "code": "76",
+    "name": "Kinh doanh dịch vụ đào tạo thẩm tra viên an toàn giao thông",
+    "conditional": true
+  },
+  {
+    "code": "77",
+    "name": "Kinh doanh dịch vụ sát hạch lái xe",
+    "conditional": true
+  },
+  {
+    "code": "78",
+    "name": "Kinh doanh dịch vụ thẩm tra an toàn giao thông",
+    "conditional": true
+  },
+  {
+    "code": "79",
+    "name": "Kinh doanh vận tải đường thủy",
+    "conditional": true
+  },
+  {
+    "code": "80",
+    "name": "Kinh doanh dịch vụ đóng mới, hoán cải, sửa chữa, phục hồi phương tiện thủy nội địa",
+    "conditional": true
+  },
+  {
+    "code": "81",
+    "name": "Kinh doanh dịch vụ đào tạo thuyền viên và người lái phương tiện thủy nội địa",
+    "conditional": true
+  },
+  {
+    "code": "82",
+    "name": "Đào tạo, huấn luyện thuyền viên hàng hải và tổ chức tuyển dụng, cung ứng thuyền viên hàng hải",
+    "conditional": true
+  },
+  {
+    "code": "83",
+    "name": "Kinh doanh dịch vụ bảo đảm an toàn hàng hải",
+    "conditional": true
+  },
+  {
+    "code": "84",
+    "name": "Kinh doanh vận tải biển",
+    "conditional": true
+  },
+  {
+    "code": "85",
+    "name": "Kinh doanh dịch vụ lai dắt tàu biển",
+    "conditional": true
+  },
+  {
+    "code": "86",
+    "name": "Nhập khẩu, phá dỡ tàu biển đã qua sử dụng",
+    "conditional": true
+  },
+  {
+    "code": "87",
+    "name": "Kinh doanh dịch vụ đóng mới, hoán cải, sửa chữa tàu biển",
+    "conditional": true
+  },
+  {
+    "code": "88",
+    "name": "Kinh doanh khai thác cảng biển",
+    "conditional": true
+  },
+  {
+    "code": "89",
+    "name": "Kinh doanh vận tải hàng không",
+    "conditional": true
+  },
+  {
+    "code": "90",
+    "name": "Kinh doanh dịch vụ thiết kế, sản xuất, bảo dưỡng, thử nghiệm tàu bay, động cơ tàu bay, cánh quạt tàu bay và trang bị, thiết bị tàu bay tại Việt Nam",
+    "conditional": true
+  },
+  {
+    "code": "90a",
+    "name": "Nhập khẩu, tạm nhập tái xuất, tạm xuất tái nhập tàu bay không người lái, phương tiện bay khác, động cơ tàu bay, cánh quạt tàu bay và trang bị, thiết bị của tàu bay không người lái, phương tiện bay khác",
+    "conditional": true
+  },
+  {
+    "code": "90b",
+    "name": "Kinh doanh tàu bay không người lái, phương tiện bay khác, động cơ tàu bay, cánh quạt tàu bay và trang bị, thiết bị của tàu bay không người lái, phương tiện bay khác",
+    "conditional": true
+  },
+  {
+    "code": "90c",
+    "name": "Nghiên cứu chế tạo, thử nghiệm, sửa chữa, bảo dưỡng tàu bay không người lái, phương tiện bay khác, động cơ tàu bay, cánh quạt tàu bay và trang bị, thiết bị của tàu bay không người lái, phương tiện bay khác",
+    "conditional": true
+  },
+  {
+    "code": "91",
+    "name": "Kinh doanh cảng hàng không, sân bay",
+    "conditional": true
+  },
+  {
+    "code": "92",
+    "name": "Kinh doanh dịch vụ hàng không tại cảng hàng không, sân bay",
+    "conditional": true
+  },
+  {
+    "code": "93",
+    "name": "Kinh doanh dịch vụ bảo đảm hoạt động bay",
+    "conditional": true
+  },
+  {
+    "code": "94",
+    "name": "Kinh doanh dịch vụ đào tạo, huấn luyện nghiệp vụ nhân viên hàng không",
+    "conditional": true
+  },
+  {
+    "code": "95",
+    "name": "Kinh doanh vận tải đường sắt",
+    "conditional": true
+  },
+  {
+    "code": "96",
+    "name": "Kinh doanh kết cấu hạ tầng đường sắt",
+    "conditional": true
+  },
+  {
+    "code": "97",
+    "name": "Kinh doanh đường sắt đô thị",
+    "conditional": true
+  },
+  {
+    "code": "98",
+    "name": "Kinh doanh dịch vụ vận tải đa phương thức",
+    "conditional": true
+  },
+  {
+    "code": "99",
+    "name": "Kinh doanh dịch vụ vận chuyển hàng nguy hiểm",
+    "conditional": true
+  },
+  {
+    "code": "100",
+    "name": "Kinh doanh vận tải đường ống",
+    "conditional": true
+  },
+  {
+    "code": "101",
+    "name": "Kinh doanh bất động sản",
+    "conditional": true
+  },
+  {
+    "code": "102",
+    "name": "Kinh doanh nước sạch (nước sinh hoạt)",
+    "conditional": true
+  },
+  {
+    "code": "103",
+    "name": "Kinh doanh dịch vụ kiến trúc",
+    "conditional": true
+  },
+  {
+    "code": "104",
+    "name": "Kinh doanh dịch vụ tư vấn quản lý dự án đầu tư xây dựng",
+    "conditional": true
+  },
+  {
+    "code": "105",
+    "name": "Kinh doanh dịch vụ khảo sát xây dựng",
+    "conditional": true
+  },
+  {
+    "code": "106",
+    "name": "Kinh doanh dịch vụ thiết kế, thẩm tra thiết kế xây dựng",
+    "conditional": true
+  },
+  {
+    "code": "107",
+    "name": "Kinh doanh dịch vụ tư vấn giám sát thi công xây dựng công trình",
+    "conditional": true
+  },
+  {
+    "code": "108",
+    "name": "Kinh doanh dịch vụ thi công xây dựng công trình",
+    "conditional": true
+  },
+  {
+    "code": "109",
+    "name": "Hoạt động xây dựng của nhà thầu nước ngoài",
+    "conditional": true
+  },
+  {
+    "code": "110",
+    "name": "Kinh doanh dịch vụ quản lý chi phí đầu tư xây dựng",
+    "conditional": true
+  },
+  {
+    "code": "111",
+    "name": "Kinh doanh dịch vụ kiểm định xây dựng",
+    "conditional": true
+  },
+  {
+    "code": "112",
+    "name": "Kinh doanh dịch vụ thí nghiệm chuyên ngành xây dựng",
+    "conditional": true
+  },
+  {
+    "code": "113",
+    "name": "Kinh doanh dịch vụ quản lý vận hành nhà chung cư",
+    "conditional": true
+  },
+  {
+    "code": "114",
+    "name": "Kinh doanh dịch vụ quản lý, vận hành cơ sở hỏa táng",
+    "conditional": true
+  },
+  {
+    "code": "115",
+    "name": "Kinh doanh dịch vụ tư vấn lập quy hoạch đô thị và nông thôn",
+    "conditional": true
+  },
+  {
+    "code": "116",
+    "name": "Kinh doanh sản phẩm amiang trắng thuộc nhóm Serpentine",
+    "conditional": true
+  },
+  {
+    "code": "117",
+    "name": "Kinh doanh dịch vụ bưu chính",
+    "conditional": true
+  },
+  {
+    "code": "118",
+    "name": "Kinh doanh dịch vụ viễn thông",
+    "conditional": true
+  },
+  {
+    "code": "119",
+    "name": "Kinh doanh dịch vụ tin cậy",
+    "conditional": true
+  },
+  {
+    "code": "120",
+    "name": "Hoạt động của nhà xuất bản",
+    "conditional": true
+  },
+  {
+    "code": "121",
+    "name": "Kinh doanh dịch vụ in, trừ in bao bì",
+    "conditional": true
+  },
+  {
+    "code": "122",
+    "name": "Kinh doanh dịch vụ phát hành xuất bản phẩm",
+    "conditional": true
+  },
+  {
+    "code": "123",
+    "name": "Kinh doanh dịch vụ mạng xã hội",
+    "conditional": true
+  },
+  {
+    "code": "124",
+    "name": "Kinh doanh trò chơi trên mạng viễn thông, mạng Internet",
+    "conditional": true
+  },
+  {
+    "code": "125",
+    "name": "Kinh doanh dịch vụ phát thanh, truyền hình trả tiền",
+    "conditional": true
+  },
+  {
+    "code": "126",
+    "name": "Kinh doanh dịch vụ thiết lập trang thông tin điện tử tổng hợp",
+    "conditional": true
+  },
+  {
+    "code": "127",
+    "name": "Dịch vụ gia công, tái chế, sửa chữa, làm mới sản phẩm công nghệ thông tin đã qua sử dụng thuộc Danh mục sản phẩm công nghệ thông tin đã qua sử dụng cấm nhập khẩu cho đối tác nước ngoài",
+    "conditional": true
+  },
+  {
+    "code": "128",
+    "name": "Kinh doanh dịch vụ nội dung thông tin trên mạng viễn thông di động, mạng Internet",
+    "conditional": true
+  },
+  {
+    "code": "129",
+    "name": "Kinh doanh dịch vụ đăng ký, duy trì tên miền",
+    "conditional": true
+  },
+  {
+    "code": "130",
+    "name": "Kinh doanh dịch vụ trung tâm dữ liệu",
+    "conditional": true
+  },
+  {
+    "code": "131",
+    "name": "Kinh doanh dịch vụ xác thực điện tử",
+    "conditional": true
+  },
+  {
+    "code": "132",
+    "name": "Kinh doanh sản phẩm, dịch vụ an toàn thông tin mạng",
+    "conditional": true
+  },
+  {
+    "code": "132a",
+    "name": "Kinh doanh sản phẩm, dịch vụ an ninh mạng (không bao gồm kinh doanh sản phẩm, dịch vụ an toàn thông tin mạng và kinh doanh sản phẩm, dịch vụ mật mã dân sự)",
+    "conditional": true
+  },
+  {
+    "code": "133",
+    "name": "Kinh doanh dịch vụ phát hành báo chí nhập khẩu",
+    "conditional": true
+  },
+  {
+    "code": "134",
+    "name": "Kinh doanh sản phẩm, dịch vụ mật mã dân sự",
+    "conditional": true
+  },
+  {
+    "code": "135",
+    "name": "Kinh doanh các thiết bị gây nhiễu, phá sóng thông tin di động",
+    "conditional": true
+  },
+  {
+    "code": "136",
+    "name": "Hoạt động của cơ sở giáo dục mầm non",
+    "conditional": true
+  },
+  {
+    "code": "137",
+    "name": "Hoạt động của cơ sở giáo dục phổ thông",
+    "conditional": true
+  },
+  {
+    "code": "138",
+    "name": "Hoạt động của cơ sở giáo dục đại học",
+    "conditional": true
+  },
+  {
+    "code": "139",
+    "name": "Hoạt động của cơ sở giáo dục có vốn đầu tư nước ngoài, văn phòng đại diện giáo dục nước ngoài tại Việt Nam, phân hiệu cơ sở giáo dục có vốn đầu tư nước ngoài",
+    "conditional": true
+  },
+  {
+    "code": "140",
+    "name": "Hoạt động của cơ sở giáo dục thường xuyên",
+    "conditional": true
+  },
+  {
+    "code": "141",
+    "name": "Hoạt động của trường chuyên biệt",
+    "conditional": true
+  },
+  {
+    "code": "142",
+    "name": "Hoạt động liên kết đào tạo với nước ngoài",
+    "conditional": true
+  },
+  {
+    "code": "143",
+    "name": "Kiểm định chất lượng giáo dục",
+    "conditional": true
+  },
+  {
+    "code": "144",
+    "name": "Kinh doanh dịch vụ tư vấn du học",
+    "conditional": true
+  },
+  {
+    "code": "145",
+    "name": "Khai thác thủy sản",
+    "conditional": true
+  },
+  {
+    "code": "146",
+    "name": "Kinh doanh thủy sản",
+    "conditional": true
+  },
+  {
+    "code": "147",
+    "name": "Kinh doanh thức ăn thủy sản, thức ăn chăn nuôi",
+    "conditional": true
+  },
+  {
+    "code": "148",
+    "name": "Kinh doanh dịch vụ khảo nghiệm thức ăn thủy sản, thức ăn chăn nuôi",
+    "conditional": true
+  },
+  {
+    "code": "149",
+    "name": "Kinh doanh chế phẩm sinh học, vi sinh vật, hóa chất, chất xử lý môi trường trong nuôi trồng thủy sản, chăn nuôi",
+    "conditional": true
+  },
+  {
+    "code": "150",
+    "name": "Kinh doanh đóng mới, cải hoán tàu cá",
+    "conditional": true
+  },
+  {
+    "code": "151",
+    "name": "Đăng kiểm tàu cá",
+    "conditional": true
+  },
+  {
+    "code": "152",
+    "name": "Đào tạo, bồi dưỡng thuyền viên tàu cá",
+    "conditional": true
+  },
+  {
+    "code": "153",
+    "name": "Nuôi, trồng các loài thực vật, động vật hoang dã thuộc các Phụ lục của Công ước CITES và danh mục thực vật rừng, động vật rừng, thủy sản nguy cấp, quý, hiếm",
+    "conditional": true
+  },
+  {
+    "code": "154",
+    "name": "Nuôi động vật rừng thông thường",
+    "conditional": true
+  },
+  {
+    "code": "155",
+    "name": "Xuất khẩu, nhập khẩu, tái xuất khẩu, quá cảnh và nhập nội từ biển mẫu vật từ tự nhiên của các loài thuộc các Phụ lục của Công ước CITES và danh mục thực vật rừng, động vật rừng, thủy sản nguy cấp, quý, hiếm",
+    "conditional": true
+  },
+  {
+    "code": "156",
+    "name": "Xuất khẩu, nhập khẩu, tái xuất khẩu mẫu vật nuôi sinh sản, nuôi sinh trưởng, trồng cấy nhân tạo của các loài thuộc các Phụ lục của Công ước CITES và danh mục thực vật rừng, động vật rừng, thủy sản nguy cấp, quý, hiếm",
+    "conditional": true
+  },
+  {
+    "code": "157",
+    "name": "Chế biến, kinh doanh, vận chuyển, quảng cáo, trưng bày, cất giữ mẫu vật của các loài thực vật, động vật thuộc các Phụ lục của Công ước CITES và danh mục thực vật rừng, động vật rừng, thủy sản nguy cấp, quý, hiếm",
+    "conditional": true
+  },
+  {
+    "code": "158",
+    "name": "Kinh doanh thuốc bảo vệ thực vật",
+    "conditional": true
+  },
+  {
+    "code": "159",
+    "name": "Kinh doanh dịch vụ xử lý vật thể thuộc diện kiểm dịch thực vật",
+    "conditional": true
+  },
+  {
+    "code": "160",
+    "name": "Kinh doanh dịch vụ khảo nghiệm thuốc bảo vệ thực vật",
+    "conditional": true
+  },
+  {
+    "code": "161",
+    "name": "Kinh doanh dịch vụ bảo vệ thực vật",
+    "conditional": true
+  },
+  {
+    "code": "162",
+    "name": "Kinh doanh thuốc thú y, vắc xin, chế phẩm sinh học, vi sinh vật, hóa chất dùng trong thú y",
+    "conditional": true
+  },
+  {
+    "code": "163",
+    "name": "Kinh doanh dịch vụ kỹ thuật về thú y",
+    "conditional": true
+  },
+  {
+    "code": "164",
+    "name": "Kinh doanh dịch vụ xét nghiệm, phẫu thuật động vật",
+    "conditional": true
+  },
+  {
+    "code": "165",
+    "name": "Kinh doanh dịch vụ tiêm phòng, chẩn đoán bệnh, kê đơn, chữa bệnh, chăm sóc sức khỏe động vật",
+    "conditional": true
+  },
+  {
+    "code": "166",
+    "name": "Kinh doanh dịch vụ kiểm nghiệm, khảo nghiệm thuốc thú y (bao gồm thuốc thú y, thuốc thú y thủy sản, vắc xin, chế phẩm sinh học, vi sinh vật, hóa chất dùng trong thú y, thú y thủy sản)",
+    "conditional": true
+  },
+  {
+    "code": "167",
+    "name": "Kinh doanh chăn nuôi trang trại",
+    "conditional": true
+  },
+  {
+    "code": "168",
+    "name": "Kinh doanh giết mổ gia súc, gia cầm",
+    "conditional": true
+  },
+  {
+    "code": "169",
+    "name": "Kinh doanh thực phẩm thuộc lĩnh vực quản lý chuyên ngành của Bộ Nông nghiệp và Phát triển nông thôn",
+    "conditional": true
+  },
+  {
+    "code": "170",
+    "name": "Kinh doanh dịch vụ cách ly kiểm dịch động vật, sản phẩm động vật",
+    "conditional": true
+  },
+  {
+    "code": "171",
+    "name": "Kinh doanh phân bón",
+    "conditional": true
+  },
+  {
+    "code": "172",
+    "name": "Kinh doanh dịch vụ khảo nghiệm phân bón",
+    "conditional": true
+  },
+  {
+    "code": "173",
+    "name": "Kinh doanh giống cây trồng, giống vật nuôi",
+    "conditional": true
+  },
+  {
+    "code": "174",
+    "name": "Kinh doanh giống thủy sản",
+    "conditional": true
+  },
+  {
+    "code": "175",
+    "name": "Kinh doanh dịch vụ khảo nghiệm giống cây trồng, giống vật nuôi",
+    "conditional": true
+  },
+  {
+    "code": "176",
+    "name": "Kinh doanh dịch vụ khảo nghiệm giống thủy sản",
+    "conditional": true
+  },
+  {
+    "code": "177",
+    "name": "Kinh doanh dịch vụ thử nghiệm, khảo nghiệm chế phẩm sinh học, vi sinh vật, hóa chất, chất xử lý môi trường trong nuôi trồng thủy sản, chăn nuôi",
+    "conditional": true
+  },
+  {
+    "code": "178",
+    "name": "Kinh doanh sản phẩm biến đổi gen",
+    "conditional": true
+  },
+  {
+    "code": "179",
+    "name": "Kinh doanh dịch vụ khám bệnh, chữa bệnh",
+    "conditional": true
+  },
+  {
+    "code": "180",
+    "name": "Kinh doanh dịch vụ phẫu thuật thẩm mỹ",
+    "conditional": true
+  },
+  {
+    "code": "181",
+    "name": "Kinh doanh dược",
+    "conditional": true
+  },
+  {
+    "code": "182",
+    "name": "Sản xuất mỹ phẩm",
+    "conditional": true
+  },
+  {
+    "code": "183",
+    "name": "Kinh doanh hóa chất, chế phẩm diệt côn trùng, diệt khuẩn dùng trong lĩnh vực gia dụng y tế",
+    "conditional": true
+  },
+  {
+    "code": "184",
+    "name": "Kinh doanh trang thiết bị y tế",
+    "conditional": true
+  },
+  {
+    "code": "185",
+    "name": "Kinh doanh dịch vụ giám định về sở hữu trí tuệ (bao gồm giám định về quyền tác giả và quyền liên quan, giám định sở hữu công nghiệp và giám định về quyền đối với giống cây trồng)",
+    "conditional": true
+  },
+  {
+    "code": "186",
+    "name": "Kinh doanh dịch vụ tiến hành công việc bức xạ",
+    "conditional": true
+  },
+  {
+    "code": "187",
+    "name": "Kinh doanh dịch vụ hỗ trợ ứng dụng năng lượng nguyên tử",
+    "conditional": true
+  },
+  {
+    "code": "188",
+    "name": "Kinh doanh dịch vụ đánh giá sự phù hợp",
+    "conditional": true
+  },
+  {
+    "code": "189",
+    "name": "Kinh doanh dịch vụ kiểm định, hiệu chuẩn, thử nghiệm phương tiện đo, chuẩn đo lường",
+    "conditional": true
+  },
+  {
+    "code": "190",
+    "name": "Kinh doanh dịch vụ đánh giá, thẩm định giá và giám định công nghệ",
+    "conditional": true
+  },
+  {
+    "code": "191",
+    "name": "Kinh doanh dịch vụ đại diện quyền sở hữu trí tuệ (bao gồm dịch vụ đại diện sở hữu công nghiệp và dịch vụ đại diện quyền đối với giống cây trồng)",
+    "conditional": true
+  },
+  {
+    "code": "192",
+    "name": "Kinh doanh dịch vụ phổ biến phim",
+    "conditional": true
+  },
+  {
+    "code": "193",
+    "name": "Kinh doanh dịch vụ giám định di vật, cổ vật",
+    "conditional": true
+  },
+  {
+    "code": "194",
+    "name": "Kinh doanh dịch vụ lập quy hoạch, dự án, thiết kế, tổ chức thi công, tư vấn giám sát thi công dự án bảo quản, tu bổ và phục hồi di tích",
+    "conditional": true
+  },
+  {
+    "code": "195",
+    "name": "Kinh doanh dịch vụ ka-ra-ô-kê (karaoke), vũ trường",
+    "conditional": true
+  },
+  {
+    "code": "196",
+    "name": "Kinh doanh dịch vụ lữ hành",
+    "conditional": true
+  },
+  {
+    "code": "197",
+    "name": "Kinh doanh hoạt động thể thao của doanh nghiệp thể thao, câu lạc bộ thể thao chuyên nghiệp",
+    "conditional": true
+  },
+  {
+    "code": "198",
+    "name": "Kinh doanh dịch vụ biểu diễn nghệ thuật, trình diễn thời trang, tổ chức thi người đẹp, người mẫu",
+    "conditional": true
+  },
+  {
+    "code": "199",
+    "name": "Kinh doanh bản ghi âm, ghi hình ca múa nhạc, sân khấu",
+    "conditional": true
+  },
+  {
+    "code": "200",
+    "name": "Kinh doanh dịch vụ lưu trú",
+    "conditional": true
+  },
+  {
+    "code": "201",
+    "name": "Kinh doanh di vật, cổ vật, trừ kinh doanh xuất khẩu di vật, cổ vật; kinh doanh dịch vụ bảo quản, phục chế, số hóa, xây dựng cơ sở dữ liệu di vật, cổ vật",
+    "conditional": true
+  },
+  {
+    "code": "202",
+    "name": "Nhập khẩu hàng hóa văn hóa thuộc diện quản lý chuyên ngành của Bộ Văn hóa, Thể thao và Du lịch",
+    "conditional": true
+  },
+  {
+    "code": "203",
+    "name": "Kinh doanh dịch vụ bảo tàng",
+    "conditional": true
+  },
+  {
+    "code": "204",
+    "name": "Kinh doanh trò chơi điện tử (trừ kinh doanh trò chơi điện tử có thưởng dành cho người nước ngoài và kinh doanh trò chơi điện tử có thưởng trên mạng)",
+    "conditional": true
+  },
+  {
+    "code": "205",
+    "name": "Kinh doanh dịch vụ tư vấn điều tra, đánh giá đất đai",
+    "conditional": true
+  },
+  {
+    "code": "206",
+    "name": "Kinh doanh dịch vụ về lập quy hoạch, kế hoạch sử dụng đất",
+    "conditional": true
+  },
+  {
+    "code": "207",
+    "name": "Kinh doanh dịch vụ xây dựng hạ tầng kỹ thuật công nghệ thông tin, xây dựng phần mềm của hệ thống thông tin đất đai",
+    "conditional": true
+  },
+  {
+    "code": "208",
+    "name": "Kinh doanh dịch vụ xây dựng cơ sở dữ liệu đất đai",
+    "conditional": true
+  },
+  {
+    "code": "209",
+    "name": "Kinh doanh dịch vụ xác định giá đất",
+    "conditional": true
+  },
+  {
+    "code": "210",
+    "name": "Kinh doanh dịch vụ đo đạc và bản đồ",
+    "conditional": true
+  },
+  {
+    "code": "211",
+    "name": "Kinh doanh dịch vụ dự báo, cảnh báo khí tượng thủy văn",
+    "conditional": true
+  },
+  {
+    "code": "212",
+    "name": "Kinh doanh dịch vụ khoan nước dưới đất, thăm dò nước dưới đất",
+    "conditional": true
+  },
+  {
+    "code": "213",
+    "name": "Kinh doanh dịch vụ khai thác tài nguyên nước",
+    "conditional": true
+  },
+  {
+    "code": "214",
+    "name": "Kinh doanh dịch vụ hỗ trợ ra quyết định điều hòa, phân phối tài nguyên nước; dịch vụ hỗ trợ ra quyết định vận hành hồ chứa, liên hồ chứa",
+    "conditional": true
+  },
+  {
+    "code": "215",
+    "name": "Kinh doanh dịch vụ thăm dò khoáng sản",
+    "conditional": true
+  },
+  {
+    "code": "216",
+    "name": "Khai thác khoáng sản",
+    "conditional": true
+  },
+  {
+    "code": "217",
+    "name": "Kinh doanh dịch vụ vận chuyển, xử lý chất thải nguy hại",
+    "conditional": true
+  },
+  {
+    "code": "218",
+    "name": "Nhập khẩu phế liệu",
+    "conditional": true
+  },
+  {
+    "code": "219",
+    "name": "Kinh doanh dịch vụ quan trắc môi trường",
+    "conditional": true
+  },
+  {
+    "code": "220",
+    "name": "Hoạt động kinh doanh của ngân hàng thương mại",
+    "conditional": true
+  },
+  {
+    "code": "221",
+    "name": "Hoạt động kinh doanh của tổ chức tín dụng phi ngân hàng",
+    "conditional": true
+  },
+  {
+    "code": "222",
+    "name": "Hoạt động kinh doanh của ngân hàng hợp tác xã, quỹ tín dụng nhân dân, tổ chức tài chính vi mô",
+    "conditional": true
+  },
+  {
+    "code": "223",
+    "name": "Cung ứng dịch vụ trung gian thanh toán, cung ứng dịch vụ thanh toán không qua tài khoản thanh toán của khách hàng",
+    "conditional": true
+  },
+  {
+    "code": "224",
+    "name": "Cung ứng dịch vụ thông tin tín dụng",
+    "conditional": true
+  },
+  {
+    "code": "225",
+    "name": "Hoạt động kinh doanh, cung ứng dịch vụ ngoại hối của tổ chức không phải là tổ chức tín dụng",
+    "conditional": true
+  },
+  {
+    "code": "226",
+    "name": "Kinh doanh vàng",
+    "conditional": true
+  },
+  {
+    "code": "227",
+    "name": "Hoạt động in, đúc tiền",
+    "conditional": true
+  },
+  {
+    "code": "228",
+    "name": "Đào tạo, cấp chứng chỉ vô tuyến điện viên",
+    "conditional": true
+  },
+  {
+    "code": "229",
+    "name": "Kinh doanh dịch vụ lưu trữ",
+    "conditional": true
+  },
+  {
+    "code": "230",
+    "name": "Kinh doanh sản phẩm, dịch vụ trung gian dữ liệu",
+    "conditional": true
+  },
+  {
+    "code": "231",
+    "name": "Kinh doanh sản phẩm, dịch vụ phân tích, tổng hợp dữ liệu",
+    "conditional": true
+  },
+  {
+    "code": "232",
+    "name": "Kinh doanh dịch vụ sàn dữ liệu",
+    "conditional": true
+  }
+]

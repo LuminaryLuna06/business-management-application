@@ -126,10 +126,10 @@ function SubLicenses() {
       Cell: ({ cell }) => cell.getValue<Date>()?.toLocaleDateString() || "",
     },
     {
-      accessorKey: "expiration_date",
+      accessorKey: "status",
       header: "Trạng thái",
-      Cell: ({ cell }) => {
-        const expirationDate = cell.getValue<Date>();
+      Cell: ({ row }) => {
+        const expirationDate = row.original.expiration_date;
         const today = new Date();
         if (expirationDate < today) {
           return "Hết hạn";

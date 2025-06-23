@@ -358,7 +358,7 @@ export default function BusinessPage() {
           <Tabs.Tab value="first">Dashboard</Tabs.Tab>
           <Tabs.Tab value="second">Employees</Tabs.Tab>
           <Tabs.Tab value="third">Licenses</Tabs.Tab>
-          {/* <Tabs.Tab value="fourth">Inspections</Tabs.Tab> */}
+          <Tabs.Tab value="fourth">Inspections</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="first">
@@ -370,9 +370,9 @@ export default function BusinessPage() {
         <Tabs.Panel value="third">
           <SubLicenses />
         </Tabs.Panel>
-        {/* <Tabs.Panel value="fourth">
+        <Tabs.Panel value="fourth">
           <InspectionSchedulePage />
-        </Tabs.Panel> */}
+        </Tabs.Panel>
       </Tabs>
     </Box>
   );

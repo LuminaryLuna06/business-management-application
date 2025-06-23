@@ -9,8 +9,6 @@ export enum LicenseType {
 }
 
 export type License = {
-  license_id: string;
-  business_id: string;
   license_type: LicenseType;
   license_number: string;
   issue_date: Date;

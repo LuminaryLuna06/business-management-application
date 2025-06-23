@@ -5,8 +5,6 @@ export enum Gender {
 }
 
 export type Worker = {
-  worker_id: string;
-  business_id: string;
   worker_name: string;
   birth_date: Date;
   gender: Gender;

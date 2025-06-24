@@ -9,13 +9,16 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import { useForm, yupResolver } from "@mantine/form";
 import * as Yup from "yup";
 import { Gender, type Worker } from "../../../../types/worker"; // Giả định file chứa enum Gender
 import { TextInput, Select } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
+import {
+  useEmployeesQuery,
+  useAddEmployeeMutation,
+} from "../../../../tanstack/useEmployeeQueries";
 
 const schema = Yup.object().shape({
   worker_name: Yup.string()
@@ -34,54 +37,13 @@ const schema = Yup.object().shape({
 
 function Employees() {
   const { businessId } = useParams();
-  const [workers, setWorkers] = useState<Worker[]>([]);
   const [opened, { open, close }] = useDisclosure(false);
-
-  useEffect(() => {
-    const sampleWorkers: Worker[] = [
-      {
-        worker_name: "Nguyen Van A",
-        birth_date: new Date("1990-05-15"),
-        gender: Gender.Male,
-        insurance_status: true,
-        fire_safety_training: true,
-        food_safety_training: false,
-      },
-      {
-        worker_name: "Tran Thi B",
-        birth_date: new Date("1992-08-22"),
-        gender: Gender.Female,
-        insurance_status: true,
-        fire_safety_training: false,
-        food_safety_training: true,
-      },
-      {
-        worker_name: "Le Van C",
-        birth_date: new Date("1985-03-10"),
-        gender: Gender.Male,
-        insurance_status: false,
-        fire_safety_training: true,
-        food_safety_training: true,
-      },
-      {
-        worker_name: "Pham Thi D",
-        birth_date: new Date("1995-11-30"),
-        gender: Gender.Female,
-        insurance_status: true,
-        fire_safety_training: false,
-        food_safety_training: false,
-      },
-      {
-        worker_name: "Hoang Van E",
-        birth_date: new Date("1988-07-05"),
-        gender: Gender.Male,
-        insurance_status: false,
-        fire_safety_training: true,
-        food_safety_training: true,
-      },
-    ];
-    setWorkers(sampleWorkers);
-  }, [businessId]);
+  const {
+    data: employees,
+    isLoading,
+    error,
+  } = useEmployeesQuery(businessId || "");
+  const addEmployeeMutation = useAddEmployeeMutation(businessId || "");
 
   const columns: MRT_ColumnDef<Worker>[] = [
     { accessorKey: "worker_name", header: "Tên nhân viên" },
@@ -127,15 +89,36 @@ function Employees() {
   });
 
   const handleAddWorker = (values: typeof form.values) => {
-    setWorkers([...workers, values as Worker]);
-    form.reset();
-    close();
+    if (!businessId) return;
+    const employeeData: Worker = {
+      worker_name: values.worker_name,
+      birth_date: values.birth_date,
+      gender: values.gender,
+      insurance_status: values.insurance_status,
+      fire_safety_training: values.fire_safety_training,
+      food_safety_training: values.food_safety_training,
+    };
+    addEmployeeMutation.mutate(employeeData, {
+      onSuccess: () => {
+        form.reset();
+        close();
+      },
+    });
   };
 
   // Thống kê số lượng
-  const insuranceCount = workers.filter((w) => w.insurance_status).length;
-  const foodSafetyCount = workers.filter((w) => w.food_safety_training).length;
-  const fireSafetyCount = workers.filter((w) => w.fire_safety_training).length;
+  const insuranceCount = (employees || []).filter(
+    (w) => w.insurance_status
+  ).length;
+  const foodSafetyCount = (employees || []).filter(
+    (w) => w.food_safety_training
+  ).length;
+  const fireSafetyCount = (employees || []).filter(
+    (w) => w.fire_safety_training
+  ).length;
+
+  if (isLoading) return <Text>Đang tải dữ liệu nhân sự...</Text>;
+  if (error) return <Text color="red">Lỗi tải dữ liệu nhân sự</Text>;
 
   return (
     <Box p="md">
@@ -149,7 +132,7 @@ function Employees() {
             Tổng số nhân sự
           </Text>
           <Text size="2rem" fw={700} color="violet" mt="xs">
-            {workers.length}
+            {(employees || []).length}
           </Text>
         </Card>
         <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -183,7 +166,7 @@ function Employees() {
       </Group>
       <MantineReactTable
         columns={columns}
-        data={workers}
+        data={employees || []}
         enableRowSelection
         enableColumnFilters
         enableGlobalFilter
@@ -203,7 +186,13 @@ function Employees() {
           />
           <Select
             label="Giới tính"
-            {...form.getInputProps("gender")}
+            value={form.values.gender.toString()}
+            onChange={(val) =>
+              form.setFieldValue(
+                "gender",
+                val === "1" ? Gender.Male : Gender.Female
+              )
+            }
             data={[
               { value: Gender.Male.toString(), label: "Nam" },
               { value: Gender.Female.toString(), label: "Nữ" },

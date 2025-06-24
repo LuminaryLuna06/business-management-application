@@ -176,6 +176,25 @@ export const getEmployeesByBusinessId = async (
   }
 };
 
+/**
+ * Thêm một nhân viên mới cho doanh nghiệp
+ */
+export const addEmployee = async (
+  businessId: string,
+  employeeData: Worker
+): Promise<string> => {
+  try {
+    const docRef = await addDoc(
+      collection(db, "businesses", businessId, "employees"),
+      employeeData
+    );
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding employee:", error);
+    throw error;
+  }
+};
+
 // ===== INSPECTION SERVICES =====
 
 /**

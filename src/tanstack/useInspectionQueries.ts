@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   InspectionSchedule,
   InspectionReport,
@@ -8,6 +8,9 @@ import {
   getInspectionsByBusinessId,
   getAllReportsByBusinessId,
   getAllViolationsByBusinessId,
+  addInspection,
+  addReport,
+  addViolation,
 } from "../firebase/firestoreFunctions";
 
 export function useInspectionSchedules(businessId: string) {
@@ -46,5 +49,42 @@ export function useViolationDecisions(businessId: string) {
     enabled: !!businessId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+  });
+}
+
+export function useAddInspectionMutation(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (inspectionData: any) =>
+      addInspection(businessId, inspectionData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["inspection-schedules", businessId],
+      });
+    },
+  });
+}
+
+export function useAddReportMutation(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (reportData: any) => addReport(businessId, reportData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["inspection-reports", businessId],
+      });
+    },
+  });
+}
+
+export function useAddViolationMutation(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (violationData: any) => addViolation(businessId, violationData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["violation-decisions", businessId],
+      });
+    },
   });
 }

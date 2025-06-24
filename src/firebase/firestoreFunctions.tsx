@@ -5,6 +5,7 @@ import {
   getDocs,
   onSnapshot,
   Timestamp,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { type Business } from "../types/business";
@@ -201,6 +202,30 @@ export const getInspectionsByBusinessId = async (
   }
 };
 
+/**
+ * Thêm một lịch kiểm tra mới cho doanh nghiệp
+ */
+export const addInspection = async (
+  businessId: string,
+  inspectionData: InspectionSchedule
+): Promise<string> => {
+  try {
+    const docRef = await addDoc(
+      collection(db, "businesses", businessId, "inspections"),
+      {
+        ...inspectionData,
+        inspection_date: Timestamp.fromDate(
+          new Date(inspectionData.inspection_date)
+        ),
+      }
+    );
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding inspection:", error);
+    throw error;
+  }
+};
+
 // ===== REPORT SERVICES =====
 
 /**
@@ -225,6 +250,25 @@ export const getAllReportsByBusinessId = async (
   }
 };
 
+/**
+ * Thêm một báo cáo kiểm tra mới cho doanh nghiệp
+ */
+export const addReport = async (
+  businessId: string,
+  reportData: InspectionReport
+): Promise<string> => {
+  try {
+    const docRef = await addDoc(
+      collection(db, "businesses", businessId, "reports"),
+      reportData
+    );
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding report:", error);
+    throw error;
+  }
+};
+
 // ===== VIOLATION SERVICES =====
 
 /**
@@ -245,6 +289,25 @@ export const getAllViolationsByBusinessId = async (
     return violations;
   } catch (error) {
     console.error("Error getting violations:", error);
+    throw error;
+  }
+};
+
+/**
+ * Thêm một quyết định xử phạt mới cho doanh nghiệp
+ */
+export const addViolation = async (
+  businessId: string,
+  violationData: ViolationResult
+): Promise<string> => {
+  try {
+    const docRef = await addDoc(
+      collection(db, "businesses", businessId, "violations"),
+      violationData
+    );
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding violation:", error);
     throw error;
   }
 };

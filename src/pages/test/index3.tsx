@@ -25,6 +25,11 @@ import { db } from "../../firebase/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import { BusinessType, Gender, IdentificationType } from "../../types/business";
 import { LicenseType } from "../../types/licenses";
+import type {
+  InspectionSchedule,
+  InspectionReport,
+  ViolationResult,
+} from "../../types/schedule";
 // Mock data generators
 const generateMockBusinesses = () => [
   // Hộ kinh doanh (IndividualBusiness) - Hà Nội
@@ -252,73 +257,106 @@ const generateMockEmployees = () => [
   },
 ];
 
-const generateMockInspections = () => [
-  {
-    inspection_date: new Date("2024-03-15"),
-    inspector_description: "Kiểm tra định kỳ quý 1",
-    inspector_status: "completed" as const,
-    reports: [
-      {
-        report_description: "Báo cáo kết quả kiểm tra định kỳ 1",
-        report_status: "finalized" as const,
-        violation: {
-          violation_number: "QD-2024-001",
-          issue_date: new Date("2024-03-16"),
-          violation_status: "paid" as const,
-          fix_status: "fixed" as const,
-          officer_signed: "Nguyen Van A",
-        },
-      },
-      {
-        report_description: "Báo cáo kết quả kiểm tra định kỳ 1 - bổ sung",
-        report_status: "draft" as const,
-        violation: {
-          violation_number: "QD-2024-002",
-          issue_date: new Date("2024-03-17"),
-          violation_status: "pending" as const,
-          fix_status: "not_fixed" as const,
-          officer_signed: "Le Van C",
-        },
-      },
-    ],
-  },
-  {
-    inspection_date: new Date("2024-06-10"),
-    inspector_description: "Kiểm tra đột xuất an toàn thực phẩm",
-    inspector_status: "pending" as const,
-    reports: [
-      {
-        report_description: "Báo cáo kiểm tra an toàn thực phẩm",
-        report_status: "finalized" as const,
-        violation: {
-          violation_number: "QD-2024-003",
-          issue_date: new Date("2024-06-11"),
-          violation_status: "dismissed" as const,
-          fix_status: "fixed" as const,
-          officer_signed: "Tran Thi B",
-        },
-      },
-    ],
-  },
-  {
-    inspection_date: new Date("2024-09-20"),
-    inspector_description: "Kiểm tra định kỳ quý 3",
-    inspector_status: "completed" as const,
-    reports: [
-      {
-        report_description: "Báo cáo kiểm tra quý 3",
-        report_status: "draft" as const,
-        violation: {
-          violation_number: "QD-2024-004",
-          issue_date: new Date("2024-09-21"),
-          violation_status: "pending" as const,
-          fix_status: "in_progress" as const,
-          officer_signed: "Pham Van D",
-        },
-      },
-    ],
-  },
-];
+const generateMockInspections = () => {
+  // Tạo inspections
+  const inspections: InspectionSchedule[] = [
+    {
+      inspection_id: uuidv4(),
+      inspection_date: new Date("2024-03-15"),
+      inspector_description: "Kiểm tra định kỳ quý 1",
+      inspector_status: "completed",
+    },
+    {
+      inspection_id: uuidv4(),
+      inspection_date: new Date("2024-06-10"),
+      inspector_description: "Kiểm tra đột xuất an toàn thực phẩm",
+      inspector_status: "pending",
+    },
+    {
+      inspection_id: uuidv4(),
+      inspection_date: new Date("2024-09-20"),
+      inspector_description: "Kiểm tra định kỳ quý 3",
+      inspector_status: "completed",
+    },
+  ];
+
+  // Tạo reports cho từng inspection
+  const reports: InspectionReport[] = [
+    // Inspection 1
+    {
+      report_id: uuidv4(),
+      inspection_id: inspections[0].inspection_id,
+      report_description: "Báo cáo kết quả kiểm tra định kỳ 1",
+      report_status: "finalized",
+    },
+    {
+      report_id: uuidv4(),
+      inspection_id: inspections[0].inspection_id,
+      report_description: "Báo cáo kết quả kiểm tra định kỳ 1 - bổ sung",
+      report_status: "draft",
+    },
+    // Inspection 2
+    {
+      report_id: uuidv4(),
+      inspection_id: inspections[1].inspection_id,
+      report_description: "Báo cáo kiểm tra an toàn thực phẩm",
+      report_status: "finalized",
+    },
+    // Inspection 3
+    {
+      report_id: uuidv4(),
+      inspection_id: inspections[2].inspection_id,
+      report_description: "Báo cáo kiểm tra quý 3",
+      report_status: "draft",
+    },
+  ];
+
+  // Tạo violations cho từng report
+  const violations: ViolationResult[] = [
+    // Report 1
+    {
+      violation_id: uuidv4(),
+      report_id: reports[0].report_id,
+      violation_number: "QD-2024-001",
+      issue_date: new Date("2024-03-16"),
+      violation_status: "paid",
+      fix_status: "fixed",
+      officer_signed: "Nguyen Van A",
+    },
+    // Report 2
+    {
+      violation_id: uuidv4(),
+      report_id: reports[1].report_id,
+      violation_number: "QD-2024-002",
+      issue_date: new Date("2024-03-17"),
+      violation_status: "pending",
+      fix_status: "not_fixed",
+      officer_signed: "Le Van C",
+    },
+    // Report 3
+    {
+      violation_id: uuidv4(),
+      report_id: reports[2].report_id,
+      violation_number: "QD-2024-003",
+      issue_date: new Date("2024-06-11"),
+      violation_status: "dismissed",
+      fix_status: "fixed",
+      officer_signed: "Tran Thi B",
+    },
+    // Report 4
+    {
+      violation_id: uuidv4(),
+      report_id: reports[3].report_id,
+      violation_number: "QD-2024-004",
+      issue_date: new Date("2024-09-21"),
+      violation_status: "pending",
+      fix_status: "in_progress",
+      officer_signed: "Pham Van D",
+    },
+  ];
+
+  return { inspections, reports, violations };
+};
 
 interface UploadStatus {
   businesses: { success: number; error: number; total: number };
@@ -329,7 +367,7 @@ interface UploadStatus {
   violations: { success: number; error: number; total: number };
 }
 
-function Index2() {
+function Index3() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
     businesses: { success: 0, error: 0, total: 0 },
@@ -473,15 +511,16 @@ function Index2() {
         }
 
         // Upload inspections
-        const mockInspections = generateMockInspections();
-        for (const inspection of mockInspections) {
+        const { inspections, reports, violations } = generateMockInspections();
+        for (const inspection of inspections) {
           try {
             const inspectionData = {
+              inspection_id: inspection.inspection_id,
               inspection_date: Timestamp.fromDate(inspection.inspection_date),
               inspector_description: inspection.inspector_description,
               inspector_status: inspection.inspector_status,
             };
-            const inspectionRef = await addDoc(
+            await addDoc(
               collection(db, "businesses", business.business_id, "inspections"),
               inspectionData
             );
@@ -489,74 +528,61 @@ function Index2() {
             addLog(
               `  ✓ Upload lịch kiểm tra: ${inspection.inspector_description}`
             );
-
-            // Upload reports for this inspection
-            for (const report of inspection.reports) {
-              try {
-                const reportData = {
-                  report_description: report.report_description,
-                  report_status: report.report_status,
-                };
-                const reportRef = await addDoc(
-                  collection(
-                    db,
-                    "businesses",
-                    business.business_id,
-                    "inspections",
-                    inspectionRef.id,
-                    "reports"
-                  ),
-                  reportData
-                );
-                updateStatus("reports", true);
-                addLog(`    ✓ Upload báo cáo: ${report.report_description}`);
-
-                // Upload violation for this report (1:1)
-                const violation = report.violation;
-                if (violation) {
-                  try {
-                    const violationData = {
-                      violation_number: violation.violation_number,
-                      issue_date: Timestamp.fromDate(violation.issue_date),
-                      violation_status: violation.violation_status,
-                      fix_status: violation.fix_status,
-                      officer_signed: violation.officer_signed,
-                    };
-                    await addDoc(
-                      collection(
-                        db,
-                        "businesses",
-                        business.business_id,
-                        "inspections",
-                        inspectionRef.id,
-                        "reports",
-                        reportRef.id,
-                        "violations"
-                      ),
-                      violationData
-                    );
-                    updateStatus("violations", true);
-                    addLog(
-                      `      ✓ Upload quyết định xử phạt: ${violation.violation_number}`
-                    );
-                  } catch (error) {
-                    updateStatus("violations", false);
-                    addLog(
-                      `      ✗ Lỗi upload quyết định xử phạt: ${violation.violation_number} - ${error}`
-                    );
-                  }
-                }
-              } catch (error) {
-                updateStatus("reports", false);
-                addLog(
-                  `    ✗ Lỗi upload báo cáo: ${report.report_description} - ${error}`
-                );
-              }
-            }
           } catch (error) {
             updateStatus("inspections", false);
             addLog(
               `  ✗ Lỗi upload lịch kiểm tra: ${inspection.inspector_description} - ${error}`
+            );
+          }
+        }
+
+        // Upload reports
+        for (const report of reports) {
+          try {
+            const reportData = {
+              report_id: report.report_id,
+              inspection_id: report.inspection_id,
+              report_description: report.report_description,
+              report_status: report.report_status,
+            };
+            await addDoc(
+              collection(db, "businesses", business.business_id, "reports"),
+              reportData
+            );
+            updateStatus("reports", true);
+            addLog(`    ✓ Upload báo cáo: ${report.report_description}`);
+          } catch (error) {
+            updateStatus("reports", false);
+            addLog(
+              `    ✗ Lỗi upload báo cáo: ${report.report_description} - ${error}`
+            );
+          }
+        }
+
+        // Upload violations
+        for (const violation of violations) {
+          try {
+            const violationData = {
+              violation_id: violation.violation_id,
+              report_id: violation.report_id,
+              violation_number: violation.violation_number,
+              issue_date: Timestamp.fromDate(violation.issue_date),
+              violation_status: violation.violation_status,
+              fix_status: violation.fix_status,
+              officer_signed: violation.officer_signed,
+            };
+            await addDoc(
+              collection(db, "businesses", business.business_id, "violations"),
+              violationData
+            );
+            updateStatus("violations", true);
+            addLog(
+              `      ✓ Upload quyết định xử phạt: ${violation.violation_number}`
+            );
+          } catch (error) {
+            updateStatus("violations", false);
+            addLog(
+              `      ✗ Lỗi upload quyết định xử phạt: ${violation.violation_number} - ${error}`
             );
           }
         }
@@ -773,4 +799,4 @@ function Index2() {
   );
 }
 
-export default Index2;
+export default Index3;

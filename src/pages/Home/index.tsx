@@ -41,7 +41,7 @@ function HomePage() {
             paddingLeft: "1rem",
             cursor: "pointer",
           }}
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/business")}
         >
           Quản Lý
         </div>
@@ -90,6 +90,32 @@ function HomePage() {
           component={RouterNavLink}
           to={"/industry"}
           label="Ngành nghề"
+          leftSection={<IconHome2 size={16} stroke={1.5} />}
+          rightSection={
+            <IconChevronRight
+              size={12}
+              stroke={1.5}
+              className="mantine-rotate-rtl"
+            />
+          }
+        />
+        <NavLink
+          component={RouterNavLink}
+          to={"/test"}
+          label="Upload mock"
+          leftSection={<IconHome2 size={16} stroke={1.5} />}
+          rightSection={
+            <IconChevronRight
+              size={12}
+              stroke={1.5}
+              className="mantine-rotate-rtl"
+            />
+          }
+        />
+        <NavLink
+          component={RouterNavLink}
+          to={"/test3"}
+          label="Upload mock 2"
           leftSection={<IconHome2 size={16} stroke={1.5} />}
           rightSection={
             <IconChevronRight

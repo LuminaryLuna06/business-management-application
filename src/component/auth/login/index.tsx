@@ -50,7 +50,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await doSignInWithEmailAndPassword(values.email, values.password);
-      navigate("/"); // Redirect to home or dashboard after successful login
+      navigate("/business"); // Redirect to home or dashboard after successful login
       console.log("Successfully signed in with email");
     } catch (error: any) {
       console.error("Login error:", error);
@@ -65,7 +65,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await doSignInWithGoogle();
-      navigate("/"); // Redirect to home or dashboard after successful login
+      navigate("/business"); // Redirect to home or dashboard after successful login
       console.log("Successfully signed in with Google");
     } catch (error: any) {
       console.error("Google login error:", error);

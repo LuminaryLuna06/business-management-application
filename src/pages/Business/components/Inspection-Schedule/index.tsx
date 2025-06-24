@@ -7,6 +7,8 @@ import {
   Badge,
   SimpleGrid,
   Stack,
+  TextInput,
+  Select,
 } from "@mantine/core";
 // import { useDisclosure } from "@mantine/hooks";
 import { useParams } from "react-router-dom";
@@ -17,8 +19,13 @@ import {
   useInspectionSchedules,
   useInspectionReports,
   useViolationDecisions,
+  useAddInspectionMutation,
+  useAddReportMutation,
+  useAddViolationMutation,
 } from "../../../../tanstack/useInspectionQueries";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
+import { DateInput } from "@mantine/dates";
+import { v4 as uuidv4 } from "uuid";
 
 const inspectionSchema = Yup.object().shape({
   inspection_date: Yup.date().required("Ngày kiểm tra không được để trống"),
@@ -28,64 +35,61 @@ const inspectionSchema = Yup.object().shape({
     .required("Trạng thái không được để trống"),
 });
 
-// const resultSchema = Yup.object().shape({
-//   result_desc: Yup.string().required("Mô tả kiểm tra không được để trống"),
-//   result_status: Yup.mixed()
-//     .oneOf(["pending", "confirmed", "cancelled"])
-//     .required("Trạng thái kiểm tra không được để trống"),
-// });
-
-// const violationSchema = Yup.object().shape({
-//   violation_number: Yup.string().required("Số quyết định không được để trống"),
-//   issue_date: Yup.date().required("Ngày ban hành không được để trống"),
-//   violation_status: Yup.mixed().oneOf(["pending", "paid", "dismissed"]),
-//   fix_status: Yup.mixed().oneOf(["not_fixed", "fixed", "in_progress"]),
-//   officer_signed: Yup.string().required("Cán bộ ký không được để trống"),
-// });
-
 const inspectionStatusOptions = [
   { value: "pending", label: "Chờ kiểm tra" },
   { value: "completed", label: "Đã hoàn thành" },
   { value: "cancelled", label: "Đã hủy" },
 ];
 
-// useForm cho inspection
-const inspectionForm = useForm({
-  initialValues: {
-    inspection_date: new Date(),
-    inspector_description: "",
-    inspector_status: "pending" as const,
-  },
-  validate: yupResolver(inspectionSchema),
+const reportSchema = Yup.object().shape({
+  report_description: Yup.string().required(
+    "Mô tả báo cáo không được để trống"
+  ),
+  report_status: Yup.mixed()
+    .oneOf(["draft", "finalized"])
+    .required("Trạng thái không được để trống"),
 });
 
-// // useForm cho violation
-// const resultForm = useForm({
-//   initialValues: {
-//     result_desc: "",
-//     result_status: "pending" as const,
-//   },
-//   validate: yupResolver(violationSchema),
-// });
+const reportStatusOptions = [
+  { value: "draft", label: "Bản nháp" },
+  { value: "finalized", label: "Đã xác nhận" },
+];
 
-// // useForm cho penalty decision
-// const decisionForm = useForm({
-//   initialValues: {
-//     decision_number: "",
-//     issue_date: new Date(),
-//     penalty_status: "pending" as const,
-//     fix_status: "not_fixed" as const,
-//     officer_signed: "",
-//   },
-//   validate: yupResolver(violationSchema),
-// });
+const violationSchema = Yup.object().shape({
+  violation_number: Yup.string().required("Số quyết định không được để trống"),
+  issue_date: Yup.date().required("Ngày ban hành không được để trống"),
+  violation_status: Yup.mixed()
+    .oneOf(["pending", "paid", "dismissed"])
+    .required("Trạng thái không được để trống"),
+  fix_status: Yup.mixed()
+    .oneOf(["not_fixed", "fixed", "in_progress"])
+    .required("Trạng thái khắc phục không được để trống"),
+  officer_signed: Yup.string().required("Cán bộ ký không được để trống"),
+});
+
+const violationStatusOptions = [
+  { value: "pending", label: "Chờ xử lý" },
+  { value: "paid", label: "Đã nộp phạt" },
+  { value: "dismissed", label: "Đã miễn" },
+];
+
+const fixStatusOptions = [
+  { value: "not_fixed", label: "Chưa khắc phục" },
+  { value: "fixed", label: "Đã khắc phục" },
+  { value: "in_progress", label: "Đang xử lý" },
+];
 
 function InspectionSchedulePage() {
   const { businessId } = useParams();
-  // const [opened, { open, close }] = useDisclosure(false);
   const [selectedDecision, setSelectedDecision] = useState<any>(null);
   const [decisionModalOpen, setDecisionModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [addReportModalOpen, setAddReportModalOpen] = useState(false);
+  const [addViolationModalOpen, setAddViolationModalOpen] = useState(false);
+  const [currentInspectionId, setCurrentInspectionId] = useState<string | null>(
+    null
+  );
+  const [currentReportId, setCurrentReportId] = useState<string | null>(null);
   const {
     data: inspections,
     isLoading,
@@ -101,6 +105,37 @@ function InspectionSchedulePage() {
     isLoading: loadingViolations,
     // error: errorViolations,
   } = useViolationDecisions(businessId || "");
+  const addInspectionMutation = useAddInspectionMutation(businessId || "");
+  const addReportMutation = useAddReportMutation(businessId || "");
+  const addViolationMutation = useAddViolationMutation(businessId || "");
+  // useForm cho inspection
+  const inspectionForm = useForm({
+    initialValues: {
+      inspection_date: new Date(),
+      inspector_description: "",
+      inspector_status: "pending" as const,
+    },
+    validate: yupResolver(inspectionSchema),
+  });
+  const reportForm = useForm({
+    initialValues: {
+      report_id: "",
+      inspection_id: "",
+      report_description: "",
+      report_status: "draft",
+    },
+    validate: yupResolver(reportSchema),
+  });
+  const violationForm = useForm({
+    initialValues: {
+      violation_number: "",
+      issue_date: new Date(),
+      violation_status: "pending",
+      fix_status: "not_fixed",
+      officer_signed: "",
+    },
+    validate: yupResolver(violationSchema),
+  });
 
   const columns: MRT_ColumnDef<any>[] = [
     {
@@ -157,16 +192,33 @@ function InspectionSchedulePage() {
             return <Text>Chưa có kết quả kiểm tra</Text>;
           return (
             <Box>
-              <Text fw={600} mb={4}>
-                Kết quả kiểm tra:
-              </Text>
+              <Group justify="space-between" mb={8}>
+                <Text fw={600}>Kết quả kiểm tra</Text>
+                <Button
+                  size="xs"
+                  onClick={() => {
+                    setCurrentInspectionId(inspectionId);
+                    setAddReportModalOpen(true);
+                  }}
+                >
+                  Thêm kết quả kiểm tra
+                </Button>
+              </Group>
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md" mt={8}>
                 {filteredReports.map((report, idx) => {
                   const filteredViolations = (violations || []).filter(
                     (v) => v.report_id === report.report_id
                   );
                   return (
-                    <Box key={idx} mb={8} p={8} style={{ borderRadius: 4 }}>
+                    <Box
+                      key={idx}
+                      mb={8}
+                      p={12}
+                      style={{
+                        border: "1px solid #228be6",
+                        borderRadius: 8,
+                      }}
+                    >
                       <Text>Mô tả: {report.report_description}</Text>
                       <Group gap={8} mb={4}>
                         <Text>Trạng thái: </Text>
@@ -204,8 +256,8 @@ function InspectionSchedulePage() {
                           variant="outline"
                           color="green"
                           onClick={() => {
-                            setSelectedDecision({ reportId: report.report_id });
-                            setDecisionModalOpen(true);
+                            setCurrentReportId(report.report_id);
+                            setAddViolationModalOpen(true);
                           }}
                         >
                           Thêm quyết định xử phạt
@@ -285,64 +337,196 @@ function InspectionSchedulePage() {
         centered
       >
         <form
-          onSubmit={inspectionForm.onSubmit(() => {
-            // TODO: Gọi API thêm inspection vào Firestore
-            setAddModalOpen(false);
-            inspectionForm.reset();
+          onSubmit={inspectionForm.onSubmit(async (values) => {
+            if (!businessId) return;
+            const inspectionData = {
+              inspection_id: uuidv4(),
+              inspection_date: values.inspection_date,
+              inspector_description: values.inspector_description,
+              inspector_status: values.inspector_status,
+            };
+            addInspectionMutation.mutate(inspectionData, {
+              onSuccess: () => {
+                setAddModalOpen(false);
+                inspectionForm.reset();
+              },
+              // Có thể thêm onError để hiển thị lỗi nếu muốn
+            });
           })}
         >
           <Stack>
-            <label>
-              Ngày kiểm tra
-              <input
-                type="date"
-                {...inspectionForm.getInputProps("inspection_date")}
-                style={{ width: "100%", marginBottom: 8 }}
-              />
-              {inspectionForm.errors.inspection_date && (
-                <Text color="red" size="xs">
-                  {inspectionForm.errors.inspection_date}
-                </Text>
-              )}
-            </label>
-            <label>
-              Mô tả kiểm tra
-              <input
-                type="text"
-                placeholder="Nhập mô tả"
-                {...inspectionForm.getInputProps("inspector_description")}
-                style={{ width: "100%", marginBottom: 8 }}
-              />
-              {inspectionForm.errors.inspector_description && (
-                <Text color="red" size="xs">
-                  {inspectionForm.errors.inspector_description}
-                </Text>
-              )}
-            </label>
-            <label>
-              Trạng thái
-              <select
-                {...inspectionForm.getInputProps("inspector_status")}
-                style={{ width: "100%", marginBottom: 8 }}
-              >
-                {inspectionStatusOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              {inspectionForm.errors.inspector_status && (
-                <Text color="red" size="xs">
-                  {inspectionForm.errors.inspector_status}
-                </Text>
-              )}
-            </label>
+            <DateInput
+              label="Ngày kiểm tra"
+              value={inspectionForm.values.inspection_date}
+              onChange={(date) =>
+                inspectionForm.setFieldValue(
+                  "inspection_date",
+                  date ?? new Date()
+                )
+              }
+              error={inspectionForm.errors.inspection_date}
+              required
+              style={{ marginBottom: 8 }}
+            />
+            <TextInput
+              label="Mô tả kiểm tra"
+              placeholder="Nhập mô tả"
+              {...inspectionForm.getInputProps("inspector_description")}
+              error={inspectionForm.errors.inspector_description}
+              required
+              style={{ marginBottom: 8 }}
+            />
+            <Select
+              label="Trạng thái"
+              data={inspectionStatusOptions}
+              {...inspectionForm.getInputProps("inspector_status")}
+              error={inspectionForm.errors.inspector_status}
+              required
+              style={{ marginBottom: 8 }}
+            />
           </Stack>
           <Group mt="md" justify="flex-end">
             <Button variant="default" onClick={() => setAddModalOpen(false)}>
               Hủy
             </Button>
             <Button type="submit">Thêm</Button>
+          </Group>
+        </form>
+      </Modal>
+      <Modal
+        opened={addReportModalOpen}
+        onClose={() => setAddReportModalOpen(false)}
+        title="Thêm kết quả kiểm tra mới"
+        centered
+      >
+        <form
+          onSubmit={reportForm.onSubmit((values) => {
+            if (!businessId || !currentInspectionId) return;
+            const reportData = {
+              report_id: uuidv4(),
+              inspection_id: currentInspectionId,
+              report_description: values.report_description,
+              report_status: values.report_status,
+            };
+            addReportMutation.mutate(reportData, {
+              onSuccess: () => {
+                setAddReportModalOpen(false);
+                reportForm.reset();
+              },
+            });
+          })}
+        >
+          <Stack>
+            <TextInput
+              label="Mô tả báo cáo"
+              placeholder="Nhập mô tả"
+              {...reportForm.getInputProps("report_description")}
+              error={reportForm.errors.report_description}
+              required
+              style={{ marginBottom: 8 }}
+            />
+            <Select
+              label="Trạng thái"
+              data={reportStatusOptions}
+              {...reportForm.getInputProps("report_status")}
+              error={reportForm.errors.report_status}
+              required
+              style={{ marginBottom: 8 }}
+            />
+          </Stack>
+          <Group mt="md" justify="flex-end">
+            <Button
+              variant="default"
+              onClick={() => setAddReportModalOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button type="submit" loading={addReportMutation.isPending}>
+              Thêm
+            </Button>
+          </Group>
+        </form>
+      </Modal>
+      <Modal
+        opened={addViolationModalOpen}
+        onClose={() => setAddViolationModalOpen(false)}
+        title="Thêm quyết định xử phạt mới"
+        centered
+      >
+        <form
+          onSubmit={violationForm.onSubmit((values) => {
+            if (!businessId || !currentReportId) return;
+            const violationData = {
+              violation_id: uuidv4(),
+              report_id: currentReportId,
+              violation_number: values.violation_number,
+              issue_date: values.issue_date,
+              violation_status: values.violation_status,
+              fix_status: values.fix_status,
+              officer_signed: values.officer_signed,
+            };
+            addViolationMutation.mutate(violationData, {
+              onSuccess: () => {
+                setAddViolationModalOpen(false);
+                violationForm.reset();
+              },
+            });
+          })}
+        >
+          <Stack>
+            <TextInput
+              label="Số quyết định"
+              placeholder="Nhập số quyết định"
+              {...violationForm.getInputProps("violation_number")}
+              error={violationForm.errors.violation_number}
+              required
+              style={{ marginBottom: 8 }}
+            />
+            <DateInput
+              label="Ngày ban hành"
+              value={violationForm.values.issue_date}
+              onChange={(date) =>
+                violationForm.setFieldValue("issue_date", date ?? new Date())
+              }
+              error={violationForm.errors.issue_date}
+              required
+              style={{ marginBottom: 8 }}
+            />
+            <Select
+              label="Trạng thái"
+              data={violationStatusOptions}
+              {...violationForm.getInputProps("violation_status")}
+              error={violationForm.errors.violation_status}
+              required
+              style={{ marginBottom: 8 }}
+            />
+            <Select
+              label="Trạng thái khắc phục"
+              data={fixStatusOptions}
+              {...violationForm.getInputProps("fix_status")}
+              error={violationForm.errors.fix_status}
+              required
+              style={{ marginBottom: 8 }}
+            />
+            <TextInput
+              label="Cán bộ ký"
+              placeholder="Nhập tên cán bộ ký"
+              {...violationForm.getInputProps("officer_signed")}
+              error={violationForm.errors.officer_signed}
+              required
+              style={{ marginBottom: 8 }}
+            />
+          </Stack>
+          <Group mt="md" justify="flex-end">
+            <Button
+              variant="default"
+              onClick={() => setAddViolationModalOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button type="submit" loading={addViolationMutation.isPending}>
+              Thêm
+            </Button>
           </Group>
         </form>
       </Modal>

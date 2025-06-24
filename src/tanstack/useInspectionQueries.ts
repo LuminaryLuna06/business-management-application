@@ -6,8 +6,8 @@ import type {
 } from "../types/schedule";
 import {
   getInspectionsByBusinessId,
-  getReportsByInspectionId,
-  getViolationsByReportId,
+  getAllReportsByBusinessId,
+  getAllViolationsByBusinessId,
 } from "../firebase/firestoreFunctions";
 
 export function useInspectionSchedules(businessId: string) {
@@ -18,31 +18,33 @@ export function useInspectionSchedules(businessId: string) {
       return getInspectionsByBusinessId(businessId);
     },
     enabled: !!businessId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 
-export function useInspectionReports(businessId: string, inspectionId: string) {
+export function useInspectionReports(businessId: string) {
   return useQuery<InspectionReport[]>({
-    queryKey: ["inspection-reports", businessId, inspectionId],
+    queryKey: ["inspection-reports", businessId],
     queryFn: async () => {
-      if (!businessId || !inspectionId) return [];
-      return getReportsByInspectionId(businessId, inspectionId);
+      if (!businessId) return [];
+      return getAllReportsByBusinessId(businessId);
     },
-    enabled: !!businessId && !!inspectionId,
+    enabled: !!businessId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }
 
-export function useViolationDecisions(
-  businessId: string,
-  inspectionId: string,
-  reportId: string
-) {
+export function useViolationDecisions(businessId: string) {
   return useQuery<ViolationResult[]>({
-    queryKey: ["violation-decisions", businessId, inspectionId, reportId],
+    queryKey: ["violation-decisions", businessId],
     queryFn: async () => {
-      if (!businessId || !inspectionId || !reportId) return [];
-      return getViolationsByReportId(businessId, inspectionId, reportId);
+      if (!businessId) return [];
+      return getAllViolationsByBusinessId(businessId);
     },
-    enabled: !!businessId && !!inspectionId && !!reportId,
+    enabled: !!businessId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }

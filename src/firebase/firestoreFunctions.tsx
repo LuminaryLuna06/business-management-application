@@ -204,30 +204,20 @@ export const getInspectionsByBusinessId = async (
 // ===== REPORT SERVICES =====
 
 /**
- * Lấy báo cáo kiểm tra của một lịch kiểm tra
+ * Lấy tất cả báo cáo kiểm tra của một doanh nghiệp
  */
-export const getReportsByInspectionId = async (
-  businessId: string,
-  inspectionId: string
+export const getAllReportsByBusinessId = async (
+  businessId: string
 ): Promise<InspectionReport[]> => {
   try {
     const querySnapshot = await getDocs(
-      collection(
-        db,
-        "businesses",
-        businessId,
-        "inspections",
-        inspectionId,
-        "reports"
-      )
+      collection(db, "businesses", businessId, "reports")
     );
     const reports: InspectionReport[] = [];
-
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       reports.push(convertReportData(data));
     });
-
     return reports;
   } catch (error) {
     console.error("Error getting reports:", error);
@@ -238,33 +228,20 @@ export const getReportsByInspectionId = async (
 // ===== VIOLATION SERVICES =====
 
 /**
- * Lấy quyết định xử phạt của một báo cáo
+ * Lấy tất cả quyết định xử phạt của một doanh nghiệp
  */
-export const getViolationsByReportId = async (
-  businessId: string,
-  inspectionId: string,
-  reportId: string
+export const getAllViolationsByBusinessId = async (
+  businessId: string
 ): Promise<ViolationResult[]> => {
   try {
     const querySnapshot = await getDocs(
-      collection(
-        db,
-        "businesses",
-        businessId,
-        "inspections",
-        inspectionId,
-        "reports",
-        reportId,
-        "violations"
-      )
+      collection(db, "businesses", businessId, "violations")
     );
     const violations: ViolationResult[] = [];
-
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       violations.push(convertViolationData(data));
     });
-
     return violations;
   } catch (error) {
     console.error("Error getting violations:", error);

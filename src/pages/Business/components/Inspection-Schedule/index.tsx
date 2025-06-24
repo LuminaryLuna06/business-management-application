@@ -99,7 +99,7 @@ function InspectionSchedulePage() {
   const {
     data: violations,
     isLoading: loadingViolations,
-    error: errorViolations,
+    // error: errorViolations,
   } = useViolationDecisions(businessId || "");
 
   const columns: MRT_ColumnDef<any>[] = [

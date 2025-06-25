@@ -1,0 +1,86 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### 0.0.1 (2025-06-25)
+
+
+### Features
+
+* add .env file ([1374d28](https://github.com/LuminaryLuna06/business-management-application/commit/1374d2835fbe8793e4a1eb701e7059090a9fcb0e))
+* add auto changelog ([8330f2b](https://github.com/LuminaryLuna06/business-management-application/commit/8330f2b6005be9ff6f883de8fd1abb82dfed3240))
+* add dependencies ([1350167](https://github.com/LuminaryLuna06/business-management-application/commit/1350167f1598b8fb75f1be12a74481ebb5cd5b6d))
+* add home page ([d507d56](https://github.com/LuminaryLuna06/business-management-application/commit/d507d569e7bcfe56d8b1676940ea84b7a402aa66))
+* add Home page ([5a528ca](https://github.com/LuminaryLuna06/business-management-application/commit/5a528cadcb02e52422032faead633c3895c3a3af))
+* add hook firestore function ([dacac7e](https://github.com/LuminaryLuna06/business-management-application/commit/dacac7e69a119ea9d1ec7d43cdc14dec03a540de))
+* add Industry and License management page ([660c441](https://github.com/LuminaryLuna06/business-management-application/commit/660c4417ffc99656b7f670e71a4615eba13c4223))
+* add login and register page ([14a69cd](https://github.com/LuminaryLuna06/business-management-application/commit/14a69cddf58da39198c1e11a0e3c78b7750211ee))
+* add mutation function for inspections ([a18faad](https://github.com/LuminaryLuna06/business-management-application/commit/a18faaddee9a84d7f52d5b9f1bd7705b3319111e))
+* add navigate to home page ([a0a3954](https://github.com/LuminaryLuna06/business-management-application/commit/a0a3954d46bc67b8331eedb6f7022d4e2663d1f3))
+* add required style (asterisk) ([8360188](https://github.com/LuminaryLuna06/business-management-application/commit/8360188322a9a51dcc7090b8d252d24622329374))
+* add routes ([86c1235](https://github.com/LuminaryLuna06/business-management-application/commit/86c123507f979bb21bf480ab03dd5e4291fcc328))
+* add routing ([5f65985](https://github.com/LuminaryLuna06/business-management-application/commit/5f659859a4e77d94b8cf201fe13c250c83ecbfb8))
+* add select city ([5436248](https://github.com/LuminaryLuna06/business-management-application/commit/543624820cfbd41b19367fb09dbe586f5f3163f3))
+* add types ([11731ff](https://github.com/LuminaryLuna06/business-management-application/commit/11731ffe6b5703aca5f77ecc292a7992bf7c486e))
+* add user type ([c0297b2](https://github.com/LuminaryLuna06/business-management-application/commit/c0297b242f9d663004319ce752beec262ceb200a))
+* change industry display style ([9fed62d](https://github.com/LuminaryLuna06/business-management-application/commit/9fed62d740f0d9afcc7139a6c4fb829f4972038d))
+* change website favicon, name and user info + logout ([e171d57](https://github.com/LuminaryLuna06/business-management-application/commit/e171d57e16fe9aec07233941ca56251b3c5226ea))
+* complete routing ([df8657e](https://github.com/LuminaryLuna06/business-management-application/commit/df8657e7c08edbc168d409c9d6cd5b52105f4a75))
+* create Add and Edit page for company information ([501bbcf](https://github.com/LuminaryLuna06/business-management-application/commit/501bbcfc96a6fe5399ca47c1e9dca2ae5e45bcee))
+* create Business page layout ([0200534](https://github.com/LuminaryLuna06/business-management-application/commit/0200534018a02c5111458d5f1ac8794429a1a733))
+* create Dashboard page ([a885489](https://github.com/LuminaryLuna06/business-management-application/commit/a8854894cb300dc78aef9c8d4be405d17db53bcf))
+* create data hook ([7d517af](https://github.com/LuminaryLuna06/business-management-application/commit/7d517af3ed46ecdf1e33343b4534386886df0e74))
+* create Employee page ([2b36eb9](https://github.com/LuminaryLuna06/business-management-application/commit/2b36eb98fb81a7c7e153dc4fdab65df1484c42f9))
+* create get SubLicense function ([c8dc229](https://github.com/LuminaryLuna06/business-management-application/commit/c8dc229f75d7ec8775d58936b0bf0325d7aa0e3c))
+* create Inspection page ([c1a3449](https://github.com/LuminaryLuna06/business-management-application/commit/c1a344933af4645aaec4471f7a06d9d222f348eb))
+* create new Admin Routes ([6c9c431](https://github.com/LuminaryLuna06/business-management-application/commit/6c9c431bad6a9429e06456c73e6259329e306269))
+* create SubLicense page ([a2b0d5d](https://github.com/LuminaryLuna06/business-management-application/commit/a2b0d5d45caeeba8eaee09750003e9213116d914))
+* data hook by businessId instead of nested subcollection ([b9b73c3](https://github.com/LuminaryLuna06/business-management-application/commit/b9b73c3410d3d116bdb7ccf8123882175f55df24))
+* firebase config ([e271175](https://github.com/LuminaryLuna06/business-management-application/commit/e2711758d4baad7f8c3f4250ce32cd9aaee772b2))
+* function add employee ([d7c0635](https://github.com/LuminaryLuna06/business-management-application/commit/d7c0635d9bfe3de10fd9c86757a240d28a1df7e5))
+* function add inspection, report, violation ([966714f](https://github.com/LuminaryLuna06/business-management-application/commit/966714f52c9cc9820ccf9b3e2e4c8fc6f8343b26))
+* keep navbar and add tabs ([fb1468c](https://github.com/LuminaryLuna06/business-management-application/commit/fb1468c601f4bd1f54f4f1b0f26fa5ffa7d5070b))
+* use data from firebase for display and choosing sub license ([71fdeab](https://github.com/LuminaryLuna06/business-management-application/commit/71fdeab60bdeb23ad3cf76f418193f449ddaa153))
+* use firebase data for dashboard ([e7d834b](https://github.com/LuminaryLuna06/business-management-application/commit/e7d834b14276cd96605cf402fb0e3d81e7e06eba))
+* use hook function to get real data ([d76ec5f](https://github.com/LuminaryLuna06/business-management-application/commit/d76ec5f06c5f06389ce2f9eb815bf79096758073))
+
+
+### Code Refactoring
+
+* business types ([ff36c08](https://github.com/LuminaryLuna06/business-management-application/commit/ff36c0830caa43b74824ba173d939762cc00f4e3))
+* delete id and code from types ([12d0fde](https://github.com/LuminaryLuna06/business-management-application/commit/12d0fdec6aa3880f9a9f24e3a7546018a11700ac))
+* License and SubLicense types ([911e535](https://github.com/LuminaryLuna06/business-management-application/commit/911e53559822000e624669e93b9e1b8d2ab8a0bb))
+
+
+### Chores
+
+* add .env to gitignore ([db8aae2](https://github.com/LuminaryLuna06/business-management-application/commit/db8aae26b4879a66e87d81d804a2e4356a8b88b1))
+* add City data ([238d132](https://github.com/LuminaryLuna06/business-management-application/commit/238d132cf05fbd8b8b81494e3602530df38f7cb4))
+* add Edit page (not finished) ([b38b1c4](https://github.com/LuminaryLuna06/business-management-application/commit/b38b1c4ee59858f9790f32559260136b70baf9c3))
+* add industry and city json file ([4118fda](https://github.com/LuminaryLuna06/business-management-application/commit/4118fdaf286d2875d59bc33d0caf22d26e00d7ba))
+* add Inspection page ([de7aca9](https://github.com/LuminaryLuna06/business-management-application/commit/de7aca94a65342bb5ada0c14323943845651e606))
+* add mantine chart ([8b5450e](https://github.com/LuminaryLuna06/business-management-application/commit/8b5450e085ca3d985f158089b436ad6117baba0a))
+* add missing field ([0bc0c09](https://github.com/LuminaryLuna06/business-management-application/commit/0bc0c09907cf254fad5f5ecce97df8765e688839))
+* add pages ([708d3ea](https://github.com/LuminaryLuna06/business-management-application/commit/708d3ea42a6ab8e3921bc1ba058e3b1f20f2ec96))
+* add province and ward field ([ab89a9a](https://github.com/LuminaryLuna06/business-management-application/commit/ab89a9ae8fc7381e757c315c473f0005a56222e3))
+* add Select data ([c045f38](https://github.com/LuminaryLuna06/business-management-application/commit/c045f386d1b00f5ee7e1a1c7daa98cc7e37afdee))
+* add test page ([931af0d](https://github.com/LuminaryLuna06/business-management-application/commit/931af0d197d492d9529f64f836fa44e7f6115f18))
+* add test route and page ([75c45af](https://github.com/LuminaryLuna06/business-management-application/commit/75c45afe7c208f720d870d0b8567e65dd2f0f674))
+* add test3 route and change main route to /business ([5e47d88](https://github.com/LuminaryLuna06/business-management-application/commit/5e47d88b7a74706243121a164885a8333a261035))
+* add website layout ([ec83700](https://github.com/LuminaryLuna06/business-management-application/commit/ec83700ad0e73ffd95226ca1815f5db548f1e6fd))
+* change data structure ([3fa46b6](https://github.com/LuminaryLuna06/business-management-application/commit/3fa46b648d7197a15d3d17ef4dade1e1c30495dc))
+* change web to light theme ([3623d5c](https://github.com/LuminaryLuna06/business-management-application/commit/3623d5c8ac8555b2e3a45d696aaca0a325a5fe62))
+* create add new button ([32315f5](https://github.com/LuminaryLuna06/business-management-application/commit/32315f5ca096e594ed75c9883503a2bc1098b6c7))
+* create test page for inputing business data ([f47d9d1](https://github.com/LuminaryLuna06/business-management-application/commit/f47d9d1b3457295f6b012f840bec8af7a2e73ec1))
+* delete Strictmode ([24654b5](https://github.com/LuminaryLuna06/business-management-application/commit/24654b53c3c4312ce06d54264d990093e3e9466a))
+* delete unused components ([b28ed4d](https://github.com/LuminaryLuna06/business-management-application/commit/b28ed4d9646538dbdd6535e432aa19a408dd095a))
+* delete unused field ([581b5b1](https://github.com/LuminaryLuna06/business-management-application/commit/581b5b166dc7c164b494cba412163e4031f116dc))
+* delete unused field ([35e3bf7](https://github.com/LuminaryLuna06/business-management-application/commit/35e3bf732cf0fbc6f5e83a1677478ec2511c37eb))
+* delete unused file ([892bf29](https://github.com/LuminaryLuna06/business-management-application/commit/892bf29ee575f2e4d04d7327c45f897021ec509a))
+* delete unused function ([6b81458](https://github.com/LuminaryLuna06/business-management-application/commit/6b814585454e5b29c2feb8c2a1a60a2455273c1a))
+* delete unused import ([0306303](https://github.com/LuminaryLuna06/business-management-application/commit/030630328d5c11c583c34ed9116285e69450cbb9))
+* disable Violation page ([380e621](https://github.com/LuminaryLuna06/business-management-application/commit/380e6213b2385c27d943c6f36ad336e22c87789a))
+* downgrade @mantine/form ([671c4cf](https://github.com/LuminaryLuna06/business-management-application/commit/671c4cf2efa50b3a6424b4429737808e00d5e2ef))
+* finish Routes ([0ae34b7](https://github.com/LuminaryLuna06/business-management-application/commit/0ae34b7826ac86c37f541f244fe246d0e733b832))
+* hide unused functions ([2fecc46](https://github.com/LuminaryLuna06/business-management-application/commit/2fecc46493b1ce742ab1590e69f7405a17781626))
+* small change + delete unused function ([bbe9c20](https://github.com/LuminaryLuna06/business-management-application/commit/bbe9c206bf5d0815f9438e109ad659386d626a9a))

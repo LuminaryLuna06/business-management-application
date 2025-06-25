@@ -12,6 +12,8 @@ import {
   Avatar,
   Paper,
   useMantineColorScheme,
+  Skeleton,
+  Alert,
 } from "@mantine/core";
 import { BarChart, PieChart } from "@mantine/charts";
 import {
@@ -21,79 +23,316 @@ import {
   IconCalendar,
   IconFileTypePdf,
   IconFileTypeXls,
+  IconAlertCircle,
+  IconRefresh,
 } from "@tabler/icons-react";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
+import { useParams } from "react-router";
+import { useBusinessSubLicenses } from "../../../../tanstack/useLicenseQueries";
+import {
+  useInspectionSchedules,
+  useViolationDecisions,
+} from "../../../../tanstack/useInspectionQueries";
+import { useMemo } from "react";
 
-// Mock stats
-const stats = {
-  licenses: { valid: 3, expiring: 1, expired: 1 },
-  inspections: 12,
-  violations: { handled: 2, unhandled: 1 },
-  fixRate: 66.7, // %
-};
-
-// Mock chart data
-const inspectionsPerMonth = [
-  { month: "1", count: 1 },
-  { month: "2", count: 2 },
-  { month: "3", count: 1 },
-  { month: "4", count: 2 },
-  { month: "5", count: 1 },
-  { month: "6", count: 2 },
-  { month: "7", count: 1 },
-  { month: "8", count: 1 },
-  { month: "9", count: 1 },
-  { month: "10", count: 0 },
-  { month: "11", count: 1 },
-  { month: "12", count: 0 },
-];
-const licenseStatusPie = [
-  { name: "Hợp lệ", value: stats.licenses.valid, color: "green" },
-  { name: "Sắp hết hạn", value: stats.licenses.expiring, color: "yellow" },
-  { name: "Đã hết hạn", value: stats.licenses.expired, color: "red" },
-];
-
-// Mock violation history
-const violationHistory = [
+const violationColumns: MRT_ColumnDef<any>[] = [
   {
-    id: 1,
-    object: "Cơ sở",
-    date: "2024-03-10",
-    content: "Không đảm bảo PCCC",
-    status: "Đã xử lý",
-    fix: "Đã khắc phục",
+    accessorKey: "issue_date",
+    header: "Ngày",
+    Cell: ({ cell }): React.ReactNode => {
+      const value = cell.getValue();
+      if (value) {
+        return new Date(value as string | number | Date).toLocaleDateString(
+          "vi-VN"
+        );
+      }
+      return "-";
+    },
+  },
+  { accessorKey: "violation_number", header: "Số vi phạm" },
+  {
+    accessorKey: "violation_status",
+    header: "Trạng thái",
+    Cell: ({ cell }): React.ReactNode => {
+      const status = cell.getValue() as string;
+      switch (status) {
+        case "pending":
+          return "Chờ xử lý";
+        case "paid":
+          return "Đã thanh toán";
+        case "dismissed":
+          return "Đã hủy";
+        default:
+          return status;
+      }
+    },
   },
   {
-    id: 2,
-    object: "Nhân viên",
-    date: "2024-05-12",
-    content: "Không đeo găng tay",
-    status: "Chưa xử lý",
-    fix: "Chưa khắc phục",
+    accessorKey: "fix_status",
+    header: "Khắc phục",
+    Cell: ({ cell }): React.ReactNode => {
+      const status = cell.getValue() as string;
+      switch (status) {
+        case "not_fixed":
+          return "Chưa khắc phục";
+        case "fixed":
+          return "Đã khắc phục";
+        case "in_progress":
+          return "Đang khắc phục";
+        default:
+          return status;
+      }
+    },
   },
-  {
-    id: 3,
-    object: "Cơ sở",
-    date: "2024-06-01",
-    content: "Không có giấy phép ATTP",
-    status: "Đã xử lý",
-    fix: "Đã khắc phục",
-  },
-];
-
-const violationColumns: MRT_ColumnDef<(typeof violationHistory)[0]>[] = [
-  { accessorKey: "object", header: "Đối tượng" },
-  { accessorKey: "date", header: "Ngày" },
-  { accessorKey: "content", header: "Nội dung" },
-  { accessorKey: "status", header: "Trạng thái" },
-  { accessorKey: "fix", header: "Khắc phục" },
 ];
 
 function DashboardPage() {
   const { colorScheme } = useMantineColorScheme();
   const isDark = colorScheme === "dark";
+  const { businessId } = useParams();
+
   // Badge variant
   const badgeVariant = isDark ? "filled" : "light";
+
+  // Lấy dữ liệu giấy phép con
+  const {
+    data: licenses,
+    isLoading: isLoadingLicenses,
+    error: licensesError,
+    isError: isLicensesError,
+    refetch: refetchLicenses,
+  } = useBusinessSubLicenses(businessId || "");
+
+  // Lấy dữ liệu lịch kiểm tra
+  const {
+    data: inspections,
+    isLoading: isLoadingInspections,
+    error: inspectionsError,
+    isError: isInspectionsError,
+    refetch: refetchInspections,
+  } = useInspectionSchedules(businessId || "");
+
+  // Lấy dữ liệu vi phạm
+  const {
+    data: violations,
+    isLoading: isLoadingViolations,
+    error: violationsError,
+    isError: isViolationsError,
+    refetch: refetchViolations,
+  } = useViolationDecisions(businessId || "");
+
+  // Tính toán thống kê giấy phép con
+  const licenseStats = useMemo(() => {
+    if (!licenses) return { valid: 0, expiring: 0, expired: 0, total: 0 };
+
+    const now = new Date();
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(now.getDate() + 30);
+
+    let valid = 0;
+    let expiring = 0;
+    let expired = 0;
+
+    licenses.forEach((license) => {
+      const expirationDate = new Date(license.expiration_date);
+
+      if (expirationDate > now) {
+        if (expirationDate <= thirtyDaysFromNow) {
+          expiring++;
+        } else {
+          valid++;
+        }
+      } else {
+        expired++;
+      }
+    });
+
+    return {
+      valid,
+      expiring,
+      expired,
+      total: licenses.length,
+    };
+  }, [licenses]);
+
+  // Tính toán thống kê lịch kiểm tra
+  const inspectionStats = useMemo(() => {
+    if (!inspections)
+      return { total: 0, completed: 0, pending: 0, cancelled: 0 };
+
+    const currentYear = new Date().getFullYear();
+    const yearInspections = inspections.filter((inspection) => {
+      const inspectionDate = new Date(inspection.inspection_date);
+      return inspectionDate.getFullYear() === currentYear;
+    });
+
+    let completed = 0;
+    let pending = 0;
+    let cancelled = 0;
+
+    yearInspections.forEach((inspection) => {
+      switch (inspection.inspector_status) {
+        case "completed":
+          completed++;
+          break;
+        case "pending":
+          pending++;
+          break;
+        case "cancelled":
+          cancelled++;
+          break;
+      }
+    });
+
+    return {
+      total: yearInspections.length,
+      completed,
+      pending,
+      cancelled,
+    };
+  }, [inspections]);
+
+  // Tính toán thống kê vi phạm
+  const violationStats = useMemo(() => {
+    if (!violations) return { total: 0, handled: 0, unhandled: 0, fixRate: 0 };
+
+    let handled = 0;
+    let unhandled = 0;
+    let fixed = 0;
+
+    violations.forEach((violation) => {
+      if (
+        violation.violation_status === "paid" ||
+        violation.violation_status === "dismissed"
+      ) {
+        handled++;
+      } else {
+        unhandled++;
+      }
+
+      if (violation.fix_status === "fixed") {
+        fixed++;
+      }
+    });
+
+    const fixRate =
+      violations.length > 0 ? (fixed / violations.length) * 100 : 0;
+
+    return {
+      total: violations.length,
+      handled,
+      unhandled,
+      fixRate: Math.round(fixRate * 10) / 10, // Làm tròn 1 chữ số thập phân
+    };
+  }, [violations]);
+
+  // Tính toán dữ liệu lịch kiểm tra theo tháng
+  const inspectionsPerMonth = useMemo(() => {
+    if (!inspections) {
+      // Trả về dữ liệu rỗng cho 12 tháng nếu không có dữ liệu
+      return Array.from({ length: 12 }, (_, i) => ({
+        month: (i + 1).toString(),
+        count: 0,
+      }));
+    }
+
+    const currentYear = new Date().getFullYear();
+    const monthCounts = new Array(12).fill(0);
+
+    inspections.forEach((inspection) => {
+      const inspectionDate = new Date(inspection.inspection_date);
+      if (inspectionDate.getFullYear() === currentYear) {
+        const month = inspectionDate.getMonth(); // 0-11
+        monthCounts[month]++;
+      }
+    });
+
+    return monthCounts.map((count, index) => ({
+      month: (index + 1).toString(),
+      count,
+    }));
+  }, [inspections]);
+
+  // Dữ liệu cho biểu đồ tròn
+  const licenseStatusPie = useMemo(
+    () => [
+      { name: "Hợp lệ", value: licenseStats.valid, color: "green" },
+      { name: "Sắp hết hạn", value: licenseStats.expiring, color: "yellow" },
+      { name: "Đã hết hạn", value: licenseStats.expired, color: "red" },
+    ],
+    [licenseStats]
+  );
+
+  // Loading state
+  if (isLoadingLicenses || isLoadingInspections || isLoadingViolations) {
+    return (
+      <Box p="md">
+        <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md" mb="md">
+          <Skeleton height={150} />
+          <Skeleton height={150} />
+          <Skeleton height={150} />
+          <Skeleton height={150} />
+        </SimpleGrid>
+        <Divider my="md" />
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+          <Skeleton height={300} />
+          <Skeleton height={300} />
+        </SimpleGrid>
+      </Box>
+    );
+  }
+
+  // Error state
+  if (isLicensesError || isInspectionsError || isViolationsError) {
+    const error = licensesError || inspectionsError || violationsError;
+    return (
+      <Box p="md">
+        <Alert
+          icon={<IconAlertCircle size={24} />}
+          title="Lỗi khi tải dữ liệu"
+          color="red"
+          mb="md"
+        >
+          {error?.message || "Đã xảy ra lỗi không xác định."}
+          <Group mt="md">
+            {isLicensesError && (
+              <Button
+                leftSection={<IconRefresh size={16} />}
+                onClick={() => refetchLicenses()}
+                variant="light"
+                color="red"
+                size="xs"
+              >
+                Thử lại giấy phép
+              </Button>
+            )}
+            {isInspectionsError && (
+              <Button
+                leftSection={<IconRefresh size={16} />}
+                onClick={() => refetchInspections()}
+                variant="light"
+                color="red"
+                size="xs"
+              >
+                Thử lại kiểm tra
+              </Button>
+            )}
+            {isViolationsError && (
+              <Button
+                leftSection={<IconRefresh size={16} />}
+                onClick={() => refetchViolations()}
+                variant="light"
+                color="red"
+                size="xs"
+              >
+                Thử lại vi phạm
+              </Button>
+            )}
+          </Group>
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box p="md">
@@ -131,22 +370,20 @@ function DashboardPage() {
               <IconLicense size={28} />
             </Avatar>
             <Text fw={800} size="2rem">
-              {stats.licenses.valid +
-                stats.licenses.expiring +
-                stats.licenses.expired}
+              {licenseStats.total}
             </Text>
             <Text size="sm" c="dimmed" mb={4}>
               Tổng giấy phép con
             </Text>
             <Group gap={4}>
               <Badge color="green" size="sm" variant={badgeVariant}>
-                Hợp lệ: {stats.licenses.valid}
+                Hợp lệ: {licenseStats.valid}
               </Badge>
               <Badge color="yellow" size="sm" variant={badgeVariant}>
-                Sắp hết hạn: {stats.licenses.expiring}
+                Sắp hết hạn: {licenseStats.expiring}
               </Badge>
               <Badge color="red" size="sm" variant={badgeVariant}>
-                Đã hết hạn: {stats.licenses.expired}
+                Đã hết hạn: {licenseStats.expired}
               </Badge>
             </Group>
           </Stack>
@@ -184,11 +421,22 @@ function DashboardPage() {
               <IconCalendar size={28} />
             </Avatar>
             <Text fw={800} size="2rem">
-              {stats.inspections}
+              {inspectionStats.total}
             </Text>
-            <Text size="sm" c="dimmed">
+            <Text size="sm" c="dimmed" mb={4}>
               Lượt kiểm tra trong năm
             </Text>
+            <Group gap={4}>
+              <Badge color="green" size="sm" variant={badgeVariant}>
+                Hoàn thành: {inspectionStats.completed}
+              </Badge>
+              <Badge color="yellow" size="sm" variant={badgeVariant}>
+                Chờ kiểm tra: {inspectionStats.pending}
+              </Badge>
+              <Badge color="red" size="sm" variant={badgeVariant}>
+                Đã hủy: {inspectionStats.cancelled}
+              </Badge>
+            </Group>
           </Stack>
         </Paper>
         <Paper
@@ -224,17 +472,17 @@ function DashboardPage() {
               <IconAlertTriangle size={28} />
             </Avatar>
             <Text fw={800} size="2rem">
-              {stats.violations.handled + stats.violations.unhandled}
+              {violationStats.total}
             </Text>
             <Text size="sm" c="dimmed" mb={4}>
               Số vi phạm
             </Text>
             <Group gap={4}>
               <Badge color="green" size="sm" variant={badgeVariant}>
-                Đã xử lý: {stats.violations.handled}
+                Đã xử lý: {violationStats.handled}
               </Badge>
               <Badge color="red" size="sm" variant={badgeVariant}>
-                Chưa xử lý: {stats.violations.unhandled}
+                Chưa xử lý: {violationStats.unhandled}
               </Badge>
             </Group>
           </Stack>
@@ -272,7 +520,7 @@ function DashboardPage() {
               <IconCheck size={28} />
             </Avatar>
             <Text fw={800} size="2rem">
-              {stats.fixRate}%
+              {violationStats.fixRate}%
             </Text>
             <Text size="sm" c="dimmed">
               Tỷ lệ khắc phục vi phạm
@@ -286,7 +534,7 @@ function DashboardPage() {
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
         <Card withBorder>
           <Title order={4} mb="sm">
-            Lượt kiểm tra theo tháng
+            Lượt kiểm tra theo tháng ({new Date().getFullYear()})
           </Title>
           <BarChart
             h={220}
@@ -341,7 +589,7 @@ function DashboardPage() {
         </Group>
         <MantineReactTable
           columns={violationColumns}
-          data={violationHistory}
+          data={violations || []}
           enablePagination={true}
           enableColumnFilters={true}
           enableSorting={true}

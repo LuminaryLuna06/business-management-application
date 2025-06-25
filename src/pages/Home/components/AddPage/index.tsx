@@ -12,33 +12,26 @@ import {
   Divider,
 } from "@mantine/core";
 import { Timestamp, doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../../../../../firebase/firebaseConfig";
+import { db } from "../../../../firebase/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import * as Yup from "yup";
-import type { BusinessOwner } from "../../../../../types/business";
+import type { BusinessOwner } from "../../../../types/business";
 import {
   BusinessType,
   Gender,
   IdentificationType,
-} from "../../../../../types/business";
+} from "../../../../types/business";
 import { DateInput } from "@mantine/dates";
 
-import { useNavigate, useParams } from "react-router-dom";
-import { dantoc } from "../../../../../data/dantoc";
-import { quoctich } from "../../../../../data/quoctich";
-import tree from "../../../../../data/tree.json";
-import industry from "../../../../../data/industry.json";
-import { useMemo, useEffect } from "react";
-import { useGetBusinessById } from "../../../../../tanstack/useBusinessQueries";
+import { useNavigate } from "react-router-dom";
+import { dantoc } from "../../../../data/dantoc";
+import { quoctich } from "../../../../data/quoctich";
+import tree from "../../../../data/tree.json";
+import industry from "../../../../data/industry.json";
+import { useMemo } from "react";
 
-function TestPage() {
+function AddPage() {
   const navigate = useNavigate();
-  const { businessId } = useParams();
-  const {
-    data: businessData,
-    isLoading,
-    isError,
-  } = useGetBusinessById(businessId || "");
 
   // Định nghĩa schema validation với Yup
   const schema = Yup.object().shape({
@@ -244,7 +237,7 @@ function TestPage() {
       }
     },
   });
-  console.log("Initial form values:", form.values);
+
   // Province/Ward options
   const provinceOptions = useMemo(
     () => tree.map((p) => ({ value: p.name, label: p.name })),
@@ -272,71 +265,6 @@ function TestPage() {
     form.setFieldValue("province", value || "");
     form.setFieldValue("ward", "");
   };
-
-  useEffect(() => {
-    if (businessData) {
-      const data: any = businessData;
-      const owner = data.owner;
-      form.setValues({
-        business_id: data.business_id || "",
-        business_code: data.business_code || "",
-        business_name: data.business_name || "",
-        business_type: data.business_type ? String(data.business_type) : "",
-        address: data.address || "",
-        industry: data.industry || "",
-        issue_date: data.issue_date ? new Date(data.issue_date) : null,
-        phone_number: data.phone_number || "",
-        email: data.email || "",
-        fax: data.fax || "",
-        website: data.website || "",
-        owner_id: owner ? owner.id || "" : "",
-        owner_name: owner ? owner.name || "" : "",
-        gender: owner ? String(owner.gender) : "",
-        ethnicity: owner ? owner.ethnicity || "" : "",
-        nationality: owner ? owner.nationality || "" : "",
-        birthdate: owner && owner.birthdate ? new Date(owner.birthdate) : null,
-        identification_type: owner ? String(owner.identification_type) : "",
-        identification_number: owner ? owner.identification_number || "" : "",
-        license_date:
-          owner && owner.license_date ? new Date(owner.license_date) : null,
-        place_of_licensing: owner ? owner.place_of_licensing || "" : "",
-        permanent_residence: owner ? owner.permanent_residence || "" : "",
-        address_owner: owner ? owner.address || "" : "",
-        position: owner ? owner.position || "" : "",
-        registered_capital:
-          typeof data.registered_capital === "number"
-            ? data.registered_capital
-            : 0,
-        tax_code: data.tax_code || "",
-        legal_representative: data.legal_representative || "",
-        share_price:
-          typeof data.share_price === "number" ? data.share_price : 0,
-        total_shares:
-          typeof data.total_shares === "number" ? data.total_shares : 0,
-        created_at: data.created_at
-          ? typeof data.created_at.toDate === "function"
-            ? data.created_at.toDate()
-            : new Date(data.created_at)
-          : new Date(),
-        updated_at: data.updated_at
-          ? typeof data.updated_at.toDate === "function"
-            ? data.updated_at.toDate()
-            : new Date(data.updated_at)
-          : new Date(),
-        province: data.province || "",
-        ward: data.ward || "",
-        citizen_id: data.citizen_id || "",
-      });
-    }
-  }, [businessData]);
-
-  if (isLoading) return <Box p="md">Đang tải dữ liệu doanh nghiệp...</Box>;
-  if (isError)
-    return (
-      <Box p="md" c="red">
-        Lỗi khi tải dữ liệu doanh nghiệp.
-      </Box>
-    );
 
   // Hàm xử lý gửi dữ liệu lên Firebase
   const handleSubmit = async (values: typeof form.values) => {
@@ -423,9 +351,11 @@ function TestPage() {
     <Box m="md">
       <Stack gap="md">
         <Title order={2} mb="md">
-          Sửa Dữ Liệu Doanh Nghiệp
+          Thêm Dữ Liệu Doanh Nghiệp
         </Title>
-
+        <Title order={3} mb="md">
+          Thông Tin Doanh Nghiệp
+        </Title>
         <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
           <TextInput
             label="Mã ID"
@@ -559,7 +489,6 @@ function TestPage() {
                 {...form.getInputProps("registered_capital")}
                 placeholder="Nhập vốn đăng ký (VNĐ)"
                 mb="sm"
-                thousandSeparator
                 required
               />
               {form.values.business_type === "3" && (
@@ -569,7 +498,6 @@ function TestPage() {
                     {...form.getInputProps("share_price")}
                     placeholder="Nhập giá cổ phiếu (VNĐ)"
                     mb="sm"
-                    thousandSeparator
                     required
                   />
                   <NumberInput
@@ -577,7 +505,6 @@ function TestPage() {
                     {...form.getInputProps("total_shares")}
                     placeholder="Nhập tổng số cổ phần"
                     mb="sm"
-                    thousandSeparator
                     required
                   />
                 </>
@@ -831,7 +758,7 @@ function TestPage() {
                 }
               }}
             >
-              {form.submitting ? "Đang lưu..." : "Lưu thay đổi"}
+              {form.submitting ? "Đang thêm..." : "Thêm Dữ Liệu"}
             </Button>
           </Group>
         </form>
@@ -840,4 +767,4 @@ function TestPage() {
   );
 }
 
-export default TestPage;
+export default AddPage;

@@ -1,11 +1,13 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoutes from "./ProtectedRoutes";
 import HomePage from "../pages/Home";
-import Index2 from "../pages/test/index2";
 import BusinessTable from "../pages/Home/components/BusinessTable";
 import BusinessPage from "../pages/Business";
-import TestPage from "../pages/test";
 import Index3 from "../pages/test/index3";
+import LicensePage from "../pages/License";
+import IndustryPage from "../pages/Industry";
+import EditPage from "../pages/Business/components/Dashboard/EditPage";
+import AddPage from "../pages/Home/components/AddPage";
 
 export default function AdminRoutes() {
   return (
@@ -14,9 +16,11 @@ export default function AdminRoutes() {
         <Route path="/" element={<HomePage />}>
           <Route path="business" element={<BusinessTable />} />
           <Route path="business/:businessId" element={<BusinessPage />} />
-          <Route path="test" element={<Index2 />} />
-          <Route path="test2" element={<TestPage />} />
+          <Route path="business/add" element={<AddPage />} />
+          <Route path="business/:businessId/edit" element={<EditPage />} />
           <Route path="test3" element={<Index3 />} />
+          <Route path="industry" element={<IndustryPage />} />
+          <Route path="licenses" element={<LicensePage />} />
         </Route>
       </Route>
     </Routes>

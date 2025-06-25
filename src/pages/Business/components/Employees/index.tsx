@@ -178,11 +178,13 @@ function Employees() {
             label="Tên nhân viên"
             {...form.getInputProps("worker_name")}
             mb="sm"
+            required
           />
           <DateInput
             label="Ngày sinh"
             {...form.getInputProps("birth_date")}
             mb="sm"
+            required
           />
           <Select
             label="Giới tính"
@@ -198,6 +200,7 @@ function Employees() {
               { value: Gender.Female.toString(), label: "Nữ" },
             ]}
             mb="sm"
+            required
           />
           <Select
             label="Bảo hiểm"
@@ -207,6 +210,7 @@ function Employees() {
               { value: "false", label: "Không" },
             ]}
             mb="sm"
+            required
           />
           <Select
             label="Đào tạo PCCC"
@@ -216,6 +220,7 @@ function Employees() {
               { value: "false", label: "Không" },
             ]}
             mb="sm"
+            required
           />
           <Select
             label="Đào tạo ATTP"
@@ -225,6 +230,7 @@ function Employees() {
               { value: "false", label: "Không" },
             ]}
             mb="sm"
+            required
           />
           <Group justify="right">
             <Button type="submit">Lưu</Button>

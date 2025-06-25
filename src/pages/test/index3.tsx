@@ -24,7 +24,6 @@ import { doc, setDoc, Timestamp, addDoc, collection } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import { BusinessType, Gender, IdentificationType } from "../../types/business";
-import { LicenseType } from "../../types/licenses";
 import type {
   InspectionSchedule,
   InspectionReport,
@@ -38,7 +37,7 @@ const generateMockBusinesses = () => [
     business_code: "010204567",
     business_name: "HỘ KINH DOANH THỊNH PHÁT",
     business_type: BusinessType.Individual,
-    industry: "Thương mại",
+    industry: "51",
     issue_date: new Date("2015-08-20"),
     address: "12 Lý Thường Kiệt, Q. Hoàn Kiếm, Hà Nội",
     phone_number: "0912 345 678",
@@ -73,7 +72,7 @@ const generateMockBusinesses = () => [
     business_code: "020305678",
     business_name: "CÔNG TY TNHH AN PHÚ",
     business_type: BusinessType.LLC,
-    industry: "Xây dựng",
+    industry: "2", // Kinh doanh công cụ hỗ trợ
     issue_date: new Date("2018-03-15"),
     address: "78 Nguyễn Huệ, Q. 1, TP.HCM",
     phone_number: "0987 654 321",
@@ -108,7 +107,7 @@ const generateMockBusinesses = () => [
     business_code: "030406789",
     business_name: "CÔNG TY CỔ PHẦN MINH ANH",
     business_type: BusinessType.JSC,
-    industry: "Bán lẻ thực phẩm",
+    industry: "146", // Kinh doanh các loại pháo, trừ pháo nổ
     issue_date: new Date("2020-12-10"),
     address: "101 Hùng Vương, Q. 5, TP.HCM",
     phone_number: "0123 456 789",
@@ -145,7 +144,7 @@ const generateMockBusinesses = () => [
     business_code: "040507890",
     business_name: "HỘ KINH DOANH BÌNH MINH",
     business_type: BusinessType.Individual,
-    industry: "Kinh doanh ăn uống",
+    industry: "4", // Kinh doanh thiết bị, phần mềm ngụy trang dùng để ghi âm, ghi hình, định vị
     issue_date: new Date("2019-06-15"),
     address: "45 Trần Phú, Q. Hải Châu, Đà Nẵng",
     phone_number: "0905 123 456",
@@ -179,7 +178,7 @@ const generateMockBusinesses = () => [
     business_code: "050608901",
     business_name: "CÔNG TY TNHH THỦY SẢN CẦN THƠ",
     business_type: BusinessType.LLC,
-    industry: "Thủy sản",
+    industry: "5", // Kinh doanh súng bắn sơn
     issue_date: new Date("2017-09-20"),
     address: "123 Nguyễn Văn Linh, Q. Ninh Kiều, Cần Thơ",
     phone_number: "0292 345 678",
@@ -199,7 +198,7 @@ const generateMockBusinesses = () => [
       nationality: "Việt Nam",
       birthdate: new Date("1970-07-12"),
       identification_type: IdentificationType.CitizenID,
-      identification_number: "555666777888",
+      identification_number: "222333444555",
       license_date: new Date("2017-09-20"),
       place_of_licensing: "Cần Thơ",
       permanent_residence: "Cần Thơ",
@@ -211,22 +210,22 @@ const generateMockBusinesses = () => [
 
 const generateMockLicenses = () => [
   {
-    license_type: LicenseType.FireSafety,
-    license_number: "PCCC-2024-001",
-    issue_date: new Date("2024-01-15"),
-    expiration_date: new Date("2025-01-15"),
+    license_id: "093d283f-634e-4d41-a99d-158b4e2a8a03",
+    license_number: "RUOU-2024-001",
+    issue_date: new Date("2024-01-10"),
+    expiration_date: new Date("2025-01-10"),
   },
   {
-    license_type: LicenseType.FoodSafety,
-    license_number: "ATTP-2024-002",
-    issue_date: new Date("2024-02-20"),
-    expiration_date: new Date("2025-02-20"),
+    license_id: "707f2bdc-d196-4371-bb6e-134a4f92638d",
+    license_number: "PCCC-2024-002",
+    issue_date: new Date("2024-02-15"),
+    expiration_date: new Date("2025-02-15"),
   },
   {
-    license_type: LicenseType.PublicOrder,
-    license_number: "ANTT-2024-003",
-    issue_date: new Date("2024-03-10"),
-    expiration_date: new Date("2025-03-10"),
+    license_id: "0013ec85-70f7-40b4-8861-acfb25c08937",
+    license_number: "ATTP-2024-003",
+    issue_date: new Date("2024-03-20"),
+    expiration_date: new Date("2025-03-20"),
   },
 ];
 
@@ -465,7 +464,7 @@ function Index3() {
         for (const license of mockLicenses) {
           try {
             const licenseData = {
-              license_type: license.license_type,
+              license_id: license.license_id,
               license_number: license.license_number,
               issue_date: Timestamp.fromDate(license.issue_date),
               expiration_date: Timestamp.fromDate(license.expiration_date),

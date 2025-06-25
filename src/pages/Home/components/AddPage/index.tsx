@@ -273,6 +273,8 @@ function AddPage() {
         business_id: values.business_id,
         business_name: values.business_name,
         address: values.address,
+        province: values.province,
+        ward: values.ward,
         phone_number: values.phone_number || "",
         email: values.email || "",
         fax: values.fax || "",

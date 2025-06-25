@@ -16,6 +16,7 @@ import {
   type InspectionReport,
   type ViolationResult,
 } from "../types/schedule";
+import { type SubLicense } from "../types/licenses";
 
 // Helper function to convert Firestore Timestamp to Date
 const convertTimestamp = (timestamp: any): Date => {
@@ -146,6 +147,29 @@ export const getLicensesByBusinessId = async (
     return licenses;
   } catch (error) {
     console.error("Error getting licenses:", error);
+    throw error;
+  }
+};
+
+/**
+ * Lấy tất cả giấy phép con từ collection Licenses
+ */
+export const getAllSubLicenses = async (): Promise<SubLicense[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "licenses"));
+    const licenses: SubLicense[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      licenses.push({
+        id: data.id,
+        name: data.name,
+        issuing_authority: data.issuing_authority,
+        industries: data.industries,
+      });
+    });
+    return licenses;
+  } catch (error) {
+    console.error("Error getting sub licenses:", error);
     throw error;
   }
 };
@@ -327,6 +351,54 @@ export const addViolation = async (
     return docRef.id;
   } catch (error) {
     console.error("Error adding violation:", error);
+    throw error;
+  }
+};
+
+/**
+ * Thêm một giấy phép con vào collection Licenses (tên, cơ quan cấp, ngành liên quan)
+ */
+export const addSubLicense = async (
+  subLicense: SubLicense
+): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, "licenses"), {
+      id: subLicense.id,
+      name: subLicense.name,
+      issuing_authority: subLicense.issuing_authority,
+      industries: subLicense.industries,
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding sub license:", error);
+    throw error;
+  }
+};
+
+/**
+ * Thêm giấy phép con cho doanh nghiệp vào businesses/{businessId}/licenses
+ */
+export const addBusinessSubLicense = async (
+  businessId: string,
+  license: {
+    license_id: string;
+    license_number: string;
+    issue_date: Date;
+    expiration_date: Date;
+  }
+): Promise<string> => {
+  try {
+    const docRef = await addDoc(
+      collection(db, "businesses", businessId, "licenses"),
+      {
+        ...license,
+        issue_date: Timestamp.fromDate(new Date(license.issue_date)),
+        expiration_date: Timestamp.fromDate(new Date(license.expiration_date)),
+      }
+    );
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding business sub license:", error);
     throw error;
   }
 };

@@ -189,7 +189,23 @@ function InspectionSchedulePage() {
             (r) => r.inspection_id === inspectionId
           );
           if (!filteredReports.length)
-            return <Text>Chưa có kết quả kiểm tra</Text>;
+            return (
+              <Box>
+                <Group justify="space-between" mb={8}>
+                  <Text fw={600}>Kết quả kiểm tra</Text>
+                  <Button
+                    size="xs"
+                    onClick={() => {
+                      setCurrentInspectionId(inspectionId);
+                      setAddReportModalOpen(true);
+                    }}
+                  >
+                    Thêm kết quả kiểm tra
+                  </Button>
+                </Group>
+                <Text>Chưa có kết quả kiểm tra</Text>
+              </Box>
+            );
           return (
             <Box>
               <Group justify="space-between" mb={8}>

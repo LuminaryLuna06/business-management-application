@@ -1,10 +1,11 @@
-import { Alert, Badge, Box, Center, Loader, Text } from "@mantine/core";
+import { Alert, Badge, Box, Center, Loader, Text, Button } from "@mantine/core";
 import { MantineReactTable } from "mantine-react-table";
 import { useNavigate } from "react-router";
 import { BusinessType } from "../../../../types/business";
 import { useMemo } from "react";
 import { useGetAllBusinesses } from "../../../../tanstack/useBusinessQueries";
 import { IconAlertCircle } from "@tabler/icons-react";
+import industryData from "../../../../data/industry.json";
 
 function BusinessTable() {
   const navigate = useNavigate();
@@ -25,6 +26,13 @@ function BusinessTable() {
         return "Không xác định";
     }
   };
+
+  // Hàm lấy tên ngành từ mã
+  const getIndustryName = (code: string) => {
+    const found = (industryData as any[]).find((item) => item.code === code);
+    return found ? found.name : code;
+  };
+
   const tableData = useMemo(() => {
     if (!businesses) return [];
 
@@ -40,7 +48,6 @@ function BusinessTable() {
       issue_date: business.issue_date?.toLocaleDateString("vi-VN") || "-",
       province: business.province,
       ward: business.ward,
-      // owner_name: business.owner?.name || "-",
     }));
   }, [businesses]);
 
@@ -94,6 +101,7 @@ function BusinessTable() {
         accessorKey: "business_industry",
         header: "Ngành nghề",
         size: 200,
+        Cell: ({ cell }: { cell: any }) => getIndustryName(cell.getValue()),
       },
       {
         accessorKey: "phone_number",
@@ -145,13 +153,25 @@ function BusinessTable() {
   return (
     <Box>
       {/* Hiển thị thông tin tổng quan */}
-      <Box style={{ marginBottom: "1rem" }}>
-        <Text size="lg" fw={600} mb="xs">
-          Danh sách doanh nghiệp
-        </Text>
-        <Text size="sm" color="dimmed">
-          Tổng số: {businesses?.length || 0} doanh nghiệp
-        </Text>
+      <Box
+        style={{
+          marginBottom: "1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div>
+          <Text size="lg" fw={600} mb="xs">
+            Danh sách doanh nghiệp
+          </Text>
+          <Text size="sm" color="dimmed">
+            Tổng số: {businesses?.length || 0} doanh nghiệp
+          </Text>
+        </div>
+        <Button onClick={() => navigate("/business/add")}>
+          + Thêm doanh nghiệp
+        </Button>
       </Box>
 
       {/* Sử dụng dữ liệu từ Firebase */}

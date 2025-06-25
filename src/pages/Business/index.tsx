@@ -35,12 +35,14 @@ import {
 import { useNavigate, useParams } from "react-router";
 import { useGetBusinessById } from "../../tanstack/useBusinessQueries";
 import { BusinessType } from "../../types/business";
+import industryData from "../../data/industry.json";
 
 // Mock business info
 const mockBusiness = {
   business_name: "CÔNG TY THỊNH PHÁT",
   business_code: "010204567",
-  business_type: "Công ty Cổ phần",
+  business_type: "3",
+  industry: "1",
   address: "12 Lý Thường Kiệt, Q. Hoàn Kiếm",
   phone_number: "0912 345 678",
   email: "info@thinhphat.com",
@@ -63,6 +65,13 @@ const getBusinessTypeLabel = (businessType: BusinessType) => {
       return "Không xác định";
   }
 };
+
+// Hàm lấy tên ngành từ mã
+const getIndustryName = (code: string) => {
+  const found = (industryData as any[]).find((item) => item.code === code);
+  return found ? found.name : code;
+};
+
 export default function BusinessPage() {
   const [activeTab, setActiveTab] = useState<string | null>("first");
   const [showMore, setShowMore] = useState(false);
@@ -83,6 +92,7 @@ export default function BusinessPage() {
         business_name: businessData.business_name,
         business_code: businessData.business_code,
         business_type: getBusinessTypeLabel(businessData.business_type),
+        industry: businessData.industry,
         address: businessData.address,
         province: businessData.province,
         ward: businessData.ward,
@@ -196,7 +206,7 @@ export default function BusinessPage() {
               size="xs"
               variant="outline"
               leftSection={<IconEdit size={16} />}
-              onClick={() => navigate("/test")}
+              onClick={() => navigate(`/business/${businessId}/edit`)}
             >
               Sửa dữ liệu
             </Button>
@@ -311,6 +321,28 @@ export default function BusinessPage() {
                     </Text>
                   </Group>
                 </Grid.Col>
+                <Grid.Col span={{ base: 12, sm: 6 }}>
+                  <Group gap={6} align="center">
+                    <IconId size={18} color="#fab005" />
+                    <Text size="sm" fw={600}>
+                      Ngành nghề:
+                    </Text>
+                    <Text size="sm" fw={500}>
+                      {getIndustryName(business.industry)}
+                    </Text>
+                  </Group>
+                </Grid.Col>
+                <Grid.Col span={{ base: 12, sm: 6 }}>
+                  <Group gap={6} align="center">
+                    <IconId size={18} color="#868e96" />
+                    <Text size="sm" fw={600}>
+                      Fax:
+                    </Text>
+                    <Text size="sm" fw={500}>
+                      {business.fax}
+                    </Text>
+                  </Group>
+                </Grid.Col>
                 {showMore && (
                   <>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -356,9 +388,9 @@ export default function BusinessPage() {
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="first">Dashboard</Tabs.Tab>
-          <Tabs.Tab value="second">Employees</Tabs.Tab>
-          <Tabs.Tab value="third">Licenses</Tabs.Tab>
-          <Tabs.Tab value="fourth">Inspections</Tabs.Tab>
+          <Tabs.Tab value="second">Nhân viên</Tabs.Tab>
+          <Tabs.Tab value="third">Giấy phép con</Tabs.Tab>
+          <Tabs.Tab value="fourth">Lịch kiểm tra</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="first">

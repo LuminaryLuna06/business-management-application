@@ -23,6 +23,7 @@
     "@tanstack/react-query-devtools": "^5.80.7",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
+    "export-to-csv": "^1.4.0",
     "firebase": "^11.9.1",
     "mantine-react-table": "^2.0.0-beta.9",
     "react": "^19.1.0",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@types/papaparse": "^5.3.16",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
@@ -42,6 +44,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "papaparse": "^5.5.3",
     "standard-version": "^9.5.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",

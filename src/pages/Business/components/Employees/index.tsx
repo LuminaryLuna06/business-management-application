@@ -19,6 +19,7 @@ import {
   useEmployeesQuery,
   useAddEmployeeMutation,
 } from "../../../../tanstack/useEmployeeQueries";
+import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
 
 const schema = Yup.object().shape({
   worker_name: Yup.string()
@@ -50,27 +51,57 @@ function Employees() {
     {
       accessorKey: "birth_date",
       header: "Ngày sinh",
-      Cell: ({ cell }) => cell.getValue<Date>()?.toLocaleDateString() || "",
+      filterVariant: "date-range",
+      sortingFn: "datetime",
+      Cell: ({ cell }) => cell.getValue<Date>()?.toLocaleDateString(),
     },
     {
       accessorKey: "gender",
       header: "Giới tính",
+      filterVariant: "select",
+      mantineFilterSelectProps: {
+        data: [
+          { value: Gender.Male.toString(), label: "Nam" },
+          { value: Gender.Female.toString(), label: "Nữ" },
+        ],
+      },
       Cell: ({ cell }) =>
         cell.getValue<Gender>() === Gender.Male ? "Nam" : "Nữ",
     },
     {
       accessorKey: "insurance_status",
       header: "Bảo hiểm",
+      filterVariant: "select",
+      mantineFilterSelectProps: {
+        data: [
+          { value: "true", label: "Đã đóng" },
+          { value: "false", label: "Chưa đóng" },
+        ],
+      },
       Cell: ({ cell }) => (cell.getValue<boolean>() ? "Đã đóng" : "Chưa đóng"),
     },
     {
       accessorKey: "fire_safety_training",
       header: "Đào tạo PCCC",
+      filterVariant: "select",
+      mantineFilterSelectProps: {
+        data: [
+          { value: "true", label: "Có" },
+          { value: "false", label: "Không" },
+        ],
+      },
       Cell: ({ cell }) => (cell.getValue<boolean>() ? "Có" : "Không"),
     },
     {
       accessorKey: "food_safety_training",
       header: "Đào tạo ATTP",
+      filterVariant: "select",
+      mantineFilterSelectProps: {
+        data: [
+          { value: "true", label: "Có" },
+          { value: "false", label: "Không" },
+        ],
+      },
       Cell: ({ cell }) => (cell.getValue<boolean>() ? "Có" : "Không"),
     },
   ];
@@ -167,9 +198,30 @@ function Employees() {
       <MantineReactTable
         columns={columns}
         data={employees || []}
-        enableRowSelection
+        enablePagination
+        enableSorting
+        enableDensityToggle={false}
+        enableTopToolbar
+        columnFilterDisplayMode={"popover"}
         enableColumnFilters
         enableGlobalFilter
+        enableStickyHeader
+        localization={MRT_Localization_VI}
+        initialState={{
+          pagination: { pageSize: 10, pageIndex: 0 },
+          density: "xs",
+        }}
+        mantineTableProps={{
+          striped: true,
+          withTableBorder: true,
+          highlightOnHover: true,
+          withColumnBorders: true,
+        }}
+        mantineTableContainerProps={{
+          style: { maxHeight: "70vh" },
+        }}
+        enableRowSelection
+        enableSelectAll
       />
 
       <Modal opened={opened} onClose={close} title="Thêm nhân viên">
@@ -188,6 +240,10 @@ function Employees() {
           />
           <Select
             label="Giới tính"
+            data={[
+              { value: Gender.Male.toString(), label: "Nam" },
+              { value: Gender.Female.toString(), label: "Nữ" },
+            ]}
             value={form.values.gender.toString()}
             onChange={(val) =>
               form.setFieldValue(
@@ -195,10 +251,6 @@ function Employees() {
                 val === "1" ? Gender.Male : Gender.Female
               )
             }
-            data={[
-              { value: Gender.Male.toString(), label: "Nam" },
-              { value: Gender.Female.toString(), label: "Nữ" },
-            ]}
             mb="sm"
             required
           />

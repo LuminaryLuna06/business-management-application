@@ -13,6 +13,8 @@ import {
 } from "../../../../tanstack/useLicenseQueries";
 import { type License, type SubLicense } from "../../../../types/licenses";
 import { useGetBusinessById } from "../../../../tanstack/useBusinessQueries";
+import { IconDownload } from "@tabler/icons-react";
+import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
 
 const schema = Yup.object().shape({
   license_id: Yup.string().required("Chọn giấy phép con"),
@@ -45,6 +47,10 @@ function SubLicenses() {
 
   // Lấy tất cả giấy phép con
   const { data: allSubLicenses } = useGetAllSubLicenses();
+  const licenseOptions = allSubLicenses?.map((item) => ({
+    value: item.id,
+    label: item.name,
+  }));
 
   // Lọc giấy phép con phù hợp ngành
   const filteredSubLicenses = (allSubLicenses || []).filter((gpc: SubLicense) =>
@@ -62,6 +68,10 @@ function SubLicenses() {
     {
       accessorKey: "license_id",
       header: "Tên giấy phép",
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: licenseOptions,
+      },
       Cell: ({ cell }) => {
         const id = cell.getValue<string>();
         const found = (allSubLicenses || []).find((gpc) => gpc.id === id);
@@ -123,6 +133,57 @@ function SubLicenses() {
     close();
   };
 
+  // Export CSV helpers
+  const tableData = licenses || [];
+
+  const handleExportRows = (rows: any[], filename = "giay-phep-con") => {
+    if (!rows || rows.length === 0) return;
+    const headers = Object.keys(rows[0].original || rows[0]);
+    const csv = [
+      headers.join(","),
+      ...rows.map((row) =>
+        headers
+          .map((h) => {
+            let val = row.original ? row.original[h] : row[h];
+            if (val instanceof Date) return val.toLocaleDateString();
+            return `"${val ?? ""}"`;
+          })
+          .join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${filename}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleExportAll = (data: any[]) => {
+    if (!data || data.length === 0) return;
+    const headers = Object.keys(data[0]);
+    const csv = [
+      headers.join(","),
+      ...data.map((row) =>
+        headers
+          .map((h) => {
+            let val = row[h];
+            if (val instanceof Date) return val.toLocaleDateString();
+            return `"${val ?? ""}"`;
+          })
+          .join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `giay-phep-con.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <Box p="md">
       <Text size="xl" fw={700} mb="xs">
@@ -145,9 +206,92 @@ function SubLicenses() {
         <MantineReactTable
           columns={columns}
           data={licenses || []}
-          enableRowSelection
+          enablePagination
+          enableSorting
+          enableDensityToggle={false}
+          enableTopToolbar
+          columnFilterDisplayMode={"popover"}
           enableColumnFilters
           enableGlobalFilter
+          enableStickyHeader
+          enableRowSelection
+          enableSelectAll
+          localization={MRT_Localization_VI}
+          initialState={{
+            pagination: { pageSize: 10, pageIndex: 0 },
+            density: "xs",
+          }}
+          mantineTableProps={{
+            striped: true,
+            withTableBorder: true,
+            highlightOnHover: true,
+            withColumnBorders: true,
+          }}
+          mantineTableContainerProps={{
+            style: { maxHeight: "70vh" },
+          }}
+          renderTopToolbarCustomActions={({ table }) => {
+            const hasSelected = table.getSelectedRowModel().rows.length > 0;
+            return (
+              <Box
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-start",
+                  gap: 8,
+                  padding: 8,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Button
+                  leftSection={<IconDownload size={16} />}
+                  variant="light"
+                  onClick={() => handleExportAll(tableData)}
+                >
+                  Xuất tất cả dữ liệu
+                </Button>
+                <Button
+                  leftSection={<IconDownload size={16} />}
+                  variant="light"
+                  onClick={() =>
+                    handleExportRows(
+                      table.getPrePaginationRowModel().rows,
+                      "giay-phep-con-filter"
+                    )
+                  }
+                  disabled={table.getPrePaginationRowModel().rows.length === 0}
+                >
+                  Xuất tất cả hàng (theo filter)
+                </Button>
+                <Button
+                  leftSection={<IconDownload size={16} />}
+                  variant="light"
+                  onClick={() =>
+                    handleExportRows(
+                      table.getRowModel().rows,
+                      "giay-phep-con-trang-hien-tai"
+                    )
+                  }
+                  disabled={table.getRowModel().rows.length === 0}
+                >
+                  Xuất các hàng trong trang
+                </Button>
+                <Button
+                  leftSection={<IconDownload size={16} />}
+                  variant="light"
+                  color="teal"
+                  onClick={() =>
+                    handleExportRows(
+                      table.getSelectedRowModel().rows,
+                      "giay-phep-con-da-chon"
+                    )
+                  }
+                  disabled={!hasSelected}
+                >
+                  Xuất hàng được chọn
+                </Button>
+              </Box>
+            );
+          }}
         />
       )}
 

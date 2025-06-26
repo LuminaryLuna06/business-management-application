@@ -21,8 +21,6 @@ import {
   IconAlertTriangle,
   IconCheck,
   IconCalendar,
-  IconFileTypePdf,
-  IconFileTypeXls,
   IconAlertCircle,
   IconRefresh,
 } from "@tabler/icons-react";
@@ -34,6 +32,7 @@ import {
   useViolationDecisions,
 } from "../../../../tanstack/useInspectionQueries";
 import { useMemo } from "react";
+import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
 
 const violationColumns: MRT_ColumnDef<any>[] = [
   {
@@ -53,6 +52,14 @@ const violationColumns: MRT_ColumnDef<any>[] = [
   {
     accessorKey: "violation_status",
     header: "Trạng thái",
+    filterVariant: "select",
+    mantineFilterSelectProps: {
+      data: [
+        { value: "pending", label: "Chờ xử lý" },
+        { value: "paid", label: "Đã thanh toán" },
+        { value: "dismissed", label: "Đã hủy" },
+      ],
+    },
     Cell: ({ cell }): React.ReactNode => {
       const status = cell.getValue() as string;
       switch (status) {
@@ -70,6 +77,14 @@ const violationColumns: MRT_ColumnDef<any>[] = [
   {
     accessorKey: "fix_status",
     header: "Khắc phục",
+    filterVariant: "select",
+    mantineFilterSelectProps: {
+      data: [
+        { value: "not_fixed", label: "Chưa khắc phục" },
+        { value: "fixed", label: "Đã khắc phục" },
+        { value: "in_progress", label: "Đang khắc phục" },
+      ],
+    },
     Cell: ({ cell }): React.ReactNode => {
       const status = cell.getValue() as string;
       switch (status) {
@@ -569,32 +584,32 @@ function DashboardPage() {
       <Card withBorder mb="md">
         <Group justify="space-between" mb="xs">
           <Title order={5}>Lịch sử vi phạm</Title>
-          <Group>
-            <Button
-              leftSection={<IconFileTypeXls size={18} />}
-              variant="light"
-              size="xs"
-            >
-              Xuất Excel
-            </Button>
-            <Button
-              leftSection={<IconFileTypePdf size={18} />}
-              variant="light"
-              size="xs"
-              color="red"
-            >
-              Xuất PDF
-            </Button>
-          </Group>
         </Group>
         <MantineReactTable
           columns={violationColumns}
           data={violations || []}
-          enablePagination={true}
-          enableColumnFilters={true}
-          enableSorting={true}
-          mantineTableBodyRowProps={{ style: { cursor: "default" } }}
-          mantineTableContainerProps={{ style: { maxHeight: 500 } }}
+          enablePagination
+          enableSorting
+          enableDensityToggle={false}
+          enableTopToolbar
+          columnFilterDisplayMode={"popover"}
+          enableColumnFilters
+          enableGlobalFilter
+          enableStickyHeader
+          localization={MRT_Localization_VI}
+          initialState={{
+            pagination: { pageSize: 10, pageIndex: 0 },
+            density: "xs",
+          }}
+          mantineTableProps={{
+            striped: true,
+            withTableBorder: true,
+            highlightOnHover: true,
+            withColumnBorders: true,
+          }}
+          mantineTableContainerProps={{
+            style: { maxHeight: "70vh" },
+          }}
         />
       </Card>
     </Box>

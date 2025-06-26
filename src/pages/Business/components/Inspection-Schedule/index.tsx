@@ -26,6 +26,7 @@ import {
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import { DateInput } from "@mantine/dates";
 import { v4 as uuidv4 } from "uuid";
+import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
 
 const inspectionSchema = Yup.object().shape({
   inspection_date: Yup.date().required("Ngày kiểm tra không được để trống"),
@@ -141,7 +142,9 @@ function InspectionSchedulePage() {
     {
       accessorKey: "inspection_date",
       header: "Ngày kiểm tra",
-      Cell: ({ cell }) => cell.getValue<Date>()?.toLocaleDateString() || "",
+      filterVariant: "date-range",
+      sortingFn: "datetime",
+      Cell: ({ cell }) => cell.getValue<Date>()?.toLocaleDateString(),
     },
     {
       accessorKey: "inspector_description",
@@ -150,6 +153,14 @@ function InspectionSchedulePage() {
     {
       accessorKey: "inspector_status",
       header: "Trạng thái",
+      filterVariant: "multi-select",
+      mantineFilterMultiSelectProps: {
+        data: [
+          { value: "pending", label: "Chờ kiểm tra" },
+          { value: "completed", label: "Đã hoàn thành" },
+          { value: "cancelled", label: "Đã hủy" },
+        ],
+      },
       Cell: ({ cell }) => {
         const status = cell.getValue<string>();
         if (status === "pending") return "Chờ kiểm tra";
@@ -180,6 +191,30 @@ function InspectionSchedulePage() {
       <MantineReactTable
         columns={columns}
         data={inspections || []}
+        enablePagination
+        enableSorting
+        enableDensityToggle={false}
+        enableTopToolbar
+        columnFilterDisplayMode={"popover"}
+        enableColumnFilters
+        enableGlobalFilter
+        enableStickyHeader
+        localization={MRT_Localization_VI}
+        initialState={{
+          pagination: { pageSize: 10, pageIndex: 0 },
+          density: "xs",
+        }}
+        mantineTableProps={{
+          striped: true,
+          withTableBorder: true,
+          highlightOnHover: true,
+          withColumnBorders: true,
+        }}
+        mantineTableContainerProps={{
+          style: { maxHeight: "70vh" },
+        }}
+        enableRowSelection
+        enableSelectAll
         renderDetailPanel={({ row }) => {
           const inspectionId = row.original.inspection_id;
           if (loadingReports) return <Text>Đang tải kết quả kiểm tra...</Text>;

@@ -125,6 +125,19 @@ export const getBusinessById = async (
   }
 };
 
+/**
+ * Thêm doanh nghiệp mới
+ */
+export const addBusiness = async (business: Business): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, "businesses"), business);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding business:", error);
+    throw error;
+  }
+};
+
 // ===== LICENSE SERVICES =====
 
 /**

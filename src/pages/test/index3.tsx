@@ -30,6 +30,8 @@ import type {
   ViolationResult,
 } from "../../types/schedule";
 // Mock data generators
+const getRandomIndustry = () => String(Math.floor(Math.random() * 100) + 1);
+
 const generateMockBusinesses = () => [
   // Hộ kinh doanh (IndividualBusiness) - Hà Nội
   {
@@ -37,7 +39,7 @@ const generateMockBusinesses = () => [
     business_code: "010204567",
     business_name: "HỘ KINH DOANH THỊNH PHÁT",
     business_type: BusinessType.Individual,
-    industry: "51",
+    industry: getRandomIndustry(),
     issue_date: new Date("2015-08-20"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0912 345 678",
@@ -72,7 +74,7 @@ const generateMockBusinesses = () => [
     business_code: "020305678",
     business_name: "CÔNG TY TNHH AN PHÚ",
     business_type: BusinessType.LLC,
-    industry: "2", // Kinh doanh công cụ hỗ trợ
+    industry: getRandomIndustry(),
     issue_date: new Date("2018-03-15"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0987 654 321",
@@ -107,7 +109,7 @@ const generateMockBusinesses = () => [
     business_code: "030406789",
     business_name: "CÔNG TY CỔ PHẦN MINH ANH",
     business_type: BusinessType.JSC,
-    industry: "146", // Kinh doanh các loại pháo, trừ pháo nổ
+    industry: getRandomIndustry(),
     issue_date: new Date("2020-12-10"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0123 456 789",
@@ -144,7 +146,7 @@ const generateMockBusinesses = () => [
     business_code: "040507890",
     business_name: "HỘ KINH DOANH BÌNH MINH",
     business_type: BusinessType.Individual,
-    industry: "4", // Kinh doanh thiết bị, phần mềm ngụy trang dùng để ghi âm, ghi hình, định vị
+    industry: getRandomIndustry(),
     issue_date: new Date("2019-06-15"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0905 123 456",
@@ -178,7 +180,7 @@ const generateMockBusinesses = () => [
     business_code: "050608901",
     business_name: "CÔNG TY TNHH THỦY SẢN CẦN THƠ",
     business_type: BusinessType.LLC,
-    industry: "5", // Kinh doanh súng bắn sơn
+    industry: getRandomIndustry(),
     issue_date: new Date("2017-09-20"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0292 345 678",
@@ -256,23 +258,26 @@ const generateMockEmployees = () => [
   },
 ];
 
-const generateMockInspections = () => {
-  // Tạo inspections
+const generateMockInspections = (mockBusinesses: any[]) => {
+  // Tạo inspections, mỗi inspection gắn business_id theo thứ tự business
   const inspections: InspectionSchedule[] = [
     {
       inspection_id: uuidv4(),
+      business_id: mockBusinesses[0]?.business_id,
       inspection_date: new Date("2024-03-15"),
       inspector_description: "Kiểm tra định kỳ quý 1",
       inspector_status: "completed",
     },
     {
       inspection_id: uuidv4(),
+      business_id: mockBusinesses[1]?.business_id,
       inspection_date: new Date("2024-06-10"),
       inspector_description: "Kiểm tra đột xuất an toàn thực phẩm",
       inspector_status: "pending",
     },
     {
       inspection_id: uuidv4(),
+      business_id: mockBusinesses[2]?.business_id,
       inspection_date: new Date("2024-09-20"),
       inspector_description: "Kiểm tra định kỳ quý 3",
       inspector_status: "completed",
@@ -510,11 +515,13 @@ function Index3() {
         }
 
         // Upload inspections
-        const { inspections, reports, violations } = generateMockInspections();
+        const { inspections, reports, violations } =
+          generateMockInspections(mockBusinesses);
         for (const inspection of inspections) {
           try {
             const inspectionData = {
               inspection_id: inspection.inspection_id,
+              business_id: inspection.business_id,
               inspection_date: Timestamp.fromDate(inspection.inspection_date),
               inspector_description: inspection.inspector_description,
               inspector_status: inspection.inspector_status,

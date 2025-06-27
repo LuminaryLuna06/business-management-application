@@ -393,6 +393,7 @@ function InspectionSchedulePage() {
             if (!businessId) return;
             const inspectionData = {
               inspection_id: uuidv4(),
+              business_id: businessId,
               inspection_date: values.inspection_date,
               inspector_description: values.inspector_description,
               inspector_status: values.inspector_status,

@@ -660,7 +660,7 @@ export const getUpcomingInspections = async (
       limitDocs(top)
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return querySnapshot.docs.map((doc) => doc.data());
   } catch (error) {
     console.error("Error getting upcoming inspections:", error);
     throw error;

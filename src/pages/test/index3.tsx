@@ -521,7 +521,7 @@ function Index3() {
           try {
             const inspectionData = {
               inspection_id: inspection.inspection_id,
-              business_id: inspection.business_id,
+              business_id: business.business_id,
               inspection_date: Timestamp.fromDate(inspection.inspection_date),
               inspector_description: inspection.inspector_description,
               inspector_status: inspection.inspector_status,

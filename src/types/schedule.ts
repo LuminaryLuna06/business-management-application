@@ -1,5 +1,6 @@
 export type InspectionSchedule = {
   inspection_id: string;
+  business_id: string;
   inspection_date: Date;
   inspector_description?: string;
   inspector_status: "pending" | "completed" | "cancelled";

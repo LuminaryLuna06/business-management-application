@@ -112,6 +112,7 @@ function InspectionSchedulePage() {
   // useForm cho inspection
   const inspectionForm = useForm({
     initialValues: {
+      business_id: businessId || "",
       inspection_date: new Date(),
       inspector_description: "",
       inspector_status: "pending" as const,

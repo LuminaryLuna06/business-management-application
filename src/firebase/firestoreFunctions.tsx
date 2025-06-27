@@ -8,6 +8,11 @@ import {
   addDoc,
   setDoc,
   deleteDoc,
+  query,
+  orderBy,
+  limit as limitDocs,
+  collectionGroup,
+  where,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { type Business } from "../types/business";
@@ -597,6 +602,67 @@ export const deleteUser = async (uid: string): Promise<void> => {
     await deleteDoc(doc(db, "users", uid));
   } catch (error) {
     console.error("Error deleting user:", error);
+    throw error;
+  }
+};
+
+/**
+ * Lấy tất cả vi phạm (từ mọi business)
+ */
+export const getAllViolations = async (): Promise<any[]> => {
+  try {
+    const q = collectionGroup(db, "violations");
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error getting violations:", error);
+    throw error;
+  }
+};
+
+/**
+ * Lấy thống kê vi phạm: tổng số và số đã khắc phục (từ mọi business)
+ */
+export const getViolationStats = async (): Promise<{
+  total: number;
+  fixed: number;
+}> => {
+  try {
+    const q = collectionGroup(db, "violations");
+    const querySnapshot = await getDocs(q);
+    let total = 0;
+    let fixed = 0;
+    querySnapshot.forEach((doc) => {
+      total++;
+      const data = doc.data();
+      if (data.fix_status === "fixed") fixed++;
+    });
+    return { total, fixed };
+  } catch (error) {
+    console.error("Error getting violation stats:", error);
+    throw error;
+  }
+};
+
+/**
+ * Lấy top N lịch kiểm tra sắp tới (từ mọi business, mặc định 20)
+ */
+export const getUpcomingInspections = async (
+  top: number = 20
+): Promise<any[]> => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const q = query(
+      collectionGroup(db, "inspections"),
+      orderBy("inspection_date", "asc"),
+      where("inspection_date", ">=", Timestamp.fromDate(today)),
+      limitDocs(top)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Error getting upcoming inspections:", error);
     throw error;
   }
 };

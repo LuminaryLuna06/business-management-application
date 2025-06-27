@@ -39,7 +39,7 @@ const generateMockBusinesses = () => [
     business_type: BusinessType.Individual,
     industry: "51",
     issue_date: new Date("2015-08-20"),
-    address: "12 Lý Thường Kiệt, Q. Hoàn Kiếm, Hà Nội",
+    address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0912 345 678",
     email: "info@thinhphat.com",
     website: "www.thinhphat.com",
@@ -62,7 +62,7 @@ const generateMockBusinesses = () => [
       license_date: new Date("2015-08-20"),
       place_of_licensing: "Hà Nội",
       permanent_residence: "Hà Nội",
-      address: "12 Lý Thường Kiệt, Q. Hoàn Kiếm, Hà Nội",
+      address: "Hoàn Kiếm, Hà Nội",
     },
   },
 
@@ -74,7 +74,7 @@ const generateMockBusinesses = () => [
     business_type: BusinessType.LLC,
     industry: "2", // Kinh doanh công cụ hỗ trợ
     issue_date: new Date("2018-03-15"),
-    address: "78 Nguyễn Huệ, Q. 1, TP.HCM",
+    address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0987 654 321",
     email: "contact@anphu.com",
     created_at: Timestamp.fromDate(new Date()),
@@ -82,8 +82,8 @@ const generateMockBusinesses = () => [
     tax_code: "0312345678",
     registered_capital: 1000000000, // 1 tỷ VND (number)
     legal_representative: "Trần Thị B",
-    province: "Hồ Chí Minh",
-    ward: "Quận 1",
+    province: "Hà Nội",
+    ward: "Hoàn Kiếm",
     owner: {
       id: uuidv4(),
       name: "Trần Thị B",
@@ -96,7 +96,7 @@ const generateMockBusinesses = () => [
       license_date: new Date("2018-03-15"),
       place_of_licensing: "TP.HCM",
       permanent_residence: "TP.HCM",
-      address: "78 Nguyễn Huệ, Q. 1, TP.HCM",
+      address: "Hoàn Kiếm, Hà Nội",
       position: "Giám đốc",
     },
   },
@@ -109,7 +109,7 @@ const generateMockBusinesses = () => [
     business_type: BusinessType.JSC,
     industry: "146", // Kinh doanh các loại pháo, trừ pháo nổ
     issue_date: new Date("2020-12-10"),
-    address: "101 Hùng Vương, Q. 5, TP.HCM",
+    address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0123 456 789",
     email: "info@minhanh.com",
     created_at: Timestamp.fromDate(new Date()),
@@ -119,8 +119,8 @@ const generateMockBusinesses = () => [
     legal_representative: "Lê Văn C",
     share_price: 10000, // 10,000 VND/cổ phiếu
     total_shares: 5000000, // 5 triệu cổ phiếu
-    province: "Hồ Chí Minh",
-    ward: "Quận 5",
+    province: "Hà Nội",
+    ward: "Hoàn Kiếm",
     owner: {
       id: uuidv4(),
       name: "Lê Văn C",
@@ -133,7 +133,7 @@ const generateMockBusinesses = () => [
       license_date: new Date("2020-12-10"),
       place_of_licensing: "TP.HCM",
       permanent_residence: "TP.HCM",
-      address: "101 Hùng Vương, Q. 5, TP.HCM",
+      address: "Hoàn Kiếm, Hà Nội",
       position: "Chủ tịch HĐQT",
     },
   },
@@ -146,7 +146,7 @@ const generateMockBusinesses = () => [
     business_type: BusinessType.Individual,
     industry: "4", // Kinh doanh thiết bị, phần mềm ngụy trang dùng để ghi âm, ghi hình, định vị
     issue_date: new Date("2019-06-15"),
-    address: "45 Trần Phú, Q. Hải Châu, Đà Nẵng",
+    address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0905 123 456",
     email: "binhminh@gmail.com",
     created_at: Timestamp.fromDate(new Date()),
@@ -154,8 +154,8 @@ const generateMockBusinesses = () => [
     owner_name: "Phạm Thị D",
     citizen_id: "111222333444",
     registered_capital: 30000000,
-    province: "Đà Nẵng",
-    ward: "Hải Châu",
+    province: "Hà Nội",
+    ward: "Hoàn Kiếm",
     owner: {
       id: uuidv4(),
       name: "Phạm Thị D",
@@ -168,7 +168,7 @@ const generateMockBusinesses = () => [
       license_date: new Date("2019-06-15"),
       place_of_licensing: "Đà Nẵng",
       permanent_residence: "Đà Nẵng",
-      address: "45 Trần Phú, Q. Hải Châu, Đà Nẵng",
+      address: "Hoàn Kiếm, Hà Nội",
     },
   },
 
@@ -180,7 +180,7 @@ const generateMockBusinesses = () => [
     business_type: BusinessType.LLC,
     industry: "5", // Kinh doanh súng bắn sơn
     issue_date: new Date("2017-09-20"),
-    address: "123 Nguyễn Văn Linh, Q. Ninh Kiều, Cần Thơ",
+    address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0292 345 678",
     email: "thuysan@cantho.com",
     created_at: Timestamp.fromDate(new Date()),
@@ -188,8 +188,8 @@ const generateMockBusinesses = () => [
     tax_code: "0312345680",
     registered_capital: 2000000000, // 2 tỷ VND
     legal_representative: "Hoàng Văn E",
-    province: "Cần Thơ",
-    ward: "Ninh Kiều",
+    province: "Hà Nội",
+    ward: "Hoàn Kiếm",
     owner: {
       id: uuidv4(),
       name: "Hoàng Văn E",
@@ -202,7 +202,7 @@ const generateMockBusinesses = () => [
       license_date: new Date("2017-09-20"),
       place_of_licensing: "Cần Thơ",
       permanent_residence: "Cần Thơ",
-      address: "123 Nguyễn Văn Linh, Q. Ninh Kiều, Cần Thơ",
+      address: "Hoàn Kiếm, Hà Nội",
       position: "Giám đốc",
     },
   },

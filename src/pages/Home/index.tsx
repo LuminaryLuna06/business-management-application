@@ -16,9 +16,11 @@ import {
   IconMoon,
   IconHome2,
   IconChevronRight,
-  // IconUser,
   IconLogout,
-  // IconSettings,
+  IconBuildingStore,
+  IconCertificate,
+  IconBriefcase,
+  IconUsers,
 } from "@tabler/icons-react";
 import {
   Outlet,
@@ -66,7 +68,7 @@ function HomePage() {
             paddingLeft: "1rem",
             cursor: "pointer",
           }}
-          onClick={() => navigate("/business")}
+          onClick={() => navigate("/")}
         >
           Hệ thống quản lý Doanh nghiệp/Hộ kinh doanh địa phương
         </div>
@@ -125,22 +127,6 @@ function HomePage() {
 
                 <Divider />
 
-                {/* <Menu.Item
-                  leftSection={<IconUser size={14} />}
-                  onClick={() => navigate("/profile")}
-                >
-                  Thông tin cá nhân
-                </Menu.Item>
-
-                <Menu.Item
-                  leftSection={<IconSettings size={14} />}
-                  onClick={() => navigate("/settings")}
-                >
-                  Cài đặt
-                </Menu.Item> */}
-
-                <Divider />
-
                 <Menu.Item
                   leftSection={<IconLogout size={14} />}
                   color="red"
@@ -157,9 +143,22 @@ function HomePage() {
       <AppShell.Navbar p="md">
         <NavLink
           component={RouterNavLink}
+          to={"/"}
+          label="Dashboard"
+          leftSection={<IconHome2 size={16} stroke={1.5} />}
+          rightSection={
+            <IconChevronRight
+              size={12}
+              stroke={1.5}
+              className="mantine-rotate-rtl"
+            />
+          }
+        />
+        <NavLink
+          component={RouterNavLink}
           to={"/business"}
           label="Hộ kinh doanh / doanh nghiệp"
-          leftSection={<IconHome2 size={16} stroke={1.5} />}
+          leftSection={<IconBuildingStore size={16} stroke={1.5} />}
           rightSection={
             <IconChevronRight
               size={12}
@@ -172,7 +171,7 @@ function HomePage() {
           component={RouterNavLink}
           to={"/licenses"}
           label="Giấy phép con"
-          leftSection={<IconHome2 size={16} stroke={1.5} />}
+          leftSection={<IconCertificate size={16} stroke={1.5} />}
           rightSection={
             <IconChevronRight
               size={12}
@@ -185,7 +184,20 @@ function HomePage() {
           component={RouterNavLink}
           to={"/industry"}
           label="Ngành nghề"
-          leftSection={<IconHome2 size={16} stroke={1.5} />}
+          leftSection={<IconBriefcase size={16} stroke={1.5} />}
+          rightSection={
+            <IconChevronRight
+              size={12}
+              stroke={1.5}
+              className="mantine-rotate-rtl"
+            />
+          }
+        />
+        <NavLink
+          component={RouterNavLink}
+          to={"/user-management"}
+          label="Quản lý người dùng"
+          leftSection={<IconUsers size={16} stroke={1.5} />}
           rightSection={
             <IconChevronRight
               size={12}

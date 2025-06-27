@@ -9,6 +9,7 @@ import {
   Menu,
   Text,
   Divider,
+  Flex,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -61,19 +62,32 @@ function HomePage() {
     >
       <AppShell.Header style={{ display: "flex", alignItems: "center" }}>
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-        <div
+        <Text
           style={{
-            fontSize: "1.5rem",
             fontWeight: "bold",
             paddingLeft: "1rem",
             cursor: "pointer",
+            fontSize: "1.1rem",
+            "@media (minWidth: 600px)": {
+              fontSize: "1.3rem",
+            },
+            "@media (minWidth: 900px)": {
+              fontSize: "1.5rem",
+            },
           }}
           onClick={() => navigate("/")}
         >
           Hệ thống quản lý Doanh nghiệp/Hộ kinh doanh địa phương
-        </div>
+        </Text>
 
-        <Group style={{ marginLeft: "auto", marginRight: "1rem" }} gap="sm">
+        <Flex
+          ml="auto"
+          mr="1rem"
+          gap="sm"
+          align="center"
+          wrap="nowrap"
+          style={{ minWidth: 90 }}
+        >
           <ActionIcon
             variant="default"
             onClick={() => toggleColorScheme()}
@@ -137,7 +151,7 @@ function HomePage() {
               </Menu.Dropdown>
             </Menu>
           )}
-        </Group>
+        </Flex>
       </AppShell.Header>
 
       <AppShell.Navbar p="md">

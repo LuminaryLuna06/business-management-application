@@ -15,6 +15,8 @@ import { type License, type SubLicense } from "../../../../types/licenses";
 import { useGetBusinessById } from "../../../../tanstack/useBusinessQueries";
 import { IconDownload } from "@tabler/icons-react";
 import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const schema = Yup.object().shape({
   license_id: Yup.string().required("Chọn giấy phép con"),
@@ -133,55 +135,86 @@ function SubLicenses() {
     close();
   };
 
-  // Export CSV helpers
-  const tableData = licenses || [];
-
-  const handleExportRows = (rows: any[], filename = "giay-phep-con") => {
+  // Export Excel helpers
+  const exportRowsToExcel = (rows: any[], filename = "giay-phep-con") => {
     if (!rows || rows.length === 0) return;
-    const headers = Object.keys(rows[0].original || rows[0]);
-    const csv = [
-      headers.join(","),
-      ...rows.map((row) =>
-        headers
-          .map((h) => {
-            let val = row.original ? row.original[h] : row[h];
-            if (val instanceof Date) return val.toLocaleDateString();
-            return `"${val ?? ""}"`;
-          })
-          .join(",")
-      ),
-    ].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${filename}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    const data = rows.map((row) => row.original || row);
+    const mapped = data.map((row) => {
+      const licenseName =
+        (allSubLicenses || []).find((gpc) => gpc.id === row.license_id)?.name ||
+        row.license_id;
+      const today = new Date();
+      let status = "";
+      if (row.expiration_date < today) status = "Hết hạn";
+      else if (
+        row.expiration_date.getTime() - today.getTime() <
+        30 * 24 * 60 * 60 * 1000
+      )
+        status = "Sắp hết hạn";
+      else status = "Còn hiệu lực";
+      return {
+        "Số giấy phép": row.license_number,
+        "Tên giấy phép": licenseName,
+        "Ngày cấp":
+          row.issue_date instanceof Date
+            ? row.issue_date.toLocaleDateString("vi-VN")
+            : row.issue_date,
+        "Ngày hết hạn":
+          row.expiration_date instanceof Date
+            ? row.expiration_date.toLocaleDateString("vi-VN")
+            : row.expiration_date,
+        "Trạng thái": status,
+      };
+    });
+    const worksheet = XLSX.utils.json_to_sheet(mapped);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `${filename}.xlsx`);
   };
 
-  const handleExportAll = (data: any[]) => {
+  const exportAllToExcel = (data: any[]) => {
     if (!data || data.length === 0) return;
-    const headers = Object.keys(data[0]);
-    const csv = [
-      headers.join(","),
-      ...data.map((row) =>
-        headers
-          .map((h) => {
-            let val = row[h];
-            if (val instanceof Date) return val.toLocaleDateString();
-            return `"${val ?? ""}"`;
-          })
-          .join(",")
-      ),
-    ].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `giay-phep-con.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    const mapped = data.map((row) => {
+      const licenseName =
+        (allSubLicenses || []).find((gpc) => gpc.id === row.license_id)?.name ||
+        row.license_id;
+      const today = new Date();
+      let status = "";
+      if (row.expiration_date < today) status = "Hết hạn";
+      else if (
+        row.expiration_date.getTime() - today.getTime() <
+        30 * 24 * 60 * 60 * 1000
+      )
+        status = "Sắp hết hạn";
+      else status = "Còn hiệu lực";
+      return {
+        "Số giấy phép": row.license_number,
+        "Tên giấy phép": licenseName,
+        "Ngày cấp":
+          row.issue_date instanceof Date
+            ? row.issue_date.toLocaleDateString("vi-VN")
+            : row.issue_date,
+        "Ngày hết hạn":
+          row.expiration_date instanceof Date
+            ? row.expiration_date.toLocaleDateString("vi-VN")
+            : row.expiration_date,
+        "Trạng thái": status,
+      };
+    });
+    const worksheet = XLSX.utils.json_to_sheet(mapped);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `giay-phep-con.xlsx`);
   };
 
   return (
@@ -245,49 +278,49 @@ function SubLicenses() {
                 <Button
                   leftSection={<IconDownload size={16} />}
                   variant="light"
-                  onClick={() => handleExportAll(tableData)}
+                  onClick={() => exportAllToExcel(licenses || [])}
                 >
-                  Xuất tất cả dữ liệu
+                  Xuất tất cả dữ liệu (Excel)
                 </Button>
                 <Button
                   leftSection={<IconDownload size={16} />}
                   variant="light"
                   onClick={() =>
-                    handleExportRows(
+                    exportRowsToExcel(
                       table.getPrePaginationRowModel().rows,
                       "giay-phep-con-filter"
                     )
                   }
                   disabled={table.getPrePaginationRowModel().rows.length === 0}
                 >
-                  Xuất tất cả hàng (theo filter)
+                  Xuất tất cả hàng (theo filter, Excel)
                 </Button>
                 <Button
                   leftSection={<IconDownload size={16} />}
                   variant="light"
                   onClick={() =>
-                    handleExportRows(
+                    exportRowsToExcel(
                       table.getRowModel().rows,
                       "giay-phep-con-trang-hien-tai"
                     )
                   }
                   disabled={table.getRowModel().rows.length === 0}
                 >
-                  Xuất các hàng trong trang
+                  Xuất các hàng trong trang (Excel)
                 </Button>
                 <Button
                   leftSection={<IconDownload size={16} />}
                   variant="light"
                   color="teal"
                   onClick={() =>
-                    handleExportRows(
+                    exportRowsToExcel(
                       table.getSelectedRowModel().rows,
                       "giay-phep-con-da-chon"
                     )
                   }
                   disabled={!hasSelected}
                 >
-                  Xuất hàng được chọn
+                  Xuất hàng được chọn (Excel)
                 </Button>
               </Box>
             );

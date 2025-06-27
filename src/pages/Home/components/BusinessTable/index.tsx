@@ -1,13 +1,4 @@
-import {
-  Alert,
-  Badge,
-  Box,
-  Center,
-  Loader,
-  Text,
-  Button,
-  MultiSelect,
-} from "@mantine/core";
+import { Alert, Badge, Box, Center, Loader, Text, Button } from "@mantine/core";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import { useNavigate } from "react-router";
 import { BusinessType } from "../../../../types/business";
@@ -16,7 +7,8 @@ import { useGetAllBusinesses } from "../../../../tanstack/useBusinessQueries";
 import { IconAlertCircle, IconDownload } from "@tabler/icons-react";
 import industryData from "../../../../data/industry.json";
 import treeData from "../../../../data/tree.json";
-import { mkConfig, generateCsv, download } from "export-to-csv";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
 
 const industryOptions = industryData.map((industry) => ({
@@ -67,6 +59,12 @@ function BusinessTable() {
       ward: business.ward,
     }));
   }, [businesses]);
+
+  const hanoiWards = useMemo(() => {
+    const hanoi = (treeData as any[]).find((item) => item.name === "Hà Nội");
+    if (!hanoi) return [];
+    return hanoi.wards.map((w: any) => w.name);
+  }, []);
 
   const columns = useMemo<MRT_ColumnDef<any>[]>(
     () => [
@@ -128,9 +126,7 @@ function BusinessTable() {
         size: 180,
         filterVariant: "multi-select",
         mantineFilterMultiSelectProps: {
-          data: Array.from(
-            new Set((treeData as any[]).map((item) => item.name))
-          ),
+          data: ["Hà Nội"],
         },
       },
       {
@@ -138,51 +134,8 @@ function BusinessTable() {
         header: "Xã/Phường",
         size: 150,
         filterVariant: "multi-select",
-        // Custom Filter component để lấy danh sách xã/phường theo tỉnh/thành phố đã chọn
-        Filter: ({ column, table }) => {
-          const provinceFilter = table
-            .getColumn("province")
-            ?.getFilterValue() as string[] | undefined;
-          const wardList = useMemo(() => {
-            if (provinceFilter && provinceFilter.length > 0) {
-              return Array.from(
-                new Set(
-                  (treeData as any[])
-                    .filter((city) => provinceFilter.includes(city.name))
-                    .flatMap(
-                      (city) => city.wards?.map((ward: any) => ward.name) || []
-                    )
-                )
-              );
-            }
-            return Array.from(
-              new Set(
-                (treeData as any[]).flatMap(
-                  (city) => city.wards?.map((ward: any) => ward.name) || []
-                )
-              )
-            );
-          }, [provinceFilter]);
-
-          // Loại bỏ các ward không còn hợp lệ khỏi value
-          const value = (column.getFilterValue() as string[] | undefined) || [];
-          const filteredValue = value.filter((v) => wardList.includes(v));
-          if (filteredValue.length !== value.length) {
-            column.setFilterValue(filteredValue);
-          }
-
-          return (
-            <MultiSelect
-              key={provinceFilter?.join("-") || "all"}
-              data={wardList}
-              value={filteredValue}
-              onChange={column.setFilterValue}
-              placeholder="Chọn xã/phường"
-              clearable
-              searchable
-              nothingFoundMessage="Không có xã/phường"
-            />
-          );
+        mantineFilterMultiSelectProps: {
+          data: hanoiWards,
         },
       },
       {
@@ -207,35 +160,96 @@ function BusinessTable() {
     []
   );
 
-  const csvConfig = mkConfig({
-    fieldSeparator: ",",
-    decimalSeparator: ".",
-    useKeysAsHeaders: true,
-    filename: "doanh-nghiep",
-  });
-
-  // Export helpers
-  const handleExportRows = (rows: any[], filename = "doanh-nghiep") => {
+  // Export Excel helpers
+  const exportRowsToExcel = (rows: any[], filename = "doanh-nghiep") => {
     if (!rows || rows.length === 0) return;
-    const mapped = rows.map((r) => {
-      const original = r.original || r;
-      return {
-        ...original,
-        business_industry: getIndustryName(original.business_industry),
-      };
+    const data = rows.map((row) => row.original || row);
+    const mapped = data.map(
+      ({
+        business_id,
+        business_code,
+        business_name,
+        business_type,
+        business_address,
+        business_industry,
+        phone_number,
+        email,
+        issue_date,
+        province,
+        ward,
+        ...rest
+      }) => ({
+        ID: business_id,
+        "Mã số doanh nghiệp": business_code,
+        "Tên doanh nghiệp": business_name,
+        "Loại hình": business_type,
+        "Địa chỉ": business_address,
+        "Ngành nghề": getIndustryName(business_industry),
+        "Số điện thoại": phone_number,
+        Email: email,
+        "Ngày cấp":
+          issue_date instanceof Date
+            ? issue_date.toLocaleDateString()
+            : issue_date,
+        "Tỉnh/Thành phố": province,
+        "Xã/Phường": ward,
+        ...rest,
+      })
+    );
+    const worksheet = XLSX.utils.json_to_sheet(mapped);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
     });
-    const csv = generateCsv({ ...csvConfig, filename })(mapped);
-    download({ ...csvConfig, filename })(csv);
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `${filename}.xlsx`);
   };
 
-  const handleExportAll = (data: any[]) => {
+  const exportAllToExcel = (data: any[]) => {
     if (!data || data.length === 0) return;
-    const mapped = data.map((original) => ({
-      ...original,
-      business_industry: getIndustryName(original.business_industry),
-    }));
-    const csv = generateCsv(csvConfig)(mapped);
-    download(csvConfig)(csv);
+    const mapped = data.map(
+      ({
+        business_id,
+        business_code,
+        business_name,
+        business_type,
+        business_address,
+        business_industry,
+        phone_number,
+        email,
+        issue_date,
+        province,
+        ward,
+        ...rest
+      }) => ({
+        ID: business_id,
+        "Mã số doanh nghiệp": business_code,
+        "Tên doanh nghiệp": business_name,
+        "Loại hình": business_type,
+        "Địa chỉ": business_address,
+        "Ngành nghề": getIndustryName(business_industry),
+        "Số điện thoại": phone_number,
+        Email: email,
+        "Ngày cấp":
+          issue_date instanceof Date
+            ? issue_date.toLocaleDateString()
+            : issue_date,
+        "Tỉnh/Thành phố": province,
+        "Xã/Phường": ward,
+        ...rest,
+      })
+    );
+    const worksheet = XLSX.utils.json_to_sheet(mapped);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `doanh-nghiep.xlsx`);
   };
 
   if (isLoading) {
@@ -262,7 +276,7 @@ function BusinessTable() {
     );
   }
   return (
-    <Box>
+    <Box p="md">
       {/* Hiển thị thông tin tổng quan */}
       <Box
         style={{
@@ -273,7 +287,7 @@ function BusinessTable() {
         }}
       >
         <div>
-          <Text size="lg" fw={600} mb="xs">
+          <Text size="xl" fw={700} mb="xs">
             Danh sách doanh nghiệp
           </Text>
           <Text size="sm" color="dimmed">
@@ -326,49 +340,49 @@ function BusinessTable() {
               <Button
                 leftSection={<IconDownload size={16} />}
                 variant="light"
-                onClick={() => handleExportAll(tableData)}
+                onClick={() => exportAllToExcel(tableData)}
               >
-                Xuất tất cả dữ liệu
+                Xuất tất cả dữ liệu (Excel)
               </Button>
               <Button
                 leftSection={<IconDownload size={16} />}
                 variant="light"
                 onClick={() =>
-                  handleExportRows(
+                  exportRowsToExcel(
                     table.getPrePaginationRowModel().rows,
                     "doanh-nghiep-filter"
                   )
                 }
                 disabled={table.getPrePaginationRowModel().rows.length === 0}
               >
-                Xuất tất cả hàng (theo filter)
+                Xuất tất cả hàng (theo filter, Excel)
               </Button>
               <Button
                 leftSection={<IconDownload size={16} />}
                 variant="light"
                 onClick={() =>
-                  handleExportRows(
+                  exportRowsToExcel(
                     table.getRowModel().rows,
                     "doanh-nghiep-trang-hien-tai"
                   )
                 }
                 disabled={table.getRowModel().rows.length === 0}
               >
-                Xuất các hàng trong trang
+                Xuất các hàng trong trang (Excel)
               </Button>
               <Button
                 leftSection={<IconDownload size={16} />}
                 variant="light"
                 color="teal"
                 onClick={() =>
-                  handleExportRows(
+                  exportRowsToExcel(
                     table.getSelectedRowModel().rows,
                     "doanh-nghiep-da-chon"
                   )
                 }
                 disabled={!hasSelected}
               >
-                Xuất hàng được chọn
+                Xuất hàng được chọn (Excel)
               </Button>
               <Button onClick={() => navigate("/business/add")}>
                 + Thêm doanh nghiệp

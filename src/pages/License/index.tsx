@@ -22,7 +22,8 @@ import {
 } from "../../tanstack/useLicenseQueries";
 import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
 import { IconDownload } from "@tabler/icons-react";
-import { mkConfig, generateCsv, download } from "export-to-csv";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const INDUSTRY_OPTIONS = industryData.map((item: any) => ({
   value: item.code,
@@ -79,25 +80,62 @@ export default function LicensePage() {
     },
   ];
 
-  const csvConfig = mkConfig({
-    fieldSeparator: ",",
-    decimalSeparator: ".",
-    useKeysAsHeaders: true,
-    filename: "giay-phep-con",
-  });
-
-  // Export helpers
-  const handleExportRows = (rows: any[], filename = "giay-phep-con") => {
+  // Export Excel helpers
+  const exportRowsToExcel = (rows: any[], filename = "giay-phep-con") => {
     if (!rows || rows.length === 0) return;
-    const mapped = rows.map((r) => r.original || r);
-    const csv = generateCsv({ ...csvConfig, filename })(mapped);
-    download({ ...csvConfig, filename })(csv);
+    const data = rows.map((row) => row.original || row);
+    const mapped = data.map(
+      ({ id, name, issuing_authority, industries, ...rest }) => ({
+        ID: id,
+        "Tên giấy phép": name,
+        "Cơ quan cấp": issuing_authority,
+        "Ngành liên quan": (industries || [])
+          .map(
+            (code: string) =>
+              INDUSTRY_OPTIONS.find((i) => i.value === code)?.label
+          )
+          .filter(Boolean)
+          .join(", "),
+        ...rest,
+      })
+    );
+    const worksheet = XLSX.utils.json_to_sheet(mapped);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `${filename}.xlsx`);
   };
 
-  const handleExportAll = (data: any[]) => {
+  const exportAllToExcel = (data: any[]) => {
     if (!data || data.length === 0) return;
-    const csv = generateCsv(csvConfig)(data);
-    download(csvConfig)(csv);
+    const mapped = data.map(
+      ({ id, name, issuing_authority, industries, ...rest }) => ({
+        ID: id,
+        "Tên giấy phép": name,
+        "Cơ quan cấp": issuing_authority,
+        "Ngành liên quan": (industries || [])
+          .map(
+            (code: string) =>
+              INDUSTRY_OPTIONS.find((i) => i.value === code)?.label
+          )
+          .filter(Boolean)
+          .join(", "),
+        ...rest,
+      })
+    );
+    const worksheet = XLSX.utils.json_to_sheet(mapped);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `giay-phep-con.xlsx`);
   };
 
   const handleAdd = (values: typeof form.values) => {
@@ -167,42 +205,42 @@ export default function LicensePage() {
                 <Button
                   leftSection={<IconDownload size={16} />}
                   variant="light"
-                  onClick={() => handleExportAll(data || [])}
+                  onClick={() => exportAllToExcel(data || [])}
                 >
-                  Xuất tất cả dữ liệu
+                  Xuất tất cả dữ liệu (Excel)
                 </Button>
                 <Button
                   leftSection={<IconDownload size={16} />}
                   variant="light"
                   onClick={() =>
-                    handleExportRows(
+                    exportRowsToExcel(
                       table.getPrePaginationRowModel().rows,
                       "giay-phep-con-filter"
                     )
                   }
                   disabled={table.getPrePaginationRowModel().rows.length === 0}
                 >
-                  Xuất tất cả hàng (theo filter)
+                  Xuất tất cả hàng (theo filter, Excel)
                 </Button>
                 <Button
                   leftSection={<IconDownload size={16} />}
                   variant="light"
                   onClick={() =>
-                    handleExportRows(
+                    exportRowsToExcel(
                       table.getRowModel().rows,
                       "giay-phep-con-trang-hien-tai"
                     )
                   }
                   disabled={table.getRowModel().rows.length === 0}
                 >
-                  Xuất các hàng trong trang
+                  Xuất các hàng trong trang (Excel)
                 </Button>
                 <Button
                   leftSection={<IconDownload size={16} />}
                   variant="light"
                   color="teal"
                   onClick={() =>
-                    handleExportRows(
+                    exportRowsToExcel(
                       table.getSelectedRowModel().rows,
                       "giay-phep-con-da-chon"
                     )

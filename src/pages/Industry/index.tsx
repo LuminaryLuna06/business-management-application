@@ -4,7 +4,8 @@ import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import industryData from "../../data/industry.json";
 import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
 import { IconDownload } from "@tabler/icons-react";
-import { mkConfig, generateCsv, download } from "export-to-csv";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 // import { useNavigate } from "react-router";
 
 export default function IndustryPage() {
@@ -24,25 +25,44 @@ export default function IndustryPage() {
     []
   );
 
-  const csvConfig = mkConfig({
-    fieldSeparator: ",",
-    decimalSeparator: ".",
-    useKeysAsHeaders: true,
-    filename: "nganh-nghe",
-  });
-
-  // Export helpers
-  const handleExportRows = (rows: any[], filename = "nganh-nghe") => {
+  // Export Excel helpers
+  const exportRowsToExcel = (rows: any[], filename = "nganh-nghe") => {
     if (!rows || rows.length === 0) return;
-    const mapped = rows.map((r) => r.original || r);
-    const csv = generateCsv({ ...csvConfig, filename })(mapped);
-    download({ ...csvConfig, filename })(csv);
+    const data = rows.map((row) => row.original || row);
+    const mapped = data.map(({ code, name, conditional, ...rest }) => ({
+      "Mã ngành": code,
+      "Ngành nghề": name,
+      "Có điều kiện": conditional ? "Có" : "Không",
+      ...rest,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(mapped);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `${filename}.xlsx`);
   };
 
-  const handleExportAll = (data: any[]) => {
+  const exportAllToExcel = (data: any[]) => {
     if (!data || data.length === 0) return;
-    const csv = generateCsv(csvConfig)(data);
-    download(csvConfig)(csv);
+    const mapped = data.map(({ code, name, conditional, ...rest }) => ({
+      "Mã ngành": code,
+      "Ngành nghề": name,
+      "Có điều kiện": conditional ? "Có" : "Không",
+      ...rest,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(mapped);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, `nganh-nghe.xlsx`);
   };
 
   return (
@@ -92,49 +112,49 @@ export default function IndustryPage() {
               <Button
                 leftSection={<IconDownload size={16} />}
                 variant="light"
-                onClick={() => handleExportAll(industryData)}
+                onClick={() => exportAllToExcel(industryData)}
               >
-                Xuất tất cả dữ liệu
+                Xuất tất cả dữ liệu (Excel)
               </Button>
               <Button
                 leftSection={<IconDownload size={16} />}
                 variant="light"
                 onClick={() =>
-                  handleExportRows(
+                  exportRowsToExcel(
                     table.getPrePaginationRowModel().rows,
                     "nganh-nghe-filter"
                   )
                 }
                 disabled={table.getPrePaginationRowModel().rows.length === 0}
               >
-                Xuất tất cả hàng (theo filter)
+                Xuất tất cả hàng (theo filter, Excel)
               </Button>
               <Button
                 leftSection={<IconDownload size={16} />}
                 variant="light"
                 onClick={() =>
-                  handleExportRows(
+                  exportRowsToExcel(
                     table.getRowModel().rows,
                     "nganh-nghe-trang-hien-tai"
                   )
                 }
                 disabled={table.getRowModel().rows.length === 0}
               >
-                Xuất các hàng trong trang
+                Xuất các hàng trong trang (Excel)
               </Button>
               <Button
                 leftSection={<IconDownload size={16} />}
                 variant="light"
                 color="teal"
                 onClick={() =>
-                  handleExportRows(
+                  exportRowsToExcel(
                     table.getSelectedRowModel().rows,
                     "nganh-nghe-da-chon"
                   )
                 }
                 disabled={!hasSelected}
               >
-                Xuất hàng được chọn
+                Xuất hàng được chọn (Excel)
               </Button>
               {/* <Button onClick={() => navigate("/business/add")}>
                 + Thêm doanh nghiệp

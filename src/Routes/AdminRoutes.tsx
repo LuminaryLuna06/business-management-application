@@ -8,12 +8,14 @@ import LicensePage from "../pages/License";
 import IndustryPage from "../pages/Industry";
 import EditPage from "../pages/Business/components/Dashboard/EditPage";
 import AddPage from "../pages/Home/components/AddPage";
+import UserManagement from "../pages/UserManagement";
 
 export default function AdminRoutes() {
   return (
     <Routes>
       <Route element={<ProtectedRoutes />}>
         <Route path="/" element={<HomePage />}>
+          <Route index element={<div></div>} />
           <Route path="business" element={<BusinessTable />} />
           <Route path="business/:businessId" element={<BusinessPage />} />
           <Route path="business/add" element={<AddPage />} />
@@ -21,6 +23,7 @@ export default function AdminRoutes() {
           <Route path="test3" element={<Index3 />} />
           <Route path="industry" element={<IndustryPage />} />
           <Route path="licenses" element={<LicensePage />} />
+          <Route path="user-management" element={<UserManagement />} />
         </Route>
       </Route>
     </Routes>

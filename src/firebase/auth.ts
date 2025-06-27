@@ -20,12 +20,13 @@ export const doCreateUserWithEmailAndPassword = async (
     const user = userCredential.user;
 
     await setDoc(doc(db, "users", user.uid), {
-      email: user.email,
-      name: user.displayName || "",
       uid: user.uid,
+      name: user.displayName || "",
+      email: user.email,
+      phone: user.phoneNumber || "",
+      role: "staff",
+      isActive: true,
       createdAt: new Date().toISOString(),
-      isEmailUser: true,
-      isGoogleUser: false,
     });
     console.log("User signed up: ", user.email);
     return user;

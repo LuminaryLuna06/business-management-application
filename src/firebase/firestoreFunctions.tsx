@@ -6,6 +6,8 @@ import {
   onSnapshot,
   Timestamp,
   addDoc,
+  setDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { type Business } from "../types/business";
@@ -17,6 +19,11 @@ import {
   type ViolationResult,
 } from "../types/schedule";
 import { type SubLicense } from "../types/licenses";
+import type { StaffUser } from "../types/user";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { initializeApp, deleteApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { firebaseConfig } from "./firebaseConfig";
 
 // Helper function to convert Firestore Timestamp to Date
 const convertTimestamp = (timestamp: any): Date => {
@@ -492,4 +499,104 @@ export const subscribeToInspections = (
     });
     callback(inspections);
   });
+};
+
+/**
+ * Lấy tất cả người dùng (cán bộ, admin)
+ */
+export const getAllUsers = async (): Promise<StaffUser[]> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    const users: StaffUser[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      users.push({
+        uid: data.uid || doc.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        role: data.role,
+        isActive: data.isActive,
+        createdAt: data.createdAt,
+      });
+    });
+    return users;
+  } catch (error) {
+    console.error("Error getting users:", error);
+    throw error;
+  }
+};
+
+/**
+ * Tạo user trên Firebase Auth và lưu vào Firestore
+ */
+export const addUserWithAuth = async ({
+  email,
+  password,
+  name,
+  role,
+  phone,
+  isActive = true,
+}: {
+  email: string;
+  password: string;
+  name: string;
+  role: string;
+  phone?: string;
+  isActive?: boolean;
+}): Promise<string> => {
+  // Sử dụng secondary app instance để không ảnh hưởng currentUser
+  const secondaryApp = initializeApp(firebaseConfig, "Secondary");
+  const secondaryAuth = getAuth(secondaryApp);
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      secondaryAuth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+    const uid = user.uid;
+    await setDoc(doc(db, "users", uid), {
+      uid,
+      name,
+      email,
+      phone: phone || "",
+      role,
+      isActive,
+      createdAt: new Date().toISOString(),
+    });
+    return uid;
+  } catch (error) {
+    console.error("Error creating user with auth:", error);
+    throw error;
+  } finally {
+    await deleteApp(secondaryApp);
+  }
+};
+
+/**
+ * Sửa thông tin cán bộ (StaffUser) theo uid
+ */
+export const updateUser = async (
+  uid: string,
+  data: Partial<StaffUser>
+): Promise<void> => {
+  try {
+    await setDoc(doc(db, "users", uid), data, { merge: true });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa cán bộ theo uid
+ */
+export const deleteUser = async (uid: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, "users", uid));
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
+  }
 };

@@ -34,13 +34,14 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   // Add any additional auth methods you expose through the context
 }
+export type UserRole = "admin" | "staff";
 
-/**
- * User registration data type
- */
-export interface RegistrationData {
+export interface StaffUser {
+  uid: string;
+  name: string;
   email: string;
-  password: string;
-  displayName?: string;
-  // Add any additional registration fields
+  phone?: string;
+  role: UserRole;
+  isActive: boolean;
+  createdAt: string;
 }

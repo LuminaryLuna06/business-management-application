@@ -9,13 +9,14 @@ import IndustryPage from "../pages/Industry";
 import EditPage from "../pages/Business/components/Dashboard/EditPage";
 import AddPage from "../pages/Home/components/AddPage";
 import UserManagement from "../pages/UserManagement";
+import Dashboard from "../pages/Dashboard";
 
 export default function AdminRoutes() {
   return (
     <Routes>
       <Route element={<ProtectedRoutes />}>
         <Route path="/" element={<HomePage />}>
-          <Route index element={<div></div>} />
+          <Route index element={<Dashboard />} />
           <Route path="business" element={<BusinessTable />} />
           <Route path="business/:businessId" element={<BusinessPage />} />
           <Route path="business/add" element={<AddPage />} />

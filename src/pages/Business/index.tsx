@@ -35,7 +35,7 @@ import {
 import { useNavigate, useParams } from "react-router";
 import { useGetBusinessById } from "../../tanstack/useBusinessQueries";
 import { BusinessType } from "../../types/business";
-import industryData from "../../data/industry.json";
+import { useGetAllIndustries } from "../../tanstack/useIndustryQueries";
 
 // Mock business info
 const mockBusiness = {
@@ -66,18 +66,15 @@ const getBusinessTypeLabel = (businessType: BusinessType) => {
   }
 };
 
-// Hàm lấy tên ngành từ mã
-const getIndustryName = (code: string) => {
-  const found = (industryData as any[]).find((item) => item.code === code);
-  return found ? found.name : code;
-};
+
 
 export default function BusinessPage() {
   const [activeTab, setActiveTab] = useState<string | null>("first");
   const [showMore, setShowMore] = useState(false);
   const navigate = useNavigate();
   const { businessId } = useParams();
-
+  
+  const { data: industries } = useGetAllIndustries();
   const {
     data: businessData,
     isLoading,
@@ -85,7 +82,11 @@ export default function BusinessPage() {
     isError,
     refetch,
   } = useGetBusinessById(businessId || "");
-
+  const getIndustryName = (code: string) => {
+    const found = (industries || []).find((i) => i.code === code);
+    return found ? found.name : code;
+  };
+  
   const business = useMemo((): typeof mockBusiness => {
     if (businessData) {
       return {
@@ -378,6 +379,139 @@ export default function BusinessPage() {
                         </Text>
                       </Group>
                     </Grid.Col>
+
+                    {/* Thông tin chủ hộ kinh doanh */}
+                    {businessData &&
+                      (businessData as any).business_type ===
+                        BusinessType.Individual && (
+                        <>
+                          <Grid.Col span={{ base: 12, sm: 6 }}>
+                            <Group gap={6} align="center">
+                              <IconId size={18} color="#e64980" />
+                              <Text size="sm" fw={600}>
+                                Tên chủ hộ:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {(businessData as any).owner_name}
+                              </Text>
+                            </Group>
+                          </Grid.Col>
+                          <Grid.Col span={{ base: 12, sm: 6 }}>
+                            <Group gap={6} align="center">
+                              <IconId size={18} color="#7950f2" />
+                              <Text size="sm" fw={600}>
+                                CCCD/CMND:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {(businessData as any).citizen_id}
+                              </Text>
+                            </Group>
+                          </Grid.Col>
+                          <Grid.Col span={{ base: 12, sm: 6 }}>
+                            <Group gap={6} align="center">
+                              <IconId size={18} color="#fd7e14" />
+                              <Text size="sm" fw={600}>
+                                Vốn đăng ký:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {(
+                                  businessData as any
+                                ).registered_capital?.toLocaleString(
+                                  "vi-VN"
+                                )}{" "}
+                                VNĐ
+                              </Text>
+                            </Group>
+                          </Grid.Col>
+                        </>
+                      )}
+
+                    {/* Thông tin doanh nghiệp (Công ty TNHH, Công ty Cổ phần) */}
+                    {businessData &&
+                      ((businessData as any).business_type ===
+                        BusinessType.LLC ||
+                        (businessData as any).business_type ===
+                          BusinessType.JSC) && (
+                        <>
+                          <Grid.Col span={{ base: 12, sm: 6 }}>
+                            <Group gap={6} align="center">
+                              <IconId size={18} color="#e64980" />
+                              <Text size="sm" fw={600}>
+                                Mã số thuế:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {(businessData as any).tax_code}
+                              </Text>
+                            </Group>
+                          </Grid.Col>
+                          <Grid.Col span={{ base: 12, sm: 6 }}>
+                            <Group gap={6} align="center">
+                              <IconId size={18} color="#7950f2" />
+                              <Text size="sm" fw={600}>
+                                Người đại diện:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {(businessData as any).legal_representative}
+                              </Text>
+                            </Group>
+                          </Grid.Col>
+                          <Grid.Col span={{ base: 12, sm: 6 }}>
+                            <Group gap={6} align="center">
+                              <IconId size={18} color="#fd7e14" />
+                              <Text size="sm" fw={600}>
+                                Vốn đăng ký:
+                              </Text>
+                              <Text size="sm" fw={500}>
+                                {typeof (businessData as any)
+                                  .registered_capital === "bigint"
+                                  ? (
+                                      businessData as any
+                                    ).registered_capital.toString()
+                                  : (
+                                      businessData as any
+                                    ).registered_capital?.toLocaleString(
+                                      "vi-VN"
+                                    )}{" "}
+                                VNĐ
+                              </Text>
+                            </Group>
+                          </Grid.Col>
+
+                          {/* Thông tin bổ sung cho Công ty Cổ phần */}
+                          {(businessData as any).business_type ===
+                            BusinessType.JSC && (
+                            <>
+                              <Grid.Col span={{ base: 12, sm: 6 }}>
+                                <Group gap={6} align="center">
+                                  <IconId size={18} color="#20c997" />
+                                  <Text size="sm" fw={600}>
+                                    Giá cổ phiếu:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {(
+                                      businessData as any
+                                    ).share_price?.toLocaleString("vi-VN")}{" "}
+                                    VNĐ
+                                  </Text>
+                                </Group>
+                              </Grid.Col>
+                              <Grid.Col span={{ base: 12, sm: 6 }}>
+                                <Group gap={6} align="center">
+                                  <IconId size={18} color="#6f42c1" />
+                                  <Text size="sm" fw={600}>
+                                    Tổng số cổ phiếu:
+                                  </Text>
+                                  <Text size="sm" fw={500}>
+                                    {(
+                                      businessData as any
+                                    ).total_shares?.toLocaleString("vi-VN")}
+                                  </Text>
+                                </Group>
+                              </Grid.Col>
+                            </>
+                          )}
+                        </>
+                      )}
                   </>
                 )}
               </Grid>

@@ -3,6 +3,7 @@ export type License = {
   license_number: string;
   issue_date: Date;
   expiration_date: Date;
+  file_link?: string;
 };
 
 export type SubLicense = {

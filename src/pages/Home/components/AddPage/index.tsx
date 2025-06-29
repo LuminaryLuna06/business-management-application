@@ -27,11 +27,16 @@ import { useNavigate } from "react-router-dom";
 import { dantoc } from "../../../../data/dantoc";
 import { quoctich } from "../../../../data/quoctich";
 import tree from "../../../../data/tree.json";
-import industry from "../../../../data/industry.json";
+import { useGetAllIndustries } from "../../../../tanstack/useIndustryQueries";
 import { useMemo } from "react";
 
 function AddPage() {
   const navigate = useNavigate();
+  const { data: industries } = useGetAllIndustries();
+  const industryOptions = useMemo(
+    () => (industries || []).map((i) => ({ value: i.code, label: i.name })),
+    [industries]
+  );
 
   // Định nghĩa schema validation với Yup
   const schema = Yup.object().shape({
@@ -52,7 +57,7 @@ function AddPage() {
       .required("Ngành nghề không được để trống")
       .test("valid-industry", "Ngành nghề không hợp lệ", function (value) {
         if (!value) return false;
-        const validIndustryCodes = industry.map((ind) => ind.code);
+        const validIndustryCodes = (industries || []).map((ind) => ind.code);
         return validIndustryCodes.includes(value);
       }),
     issue_date: Yup.date().required("Ngày cấp không được để trống"),
@@ -250,14 +255,6 @@ function AddPage() {
         ? selectedProvince.wards.map((w) => ({ value: w.name, label: w.name }))
         : [],
     [form.values.province]
-  );
-  const industryOptions = useMemo(
-    () =>
-      industry.map((ind) => ({
-        value: ind.code,
-        label: `${ind.code} - ${ind.name}`,
-      })),
-    []
   );
 
   // Reset ward when province changes

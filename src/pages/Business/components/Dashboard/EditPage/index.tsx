@@ -11,8 +11,7 @@ import {
   SimpleGrid,
   Divider,
 } from "@mantine/core";
-import { Timestamp, doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../../../../../firebase/firebaseConfig";
+import { Timestamp } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import * as Yup from "yup";
 import type { BusinessOwner } from "../../../../../types/business";
@@ -27,9 +26,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { dantoc } from "../../../../../data/dantoc";
 import { quoctich } from "../../../../../data/quoctich";
 import tree from "../../../../../data/tree.json";
-import industry from "../../../../../data/industry.json";
 import { useMemo, useEffect } from "react";
-import { useGetBusinessById } from "../../../../../tanstack/useBusinessQueries";
+import {
+  useGetBusinessById,
+  useUpdateBusiness,
+} from "../../../../../tanstack/useBusinessQueries";
+import { notifications } from "@mantine/notifications";
+import { useGetAllIndustries } from "../../../../../tanstack/useIndustryQueries";
 
 function TestPage() {
   const navigate = useNavigate();
@@ -39,6 +42,8 @@ function TestPage() {
     isLoading,
     isError,
   } = useGetBusinessById(businessId || "");
+  const updateBusinessMutation = useUpdateBusiness();
+  const { data: industries } = useGetAllIndustries();
 
   // Định nghĩa schema validation với Yup
   const schema = Yup.object().shape({
@@ -59,7 +64,7 @@ function TestPage() {
       .required("Ngành nghề không được để trống")
       .test("valid-industry", "Ngành nghề không hợp lệ", function (value) {
         if (!value) return false;
-        const validIndustryCodes = industry.map((ind) => ind.code);
+        const validIndustryCodes = industries?.map((ind) => ind.code) || [];
         return validIndustryCodes.includes(value);
       }),
     issue_date: Yup.date().required("Ngày cấp không được để trống"),
@@ -259,12 +264,8 @@ function TestPage() {
     [form.values.province]
   );
   const industryOptions = useMemo(
-    () =>
-      industry.map((ind) => ({
-        value: ind.code,
-        label: `${ind.code} - ${ind.name}`,
-      })),
-    []
+    () => (industries || []).map((i) => ({ value: i.code, label: i.name })),
+    [industries]
   );
 
   // Reset ward when province changes
@@ -338,7 +339,7 @@ function TestPage() {
       </Box>
     );
 
-  // Hàm xử lý gửi dữ liệu lên Firebase
+  // Hàm xử lý cập nhật dữ liệu lên Firebase
   const handleSubmit = async (values: typeof form.values) => {
     try {
       const businessData = {
@@ -352,13 +353,13 @@ function TestPage() {
         fax: values.fax || "",
         website: values.website || "",
         industry: values.industry,
-        business_type: values.business_type as unknown as BusinessType,
+        business_type: Number(values.business_type) as BusinessType,
         issue_date: values.issue_date
           ? Timestamp.fromDate(values.issue_date as unknown as Date)
           : Timestamp.fromDate(new Date()),
         business_code: values.business_code,
         created_at: values.created_at,
-        updated_at: values.updated_at,
+        updated_at: Timestamp.fromDate(new Date()), // Cập nhật thời gian sửa đổi
       };
 
       if (values.business_type === "1") {
@@ -384,12 +385,13 @@ function TestPage() {
       const ownerData: BusinessOwner = {
         id: values.owner_id,
         name: values.owner_name,
-        gender: values.gender as unknown as Gender,
+        gender: Number(values.gender) as Gender,
         ethnicity: values.ethnicity,
         nationality: values.nationality,
         birthdate: values.birthdate ?? new Date(),
-        identification_type:
-          values.identification_type as unknown as IdentificationType,
+        identification_type: Number(
+          values.identification_type
+        ) as IdentificationType,
         identification_number: values.identification_number,
         license_date: values.license_date ?? new Date(),
         place_of_licensing: values.place_of_licensing,
@@ -401,23 +403,28 @@ function TestPage() {
         Object.assign(ownerData, { position: values.position });
       }
 
-      const businessRef = doc(db, "businesses", values.business_id);
-      const docSnap = await getDoc(businessRef);
-      if (docSnap.exists()) {
-        throw new Error("business_id đã tồn tại!");
-      }
-      await setDoc(businessRef, {
-        ...businessData,
-        owner: ownerData,
+      // Sử dụng mutation hook để cập nhật
+      await updateBusinessMutation.mutateAsync({
+        businessId: values.business_id,
+        businessData: {
+          ...businessData,
+          owner: ownerData,
+        } as any,
+      });
+      notifications.show({
+        title: "Thành công",
+        message: "Dữ liệu đã được cập nhật thành công!",
+        color: "green",
       });
 
-      alert("Dữ liệu đã được thêm thành công!");
-      form.reset();
-      form.setFieldValue("business_id", uuidv4());
-      form.setFieldValue("owner_id", uuidv4());
+      navigate(`/business`); // Chuyển về trang chi tiết
     } catch (error) {
-      console.error("Lỗi khi thêm dữ liệu: ", error);
-      alert("Đã xảy ra lỗi khi thêm dữ liệu!");
+      console.error("Lỗi khi cập nhật dữ liệu: ", error);
+      notifications.show({
+        title: "Lỗi",
+        message: "Đã xảy ra lỗi khi cập nhật dữ liệu!",
+        color: "red",
+      });
     }
   };
 
@@ -824,16 +831,12 @@ function TestPage() {
           <Group justify="end" mt="md">
             <Button
               type="submit"
-              loading={form.submitting}
+              loading={updateBusinessMutation.isPending}
               disabled={!form.isValid()}
-              onClick={() => {
-                if (form.isValid()) {
-                  console.log("Form values:", form.values);
-                  navigate(`/business/${form.values.business_id}/dashboard`);
-                }
-              }}
             >
-              {form.submitting ? "Đang lưu..." : "Lưu thay đổi"}
+              {updateBusinessMutation.isPending
+                ? "Đang lưu..."
+                : "Lưu thay đổi"}
             </Button>
           </Group>
         </form>

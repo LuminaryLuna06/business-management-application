@@ -10,7 +10,8 @@ import EditPage from "../pages/Business/components/Dashboard/EditPage";
 import AddPage from "../pages/Home/components/AddPage";
 import UserManagement from "../pages/UserManagement";
 import Dashboard from "../pages/Dashboard";
-import GoogleDriveUploader from "../googledrive/GoogleDriveUploader";
+import Report from "../pages/Report";
+import TestPage from "../pages/test/index2";
 
 export default function AdminRoutes() {
   return (
@@ -23,10 +24,11 @@ export default function AdminRoutes() {
           <Route path="business/add" element={<AddPage />} />
           <Route path="business/:businessId/edit" element={<EditPage />} />
           <Route path="test3" element={<Index3 />} />
+          <Route path="test" element={<TestPage />} />
           <Route path="industry" element={<IndustryPage />} />
           <Route path="licenses" element={<LicensePage />} />
           <Route path="user-management" element={<UserManagement />} />
-          <Route path="google-drive" element={<GoogleDriveUploader />} />
+          <Route path="report" element={<Report />} />
         </Route>
       </Route>
     </Routes>

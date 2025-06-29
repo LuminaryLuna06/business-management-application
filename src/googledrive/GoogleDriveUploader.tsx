@@ -1,57 +1,67 @@
-import { useRef } from "react";
-
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID; // Thay bằng client id của bạn
 const SCOPES = "https://www.googleapis.com/auth/drive.file";
-const FOLDER_ID = "1S2lrjpOhQwNDfox-bbi5zuKGA7N0Ziha"; // Thay bằng folderId Google Drive bạn muốn upload vào
 
-export default function GoogleDriveUploader() {
-  const accessTokenRef = useRef<string | null>(null);
+const getStoredToken = () => localStorage.getItem("gdrive_token");
+const setStoredToken = (token: string) =>
+  localStorage.setItem("gdrive_token", token);
 
-  // Hàm lấy access token bằng Google Identity Services
-  const getAccessToken = (callback: (token: string) => void) => {
-    if (accessTokenRef.current) {
-      callback(accessTokenRef.current);
-      return;
-    }
+// Hàm lấy access token bằng Google Identity Services
+export function getAccessToken(callback: (token: string) => void) {
+  const storedToken = getStoredToken();
+  if (storedToken) {
+    callback(storedToken);
+    return;
+  }
+  try {
     // @ts-ignore
     const tokenClient = window.google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
       scope: SCOPES,
       callback: (tokenResponse: any) => {
-        accessTokenRef.current = tokenResponse.access_token;
+        setStoredToken(tokenResponse.access_token);
         callback(tokenResponse.access_token);
       },
     });
     tokenClient.requestAccessToken();
-  };
-
-  // Hàm set quyền public cho file
-  const setFilePublic = async (fileId: string, accessToken: string) => {
-    await fetch(
-      `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + accessToken,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          role: "reader",
-          type: "anyone",
-        }),
-      }
+  } catch (err: any) {
+    alert(
+      "Không thể mở cửa sổ đăng nhập Google. Có thể trình duyệt đã chặn popup. Vui lòng kiểm tra lại cài đặt trình duyệt hoặc thử lại."
     );
-  };
+  }
+}
 
-  // Hàm upload file lên Google Drive
-  const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+// Hàm set quyền public cho file
+export async function setFilePublic(fileId: string, accessToken: string) {
+  await fetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + accessToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        role: "reader",
+        type: "anyone",
+      }),
+    }
+  );
+}
+
+// Hàm upload file lên Google Drive
+export async function uploadFileToDrive({
+  file,
+  folderId,
+}: {
+  file: File;
+  folderId: string;
+}): Promise<string> {
+  return new Promise((resolve, reject) => {
     getAccessToken(async (accessToken) => {
       const metadata = {
         name: file.name,
         mimeType: file.type,
-        parents: [FOLDER_ID],
+        parents: [folderId],
       };
       const form = new FormData();
       form.append(
@@ -59,35 +69,33 @@ export default function GoogleDriveUploader() {
         new Blob([JSON.stringify(metadata)], { type: "application/json" })
       );
       form.append("file", file);
-      const res = await fetch(
-        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,webContentLink",
-        {
-          method: "POST",
-          headers: new Headers({ Authorization: "Bearer " + accessToken }),
-          body: form,
+      try {
+        const res = await fetch(
+          "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,webContentLink",
+          {
+            method: "POST",
+            headers: new Headers({ Authorization: "Bearer " + accessToken }),
+            body: form,
+          }
+        );
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem("gdrive_token");
+          alert(
+            "Phiên đăng nhập đã hết hạn, vui lòng nhấn 'Đăng nhập Google' để đăng nhập lại!"
+          );
+          reject("Token expired");
+          return;
         }
-      );
-      const data = await res.json();
-      if (data.id) {
-        await setFilePublic(data.id, accessToken);
-        alert("Đã upload! Link chia sẻ: " + data.webViewLink);
-      } else {
-        alert("Lỗi upload: " + JSON.stringify(data));
+        const data = await res.json();
+        if (data.id) {
+          await setFilePublic(data.id, accessToken);
+          resolve(data.webViewLink);
+        } else {
+          reject(data);
+        }
+      } catch (err) {
+        reject(err);
       }
     });
-  };
-
-  // Hàm đăng nhập Google (lấy access token)
-  const handleSignIn = () => {
-    getAccessToken(() => {
-      alert("Đăng nhập thành công!");
-    });
-  };
-
-  return (
-    <div>
-      <button onClick={handleSignIn}>Đăng nhập Google</button>
-      <input type="file" onChange={handleUpload} />
-    </div>
-  );
+  });
 }

@@ -8,6 +8,8 @@ import {
   Select,
   Stack,
   Text,
+  Center,
+  Loader,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { BarChart, PieChart, LineChart } from "@mantine/charts";
@@ -64,9 +66,24 @@ function Report() {
     },
   });
 
-  const { data: violations } = useAllViolationsQuery();
-  const { data: businesses } = useGetAllBusinesses();
-  const { data: industries } = useGetAllIndustries();
+  const {
+    data: violations,
+    isLoading: violationsLoading,
+    isError: violationsError,
+    error: violationsErrorObj,
+  } = useAllViolationsQuery();
+  const {
+    data: businesses,
+    isLoading: businessesLoading,
+    isError: businessesError,
+    error: businessesErrorObj,
+  } = useGetAllBusinesses();
+  const {
+    data: industries,
+    isLoading: industriesLoading,
+    isError: industriesError,
+    error: industriesErrorObj,
+  } = useGetAllIndustries();
   const industryOptions = useMemo(
     () => (industries || []).map((i) => ({ value: i.code, label: i.name })),
     [industries]
@@ -175,6 +192,26 @@ function Report() {
     );
     return result;
   }, [violationWithBusiness, form.values]);
+
+  if (industriesLoading || businessesLoading || violationsLoading) {
+    return (
+      <Center style={{ height: "50vh" }}>
+        <Loader size="lg" />
+        <Text ml="md">Đang tải dữ liệu giấy phép con...</Text>
+      </Center>
+    );
+  }
+  if (industriesError || businessesError || violationsError) {
+    return (
+      <Text color="red">
+        Lỗi tải dữ liệu báo cáo:{" "}
+        {industriesErrorObj?.message ||
+          businessesErrorObj?.message ||
+          violationsErrorObj?.message ||
+          "Không xác định"}
+      </Text>
+    );
+  }
 
   return (
     <Box p="md">

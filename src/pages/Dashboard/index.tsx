@@ -7,6 +7,8 @@ import {
   Paper,
   Badge,
   Flex,
+  Center,
+  Loader,
 } from "@mantine/core";
 import { BarChart, DonutChart } from "@mantine/charts";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
@@ -130,7 +132,12 @@ export default function Dashboard() {
   } = useGetAllBusinesses();
 
   // Gọi dữ liệu ngành nghề thực
-  const { data: industries } = useGetAllIndustries();
+  const {
+    data: industries,
+    isLoading: isLoadingIndustries,
+    isError: isErrorIndustries,
+    error: errorIndustries,
+  } = useGetAllIndustries();
 
   function getIndustryChartData(businesses: any[]) {
     // Tạo map code -> name từ industry.json
@@ -162,21 +169,26 @@ export default function Dashboard() {
     return Object.values(result).sort((a, b) => b.value - a.value);
   }
   // Loading/error cho các stat chính
-  if (isLoadingStats || isLoadingIns || isLoadingBiz) {
+  if (isLoadingStats || isLoadingIns || isLoadingBiz || isLoadingIndustries) {
     return (
-      <Box p="md">
-        <Text>Đang tải dữ liệu thống kê...</Text>
-      </Box>
+      <Center style={{ height: "50vh" }}>
+        <Loader size="lg" />
+        <Text ml="md">Đang tải dữ liệu thống kê...</Text>
+      </Center>
     );
   }
-  if (isErrorStats || isErrorIns || isErrorBiz) {
+  if (isErrorStats || isErrorIns || isErrorBiz || isErrorIndustries) {
     return (
-      <Box p="md">
+      <Center style={{ height: "50vh" }}>
         <Text color="red">
           Lỗi tải dữ liệu:{" "}
-          {errorStats?.message || errorIns?.message || errorBiz?.message}
+          {errorStats?.message ||
+            errorIns?.message ||
+            errorBiz?.message ||
+            errorIndustries?.message ||
+            "Không xác định"}
         </Text>
-      </Box>
+      </Center>
     );
   }
 

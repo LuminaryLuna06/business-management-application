@@ -29,8 +29,9 @@ import type {
   InspectionReport,
   ViolationResult,
 } from "../../types/schedule";
+import { ViolationTypeEnum } from "../../types/schedule";
 // Mock data generators
-const getRandomIndustry = () => String(Math.floor(Math.random() * 100) + 1);
+// const getRandomIndustry = () => String(Math.floor(Math.random() * 100) + 1);
 
 const generateMockBusinesses = () => [
   // Hộ kinh doanh (IndividualBusiness) - Hà Nội
@@ -39,7 +40,7 @@ const generateMockBusinesses = () => [
     business_code: "010204567",
     business_name: "HỘ KINH DOANH THỊNH PHÁT",
     business_type: BusinessType.Individual,
-    industry: getRandomIndustry(),
+    industry: "1",
     issue_date: new Date("2015-08-20"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0912 345 678",
@@ -74,7 +75,7 @@ const generateMockBusinesses = () => [
     business_code: "020305678",
     business_name: "CÔNG TY TNHH AN PHÚ",
     business_type: BusinessType.LLC,
-    industry: getRandomIndustry(),
+    industry: "2",
     issue_date: new Date("2018-03-15"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0987 654 321",
@@ -109,7 +110,7 @@ const generateMockBusinesses = () => [
     business_code: "030406789",
     business_name: "CÔNG TY CỔ PHẦN MINH ANH",
     business_type: BusinessType.JSC,
-    industry: getRandomIndustry(),
+    industry: "3",
     issue_date: new Date("2020-12-10"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0123 456 789",
@@ -146,7 +147,7 @@ const generateMockBusinesses = () => [
     business_code: "040507890",
     business_name: "HỘ KINH DOANH BÌNH MINH",
     business_type: BusinessType.Individual,
-    industry: getRandomIndustry(),
+    industry: "4",
     issue_date: new Date("2019-06-15"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0905 123 456",
@@ -180,7 +181,7 @@ const generateMockBusinesses = () => [
     business_code: "050608901",
     business_name: "CÔNG TY TNHH THỦY SẢN CẦN THƠ",
     business_type: BusinessType.LLC,
-    industry: getRandomIndustry(),
+    industry: "5",
     issue_date: new Date("2017-09-20"),
     address: "Hoàn Kiếm, Hà Nội",
     phone_number: "0292 345 678",
@@ -212,22 +213,22 @@ const generateMockBusinesses = () => [
 
 const generateMockLicenses = () => [
   {
-    license_id: "093d283f-634e-4d41-a99d-158b4e2a8a03",
     license_number: "RUOU-2024-001",
     issue_date: new Date("2024-01-10"),
     expiration_date: new Date("2025-01-10"),
+    file_link: "",
   },
   {
-    license_id: "707f2bdc-d196-4371-bb6e-134a4f92638d",
     license_number: "PCCC-2024-002",
     issue_date: new Date("2024-02-15"),
     expiration_date: new Date("2025-02-15"),
+    file_link: "",
   },
   {
-    license_id: "0013ec85-70f7-40b4-8861-acfb25c08937",
     license_number: "ATTP-2024-003",
     issue_date: new Date("2024-03-20"),
     expiration_date: new Date("2025-03-20"),
+    file_link: "",
   },
 ];
 
@@ -321,41 +322,65 @@ const generateMockInspections = (mockBusinesses: any[]) => {
     {
       violation_id: uuidv4(),
       report_id: reports[0].report_id,
+      business_id:
+        inspections.find(
+          (ins) => ins.inspection_id === reports[0].inspection_id
+        )?.business_id || "",
       violation_number: "QD-2024-001",
+      violation_type: ViolationTypeEnum.FalseTaxDeclaration,
       issue_date: new Date("2024-03-16"),
       violation_status: "paid",
       fix_status: "fixed",
       officer_signed: "Nguyen Van A",
+      file_link: "",
     },
     // Report 2
     {
       violation_id: uuidv4(),
       report_id: reports[1].report_id,
+      business_id:
+        inspections.find(
+          (ins) => ins.inspection_id === reports[1].inspection_id
+        )?.business_id || "",
       violation_number: "QD-2024-002",
+      violation_type: ViolationTypeEnum.FalseTaxDeclaration,
       issue_date: new Date("2024-03-17"),
       violation_status: "pending",
       fix_status: "not_fixed",
       officer_signed: "Le Van C",
+      file_link: "",
     },
     // Report 3
     {
       violation_id: uuidv4(),
       report_id: reports[2].report_id,
+      business_id:
+        inspections.find(
+          (ins) => ins.inspection_id === reports[2].inspection_id
+        )?.business_id || "",
       violation_number: "QD-2024-003",
+      violation_type: ViolationTypeEnum.IllegalBusinessActivity,
       issue_date: new Date("2024-06-11"),
       violation_status: "dismissed",
       fix_status: "fixed",
       officer_signed: "Tran Thi B",
+      file_link: "",
     },
     // Report 4
     {
       violation_id: uuidv4(),
       report_id: reports[3].report_id,
+      business_id:
+        inspections.find(
+          (ins) => ins.inspection_id === reports[3].inspection_id
+        )?.business_id || "",
       violation_number: "QD-2024-004",
+      violation_type: ViolationTypeEnum.UnregisteredLabor,
       issue_date: new Date("2024-09-21"),
       violation_status: "pending",
       fix_status: "in_progress",
       officer_signed: "Pham Van D",
+      file_link: "",
     },
   ];
 
@@ -469,7 +494,6 @@ function Index3() {
         for (const license of mockLicenses) {
           try {
             const licenseData = {
-              license_id: license.license_id,
               license_number: license.license_number,
               issue_date: Timestamp.fromDate(license.issue_date),
               expiration_date: Timestamp.fromDate(license.expiration_date),
@@ -571,7 +595,9 @@ function Index3() {
             const violationData = {
               violation_id: violation.violation_id,
               report_id: violation.report_id,
+              business_id: violation.business_id,
               violation_number: violation.violation_number,
+              violation_type: violation.violation_type,
               issue_date: Timestamp.fromDate(violation.issue_date),
               violation_status: violation.violation_status,
               fix_status: violation.fix_status,

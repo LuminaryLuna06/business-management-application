@@ -1,11 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getAllSubLicenses,
-  addSubLicense,
   getLicensesByBusinessId,
+  addSubLicense,
+  updateSubLicense,
+  deleteSubLicense,
   addBusinessSubLicense,
+  updateBusinessSubLicense,
+  deleteBusinessSubLicense,
 } from "../firebase/firestoreFunctions";
-import type { SubLicense, License } from "../types/licenses";
+import type { License, SubLicense } from "../types/licenses";
 
 export const subLicenseKeys = {
   all: ["sub-licenses"] as const,
@@ -27,9 +31,12 @@ export const useGetAllSubLicenses = () => {
 
 // Hook lấy giấy phép con của doanh nghiệp
 export const useBusinessSubLicenses = (businessId: string) => {
-  return useQuery<License[]>({
-    queryKey: subLicenseKeys.business(businessId),
-    queryFn: () => getLicensesByBusinessId(businessId),
+  return useQuery<(License & { id: string })[]>({
+    queryKey: ["business-sub-licenses", businessId],
+    queryFn: async () => {
+      if (!businessId) return [];
+      return getLicensesByBusinessId(businessId);
+    },
     enabled: !!businessId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -40,7 +47,37 @@ export const useBusinessSubLicenses = (businessId: string) => {
 export const useAddSubLicenseMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (subLicense: SubLicense) => addSubLicense(subLicense),
+    mutationFn: async (subLicense: Omit<SubLicense, "id">) => {
+      await addSubLicense(subLicense);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: subLicenseKeys.list() });
+    },
+  });
+};
+
+// Hook mutation cập nhật giấy phép con
+export const useUpdateSubLicenseMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      licenseId,
+      licenseData,
+    }: {
+      licenseId: string;
+      licenseData: Partial<SubLicense>;
+    }) => updateSubLicense(licenseId, licenseData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: subLicenseKeys.list() });
+    },
+  });
+};
+
+// Hook mutation xóa giấy phép con
+export const useDeleteSubLicenseMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (licenseId: string) => deleteSubLicense(licenseId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: subLicenseKeys.list() });
     },
@@ -51,15 +88,53 @@ export const useAddSubLicenseMutation = () => {
 export const useAddBusinessSublicenseMutation = (businessId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (license: {
+    mutationFn: async (license: {
       license_id: string;
       license_number: string;
       issue_date: Date;
       expiration_date: Date;
+      file_link?: string;
     }) => addBusinessSubLicense(businessId, license),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: subLicenseKeys.business(businessId),
+        queryKey: ["business-sub-licenses", businessId],
+      });
+    },
+  });
+};
+
+export const useUpdateBusinessSubLicenseMutation = (businessId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      licenseId,
+      licenseData,
+    }: {
+      licenseId: string;
+      licenseData: {
+        license_id: string;
+        license_number: string;
+        issue_date: Date;
+        expiration_date: Date;
+        file_link?: string;
+      };
+    }) => updateBusinessSubLicense(businessId, licenseId, licenseData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["business-sub-licenses", businessId],
+      });
+    },
+  });
+};
+
+export const useDeleteBusinessSubLicenseMutation = (businessId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (licenseId: string) =>
+      deleteBusinessSubLicense(businessId, licenseId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["business-sub-licenses", businessId],
       });
     },
   });

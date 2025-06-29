@@ -11,10 +11,17 @@ import {
   addInspection,
   addReport,
   addViolation,
+  updateInspection,
+  updateReport,
+  updateViolation,
+  deleteInspection,
+  deleteReport,
+  deleteViolation,
+  getAllViolations,
 } from "../firebase/firestoreFunctions";
 
 export function useInspectionSchedules(businessId: string) {
-  return useQuery<InspectionSchedule[]>({
+  return useQuery<(InspectionSchedule & { id: string })[]>({
     queryKey: ["inspection-schedules", businessId],
     queryFn: async () => {
       if (!businessId) return [];
@@ -27,7 +34,7 @@ export function useInspectionSchedules(businessId: string) {
 }
 
 export function useInspectionReports(businessId: string) {
-  return useQuery<InspectionReport[]>({
+  return useQuery<(InspectionReport & { id: string })[]>({
     queryKey: ["inspection-reports", businessId],
     queryFn: async () => {
       if (!businessId) return [];
@@ -40,7 +47,7 @@ export function useInspectionReports(businessId: string) {
 }
 
 export function useViolationDecisions(businessId: string) {
-  return useQuery<ViolationResult[]>({
+  return useQuery<(ViolationResult & { id: string })[]>({
     queryKey: ["violation-decisions", businessId],
     queryFn: async () => {
       if (!businessId) return [];
@@ -65,10 +72,71 @@ export function useAddInspectionMutation(businessId: string) {
   });
 }
 
+export function useUpdateInspectionMutation(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      inspectionId,
+      inspectionData,
+    }: {
+      inspectionId: string;
+      inspectionData: Partial<InspectionSchedule>;
+    }) => updateInspection(businessId, inspectionId, inspectionData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["inspection-schedules", businessId],
+      });
+    },
+  });
+}
+
+export function useDeleteInspectionMutation(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (inspectionId: string) =>
+      deleteInspection(businessId, inspectionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["inspection-schedules", businessId],
+      });
+    },
+  });
+}
+
 export function useAddReportMutation(businessId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (reportData: any) => addReport(businessId, reportData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["inspection-reports", businessId],
+      });
+    },
+  });
+}
+
+export function useUpdateReportMutation(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      reportId,
+      reportData,
+    }: {
+      reportId: string;
+      reportData: Partial<InspectionReport>;
+    }) => updateReport(businessId, reportId, reportData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["inspection-reports", businessId],
+      });
+    },
+  });
+}
+
+export function useDeleteReportMutation(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (reportId: string) => deleteReport(businessId, reportId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["inspection-reports", businessId],
@@ -86,5 +154,45 @@ export function useAddViolationMutation(businessId: string) {
         queryKey: ["violation-decisions", businessId],
       });
     },
+  });
+}
+
+export function useUpdateViolationMutation(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      violationId,
+      violationData,
+    }: {
+      violationId: string;
+      violationData: Partial<ViolationResult>;
+    }) => updateViolation(businessId, violationId, violationData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["violation-decisions", businessId],
+      });
+    },
+  });
+}
+
+export function useDeleteViolationMutation(businessId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (violationId: string) =>
+      deleteViolation(businessId, violationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["violation-decisions", businessId],
+      });
+    },
+  });
+}
+
+export function useAllViolationsQuery() {
+  return useQuery<any[]>({
+    queryKey: ["all-violations"],
+    queryFn: getAllViolations,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 }

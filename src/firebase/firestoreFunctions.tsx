@@ -15,7 +15,12 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
-import { type Business } from "../types/business";
+import {
+  type Business,
+  type BusinessType,
+  type Gender,
+  type IdentificationType,
+} from "../types/business";
 import { type License } from "../types/licenses";
 import { type Worker } from "../types/worker";
 import {
@@ -29,6 +34,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { initializeApp, deleteApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { firebaseConfig } from "./firebaseConfig";
+import { type Industry } from "../types/industry";
 
 // Helper function to convert Firestore Timestamp to Date
 const convertTimestamp = (timestamp: any): Date => {
@@ -42,13 +48,18 @@ const convertTimestamp = (timestamp: any): Date => {
 const convertBusinessData = (data: any): Business => {
   return {
     ...data,
+    business_type: Number(data.business_type) as BusinessType,
     issue_date: convertTimestamp(data.issue_date),
     created_at: convertTimestamp(data.created_at),
     updated_at: data.updated_at ? convertTimestamp(data.updated_at) : undefined,
     owner: {
       ...data.owner,
-      birthdate: convertTimestamp(data.owner.birthdate),
-      license_date: convertTimestamp(data.owner.license_date),
+      gender: Number(data.owner?.gender) as Gender,
+      identification_type: Number(
+        data.owner?.identification_type
+      ) as IdentificationType,
+      birthdate: convertTimestamp(data.owner?.birthdate),
+      license_date: convertTimestamp(data.owner?.license_date),
     },
   };
 };
@@ -150,6 +161,48 @@ export const addBusiness = async (business: Business): Promise<string> => {
   }
 };
 
+/**
+ * Cập nhật doanh nghiệp theo ID
+ */
+export const updateBusiness = async (
+  businessId: string,
+  businessData: any
+): Promise<void> => {
+  try {
+    // Ensure enum fields are properly converted
+    const processedData = {
+      ...businessData,
+      business_type: Number(businessData.business_type),
+      owner: businessData.owner
+        ? {
+            ...businessData.owner,
+            gender: Number(businessData.owner.gender),
+            identification_type: Number(businessData.owner.identification_type),
+          }
+        : undefined,
+    };
+
+    await setDoc(doc(db, "businesses", businessId), processedData, {
+      merge: true,
+    });
+  } catch (error) {
+    console.error("Error updating business:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa doanh nghiệp theo ID
+ */
+export const deleteBusiness = async (businessId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, "businesses", businessId));
+  } catch (error) {
+    console.error("Error deleting business:", error);
+    throw error;
+  }
+};
+
 // ===== LICENSE SERVICES =====
 
 /**
@@ -157,16 +210,19 @@ export const addBusiness = async (business: Business): Promise<string> => {
  */
 export const getLicensesByBusinessId = async (
   businessId: string
-): Promise<License[]> => {
+): Promise<(License & { id: string })[]> => {
   try {
     const querySnapshot = await getDocs(
       collection(db, "businesses", businessId, "licenses")
     );
-    const licenses: License[] = [];
+    const licenses: (License & { id: string })[] = [];
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      licenses.push(convertLicenseData(data));
+      licenses.push({
+        ...convertLicenseData(data),
+        id: doc.id,
+      });
     });
 
     return licenses;
@@ -186,7 +242,7 @@ export const getAllSubLicenses = async (): Promise<SubLicense[]> => {
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       licenses.push({
-        id: data.id,
+        id: doc.id,
         name: data.name,
         issuing_authority: data.issuing_authority,
         industries: data.industries,
@@ -206,16 +262,19 @@ export const getAllSubLicenses = async (): Promise<SubLicense[]> => {
  */
 export const getEmployeesByBusinessId = async (
   businessId: string
-): Promise<Worker[]> => {
+): Promise<(Worker & { id: string })[]> => {
   try {
     const querySnapshot = await getDocs(
       collection(db, "businesses", businessId, "employees")
     );
-    const employees: Worker[] = [];
+    const employees: (Worker & { id: string })[] = [];
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      employees.push(convertWorkerData(data));
+      employees.push({
+        ...convertWorkerData(data),
+        id: doc.id,
+      });
     });
 
     return employees;
@@ -244,6 +303,43 @@ export const addEmployee = async (
   }
 };
 
+/**
+ * Cập nhật nhân viên theo ID
+ */
+export const updateEmployee = async (
+  businessId: string,
+  employeeId: string,
+  employeeData: Partial<Worker>
+): Promise<void> => {
+  try {
+    await setDoc(
+      doc(db, "businesses", businessId, "employees", employeeId),
+      employeeData,
+      {
+        merge: true,
+      }
+    );
+  } catch (error) {
+    console.error("Error updating employee:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa nhân viên theo ID
+ */
+export const deleteEmployee = async (
+  businessId: string,
+  employeeId: string
+): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, "businesses", businessId, "employees", employeeId));
+  } catch (error) {
+    console.error("Error deleting employee:", error);
+    throw error;
+  }
+};
+
 // ===== INSPECTION SERVICES =====
 
 /**
@@ -251,18 +347,19 @@ export const addEmployee = async (
  */
 export const getInspectionsByBusinessId = async (
   businessId: string
-): Promise<InspectionSchedule[]> => {
+): Promise<(InspectionSchedule & { id: string })[]> => {
   try {
     const querySnapshot = await getDocs(
       collection(db, "businesses", businessId, "inspections")
     );
-    const inspections: InspectionSchedule[] = [];
-
+    const inspections: (InspectionSchedule & { id: string })[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      inspections.push(convertInspectionData(data));
+      inspections.push({
+        ...convertInspectionData(data),
+        id: doc.id,
+      });
     });
-
     return inspections;
   } catch (error) {
     console.error("Error getting inspections:", error);
@@ -294,6 +391,49 @@ export const addInspection = async (
   }
 };
 
+/**
+ * Cập nhật lịch kiểm tra
+ */
+export const updateInspection = async (
+  businessId: string,
+  inspectionId: string,
+  inspectionData: Partial<InspectionSchedule>
+): Promise<void> => {
+  try {
+    const updateData: any = { ...inspectionData };
+    if (inspectionData.inspection_date) {
+      updateData.inspection_date = Timestamp.fromDate(
+        new Date(inspectionData.inspection_date)
+      );
+    }
+    await setDoc(
+      doc(db, "businesses", businessId, "inspections", inspectionId),
+      updateData,
+      { merge: true }
+    );
+  } catch (error) {
+    console.error("Error updating inspection:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa lịch kiểm tra
+ */
+export const deleteInspection = async (
+  businessId: string,
+  inspectionId: string
+): Promise<void> => {
+  try {
+    await deleteDoc(
+      doc(db, "businesses", businessId, "inspections", inspectionId)
+    );
+  } catch (error) {
+    console.error("Error deleting inspection:", error);
+    throw error;
+  }
+};
+
 // ===== REPORT SERVICES =====
 
 /**
@@ -301,15 +441,18 @@ export const addInspection = async (
  */
 export const getAllReportsByBusinessId = async (
   businessId: string
-): Promise<InspectionReport[]> => {
+): Promise<(InspectionReport & { id: string })[]> => {
   try {
     const querySnapshot = await getDocs(
       collection(db, "businesses", businessId, "reports")
     );
-    const reports: InspectionReport[] = [];
+    const reports: (InspectionReport & { id: string })[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      reports.push(convertReportData(data));
+      reports.push({
+        ...convertReportData(data),
+        id: doc.id,
+      });
     });
     return reports;
   } catch (error) {
@@ -337,6 +480,41 @@ export const addReport = async (
   }
 };
 
+/**
+ * Cập nhật báo cáo kiểm tra
+ */
+export const updateReport = async (
+  businessId: string,
+  reportId: string,
+  reportData: Partial<InspectionReport>
+): Promise<void> => {
+  try {
+    await setDoc(
+      doc(db, "businesses", businessId, "reports", reportId),
+      reportData,
+      { merge: true }
+    );
+  } catch (error) {
+    console.error("Error updating report:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa báo cáo kiểm tra
+ */
+export const deleteReport = async (
+  businessId: string,
+  reportId: string
+): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, "businesses", businessId, "reports", reportId));
+  } catch (error) {
+    console.error("Error deleting report:", error);
+    throw error;
+  }
+};
+
 // ===== VIOLATION SERVICES =====
 
 /**
@@ -344,15 +522,18 @@ export const addReport = async (
  */
 export const getAllViolationsByBusinessId = async (
   businessId: string
-): Promise<ViolationResult[]> => {
+): Promise<(ViolationResult & { id: string })[]> => {
   try {
     const querySnapshot = await getDocs(
       collection(db, "businesses", businessId, "violations")
     );
-    const violations: ViolationResult[] = [];
+    const violations: (ViolationResult & { id: string })[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      violations.push(convertViolationData(data));
+      violations.push({
+        ...convertViolationData(data),
+        id: doc.id,
+      });
     });
     return violations;
   } catch (error) {
@@ -381,14 +562,56 @@ export const addViolation = async (
 };
 
 /**
+ * Cập nhật quyết định xử phạt
+ */
+export const updateViolation = async (
+  businessId: string,
+  violationId: string,
+  violationData: Partial<ViolationResult>
+): Promise<void> => {
+  try {
+    const updateData: any = { ...violationData };
+    if (violationData.issue_date) {
+      updateData.issue_date = Timestamp.fromDate(
+        new Date(violationData.issue_date)
+      );
+    }
+    await setDoc(
+      doc(db, "businesses", businessId, "violations", violationId),
+      updateData,
+      { merge: true }
+    );
+  } catch (error) {
+    console.error("Error updating violation:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa quyết định xử phạt
+ */
+export const deleteViolation = async (
+  businessId: string,
+  violationId: string
+): Promise<void> => {
+  try {
+    await deleteDoc(
+      doc(db, "businesses", businessId, "violations", violationId)
+    );
+  } catch (error) {
+    console.error("Error deleting violation:", error);
+    throw error;
+  }
+};
+
+/**
  * Thêm một giấy phép con vào collection Licenses (tên, cơ quan cấp, ngành liên quan)
  */
 export const addSubLicense = async (
-  subLicense: SubLicense
+  subLicense: Omit<SubLicense, "id">
 ): Promise<string> => {
   try {
     const docRef = await addDoc(collection(db, "licenses"), {
-      id: subLicense.id,
       name: subLicense.name,
       issuing_authority: subLicense.issuing_authority,
       industries: subLicense.industries,
@@ -396,6 +619,35 @@ export const addSubLicense = async (
     return docRef.id;
   } catch (error) {
     console.error("Error adding sub license:", error);
+    throw error;
+  }
+};
+
+/**
+ * Cập nhật giấy phép con theo ID
+ */
+export const updateSubLicense = async (
+  licenseId: string,
+  licenseData: Partial<SubLicense>
+): Promise<void> => {
+  try {
+    await setDoc(doc(db, "licenses", licenseId), licenseData, {
+      merge: true,
+    });
+  } catch (error) {
+    console.error("Error updating sub license:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa giấy phép con theo ID
+ */
+export const deleteSubLicense = async (licenseId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, "licenses", licenseId));
+  } catch (error) {
+    console.error("Error deleting sub license:", error);
     throw error;
   }
 };
@@ -424,6 +676,52 @@ export const addBusinessSubLicense = async (
     return docRef.id;
   } catch (error) {
     console.error("Error adding business sub license:", error);
+    throw error;
+  }
+};
+
+/**
+ * Cập nhật giấy phép con của doanh nghiệp
+ */
+export const updateBusinessSubLicense = async (
+  businessId: string,
+  licenseId: string,
+  licenseData: {
+    license_id: string;
+    license_number: string;
+    issue_date: Date;
+    expiration_date: Date;
+  }
+): Promise<void> => {
+  try {
+    await setDoc(
+      doc(db, "businesses", businessId, "licenses", licenseId),
+      {
+        ...licenseData,
+        issue_date: Timestamp.fromDate(new Date(licenseData.issue_date)),
+        expiration_date: Timestamp.fromDate(
+          new Date(licenseData.expiration_date)
+        ),
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    console.error("Error updating business sub license:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa giấy phép con của doanh nghiệp
+ */
+export const deleteBusinessSubLicense = async (
+  businessId: string,
+  licenseId: string
+): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, "businesses", businessId, "licenses", licenseId));
+  } catch (error) {
+    console.error("Error deleting business sub license:", error);
     throw error;
   }
 };
@@ -663,6 +961,64 @@ export const getUpcomingInspections = async (
     return querySnapshot.docs.map((doc) => doc.data());
   } catch (error) {
     console.error("Error getting upcoming inspections:", error);
+    throw error;
+  }
+};
+
+/**
+ * Lấy tất cả ngành nghề
+ */
+export const getAllIndustries = async (): Promise<
+  (Industry & { id: string })[]
+> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "industries"));
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Industry),
+    }));
+  } catch (error) {
+    console.error("Error getting industries:", error);
+    throw error;
+  }
+};
+
+/**
+ * Thêm ngành nghề mới
+ */
+export const addIndustry = async (industry: Industry): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, "industries"), industry);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding industry:", error);
+    throw error;
+  }
+};
+
+/**
+ * Sửa ngành nghề theo id
+ */
+export const updateIndustry = async (
+  id: string,
+  data: Partial<Industry>
+): Promise<void> => {
+  try {
+    await setDoc(doc(db, "industries", id), data, { merge: true });
+  } catch (error) {
+    console.error("Error updating industry:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa ngành nghề theo id
+ */
+export const deleteIndustry = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, "industries", id));
+  } catch (error) {
+    console.error("Error deleting industry:", error);
     throw error;
   }
 };

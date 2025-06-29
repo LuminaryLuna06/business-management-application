@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getAllBusinesses,
   getBusinessById,
+  deleteBusiness,
+  updateBusiness,
 } from "../firebase/firestoreFunctions";
 
 // Query keys
@@ -31,5 +33,46 @@ export const useGetBusinessById = (businessId: string) => {
     enabled: !!businessId, // Chỉ chạy khi có businessId
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+  });
+};
+
+// Hook để xóa doanh nghiệp
+export const useDeleteBusiness = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteBusiness,
+    onSuccess: () => {
+      // Invalidate và refetch danh sách doanh nghiệp
+      queryClient.invalidateQueries({ queryKey: businessKeys.lists() });
+    },
+    onError: (error) => {
+      console.error("Error deleting business:", error);
+    },
+  });
+};
+
+// Hook để cập nhật doanh nghiệp
+export const useUpdateBusiness = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      businessId,
+      businessData,
+    }: {
+      businessId: string;
+      businessData: any;
+    }) => updateBusiness(businessId, businessData),
+    onSuccess: (_, { businessId }) => {
+      // Invalidate và refetch danh sách doanh nghiệp và chi tiết doanh nghiệp
+      queryClient.invalidateQueries({ queryKey: businessKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: businessKeys.detail(businessId),
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating business:", error);
+    },
   });
 };

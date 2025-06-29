@@ -10,6 +10,10 @@ import {
   Text,
   Divider,
   Flex,
+  Tooltip,
+  Modal,
+  TextInput,
+  Button,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -22,6 +26,8 @@ import {
   IconCertificate,
   IconBriefcase,
   IconUsers,
+  IconTrash,
+  IconFolderPlus,
 } from "@tabler/icons-react";
 import {
   Outlet,
@@ -30,12 +36,17 @@ import {
 } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import { doSignOut } from "../../firebase/auth";
+import { getAccessToken } from "../../googledrive/GoogleDriveUploader";
+import { useState } from "react";
+import { notifications } from "@mantine/notifications";
 
 function HomePage() {
   const [opened, { toggle }] = useDisclosure();
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
+  const [folderModalOpen, setFolderModalOpen] = useState(false);
+  const [folderIdInput, setFolderIdInput] = useState("");
 
   const handleLogout = async () => {
     try {
@@ -99,6 +110,70 @@ function HomePage() {
               <IconMoon size="1.2rem" />
             )}
           </ActionIcon>
+          <Tooltip label="Lấy Google Drive Token" withArrow position="bottom">
+            <ActionIcon
+              variant="filled"
+              color="teal"
+              size="lg"
+              style={{
+                marginLeft: 8,
+                border: "1.5px solid #0ca678",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              }}
+              onClick={() => {
+                getAccessToken((token) => {
+                  notifications.show({
+                    title: "Lấy token thành công",
+                    message: token,
+                    color: "teal",
+                  });
+                });
+              }}
+            >
+              <IconCertificate size="1.2rem" />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Xóa Google Drive Token" withArrow position="bottom">
+            <ActionIcon
+              variant="filled"
+              color="red"
+              size="lg"
+              style={{
+                marginLeft: 8,
+                border: "1.5px solid #fa5252",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              }}
+              onClick={() => {
+                localStorage.removeItem("gdrive_token");
+                notifications.show({
+                  title: "Thành công",
+                  message: "Đã xóa Google Drive Token khỏi localStorage!",
+                  color: "green",
+                });
+              }}
+            >
+              <IconTrash size="1.2rem" />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip
+            label="Tạo/Sửa Folder Google Drive"
+            withArrow
+            position="bottom"
+          >
+            <ActionIcon
+              variant="filled"
+              color="blue"
+              size="lg"
+              style={{
+                marginLeft: 8,
+                border: "1.5px solid #228be6",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+              }}
+              onClick={() => setFolderModalOpen(true)}
+            >
+              <IconFolderPlus size="1.2rem" />
+            </ActionIcon>
+          </Tooltip>
 
           {currentUser && (
             <Menu shadow="md" width={200}>
@@ -170,6 +245,19 @@ function HomePage() {
         />
         <NavLink
           component={RouterNavLink}
+          to={"/report"}
+          label="Báo cáo tổng quan"
+          leftSection={<IconHome2 size={16} stroke={1.5} />}
+          rightSection={
+            <IconChevronRight
+              size={12}
+              stroke={1.5}
+              className="mantine-rotate-rtl"
+            />
+          }
+        />
+        <NavLink
+          component={RouterNavLink}
           to={"/business"}
           label="Hộ kinh doanh / doanh nghiệp"
           leftSection={<IconBuildingStore size={16} stroke={1.5} />}
@@ -225,6 +313,38 @@ function HomePage() {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+
+      <Modal
+        opened={folderModalOpen}
+        onClose={() => setFolderModalOpen(false)}
+        title="Nhập ID folder Google Drive"
+        centered
+      >
+        <TextInput
+          label="Folder ID"
+          placeholder="Nhập ID folder Google Drive..."
+          value={folderIdInput}
+          onChange={(e) => setFolderIdInput(e.currentTarget.value)}
+          mb="md"
+        />
+        <Group justify="flex-end">
+          <Button
+            onClick={() => {
+              localStorage.setItem("gdrive_folder_id", folderIdInput.trim());
+              setFolderModalOpen(false);
+              setFolderIdInput("");
+              notifications.show({
+                title: "Thành công",
+                message: "Đã lưu folder ID vào localStorage!",
+                color: "green",
+              });
+            }}
+            disabled={!folderIdInput.trim()}
+          >
+            Lưu
+          </Button>
+        </Group>
+      </Modal>
     </AppShell>
   );
 }

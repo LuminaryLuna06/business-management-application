@@ -6,6 +6,7 @@ import {
   Progress,
   Paper,
   Badge,
+  Flex,
 } from "@mantine/core";
 import { BarChart, DonutChart } from "@mantine/charts";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
@@ -16,7 +17,7 @@ import {
   useUpcomingInspectionsQuery,
 } from "../../tanstack/useDashboardQueries";
 import { useGetAllBusinesses } from "../../tanstack/useBusinessQueries";
-import industries from "../../data/industry.json";
+import { useGetAllIndustries } from "../../tanstack/useIndustryQueries";
 import { useNavigate } from "react-router-dom";
 
 const inspectionColumns: MRT_ColumnDef<any>[] = [
@@ -102,35 +103,6 @@ function getTypeChartData(businesses: any[]) {
 }
 
 // Hàm group theo ngành nghề
-function getIndustryChartData(businesses: any[]) {
-  // Tạo map code -> name từ industry.json
-  const industryMap = Object.fromEntries(
-    industries.map((item: { code: string; name: string }) => [
-      item.code,
-      item.name,
-    ])
-  );
-  const result: Record<string, { industry: string; value: number }> = {};
-  for (const b of businesses) {
-    let codes: string[] = [];
-    if (Array.isArray(b.industry)) {
-      codes = b.industry;
-    } else if (typeof b.industry === "string") {
-      codes = [b.industry];
-    }
-    if (codes.length === 0) {
-      codes = ["Khác"];
-    }
-    for (const code of codes) {
-      const name = industryMap[code] || "Khác";
-      if (!result[name]) {
-        result[name] = { industry: name, value: 0 };
-      }
-      result[name].value++;
-    }
-  }
-  return Object.values(result).sort((a, b) => b.value - a.value);
-}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -157,6 +129,38 @@ export default function Dashboard() {
     error: errorBiz,
   } = useGetAllBusinesses();
 
+  // Gọi dữ liệu ngành nghề thực
+  const { data: industries } = useGetAllIndustries();
+
+  function getIndustryChartData(businesses: any[]) {
+    // Tạo map code -> name từ industry.json
+    const industryMap = Object.fromEntries(
+      (industries || []).map((item: { code: string; name: string }) => [
+        item.code,
+        item.name,
+      ])
+    );
+    const result: Record<string, { industry: string; value: number }> = {};
+    for (const b of businesses) {
+      let codes: string[] = [];
+      if (Array.isArray(b.industry)) {
+        codes = b.industry;
+      } else if (typeof b.industry === "string") {
+        codes = [b.industry];
+      }
+      if (codes.length === 0) {
+        codes = ["Khác"];
+      }
+      for (const code of codes) {
+        const name = industryMap[code] || "Khác";
+        if (!result[name]) {
+          result[name] = { industry: name, value: 0 };
+        }
+        result[name].value++;
+      }
+    }
+    return Object.values(result).sort((a, b) => b.value - a.value);
+  }
   // Loading/error cho các stat chính
   if (isLoadingStats || isLoadingIns || isLoadingBiz) {
     return (
@@ -186,27 +190,13 @@ export default function Dashboard() {
   };
 
   const chartByType = getTypeChartData(businesses || []);
-  const chartByIndustry = getIndustryChartData(businesses || []);
+  const chartByIndustry = getIndustryChartData(businesses || []).slice(0, 10);
 
   return (
     <Box p="md">
       <Text size="xl" fw={700} mb="md">
         Thống kê tổng quan
       </Text>
-      <Card mb="md">
-        <Text fw={600} mb="xs">
-          Số lượng DN/HKD theo ngành nghề
-        </Text>
-        <BarChart
-          h={500}
-          data={chartByIndustry}
-          dataKey="industry"
-          withLegend={false}
-          withTooltip
-          series={[{ name: "value", color: "#228be6", label: "Số lượng" }]}
-          orientation="horizontal"
-        />
-      </Card>
       <Paper mb="md" p="md" withBorder>
         <SimpleGrid cols={{ base: 1, md: 1, lg: 3 }} spacing="xl">
           <Box
@@ -221,14 +211,36 @@ export default function Dashboard() {
             <Text fw={600} mb="xs">
               Số lượng DN/HKD theo loại hình
             </Text>
-            <DonutChart
-              data={chartByType}
-              paddingAngle={10}
-              withLabels
-              withLabelsLine
-              labelsType="value"
-              style={{ maxWidth: 220, margin: "0 auto" }}
-            />
+            <Flex
+              align="center"
+              gap="md"
+              direction={{ base: "column", sm: "row" }}
+            >
+              <DonutChart
+                data={chartByType}
+                paddingAngle={10}
+                withLabels
+                withLabelsLine
+                labelsType="value"
+                style={{ maxWidth: 220, margin: "0 auto" }}
+              />
+              <Box>
+                {chartByType.map((item) => (
+                  <Flex key={item.name} align="center" mb={4} gap={6}>
+                    <Box
+                      w={16}
+                      h={16}
+                      style={{
+                        background: item.color,
+                        borderRadius: 4,
+                        marginRight: 6,
+                      }}
+                    />
+                    <Text size="sm">{item.name}</Text>
+                  </Flex>
+                ))}
+              </Box>
+            </Flex>
           </Box>
           <Card
             shadow="sm"
@@ -285,6 +297,23 @@ export default function Dashboard() {
           </Card>
         </SimpleGrid>
       </Paper>
+      <Card mb="md">
+        <Text fw={600} mb="xs">
+          Số lượng DN/HKD theo ngành nghề
+        </Text>
+        <BarChart
+          h={500}
+          data={chartByIndustry}
+          withRightYAxis
+          withYAxis={false}
+          dataKey="industry"
+          withLegend={false}
+          withTooltip
+          series={[{ name: "value", color: "#228be6", label: "Số lượng" }]}
+          orientation="vertical"
+          barProps={{ radius: 10 }}
+        />
+      </Card>
 
       <Card>
         <Text fw={600} mb="xs">

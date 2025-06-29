@@ -1,26 +1,51 @@
-import { Alert, Badge, Box, Center, Loader, Text, Button } from "@mantine/core";
-import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
+import {
+  Alert,
+  Badge,
+  Box,
+  Center,
+  Loader,
+  Text,
+  Button,
+  ActionIcon,
+  Tooltip,
+  Flex,
+} from "@mantine/core";
+import {
+  MantineReactTable,
+  type MRT_ColumnDef,
+  type MRT_Row,
+} from "mantine-react-table";
 import { useNavigate } from "react-router";
 import { BusinessType } from "../../../../types/business";
 import { useMemo } from "react";
-import { useGetAllBusinesses } from "../../../../tanstack/useBusinessQueries";
-import { IconAlertCircle, IconDownload } from "@tabler/icons-react";
-import industryData from "../../../../data/industry.json";
+import {
+  useGetAllBusinesses,
+  useDeleteBusiness,
+} from "../../../../tanstack/useBusinessQueries";
+import {
+  IconAlertCircle,
+  IconDownload,
+  IconEdit,
+  IconTrash,
+  IconEye,
+} from "@tabler/icons-react";
 import treeData from "../../../../data/tree.json";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
-
-const industryOptions = industryData.map((industry) => ({
-  value: industry.code,
-  label: industry.name,
-}));
+import { notifications } from "@mantine/notifications";
+import { modals } from "@mantine/modals";
+import { useGetAllIndustries } from "../../../../tanstack/useIndustryQueries";
 
 function BusinessTable() {
   const navigate = useNavigate();
 
   // Sử dụng TanStack Query để lấy dữ liệu doanh nghiệp
   const { data: businesses, isLoading, error, isError } = useGetAllBusinesses();
+  const deleteBusinessMutation = useDeleteBusiness();
+
+  // Lấy dữ liệu ngành nghề từ Firestore
+  const { data: industries } = useGetAllIndustries();
 
   // Helper function để chuyển đổi BusinessType enum thành label
   const getBusinessTypeLabel = (businessType: BusinessType) => {
@@ -36,9 +61,17 @@ function BusinessTable() {
     }
   };
 
-  // Hàm lấy tên ngành từ mã
+  // Tạo industryOptions và getIndustryName từ dữ liệu Firestore
+  const industryOptions = useMemo(
+    () =>
+      (industries || []).map((industry) => ({
+        value: industry.code,
+        label: industry.name,
+      })),
+    [industries]
+  );
   const getIndustryName = (code: string) => {
-    const found = (industryData as any[]).find((item) => item.code === code);
+    const found = (industries || []).find((item) => item.code === code);
     return found ? found.name : code;
   };
 
@@ -66,14 +99,99 @@ function BusinessTable() {
     return hanoi.wards.map((w: any) => w.name);
   }, []);
 
+  // DELETE action - Single delete
+  const openDeleteConfirmModal = (row: MRT_Row<any>) => {
+    modals.openConfirmModal({
+      title: "Xác nhận xóa doanh nghiệp",
+      children: (
+        <Text>
+          Bạn có chắc chắn muốn xóa doanh nghiệp{" "}
+          <strong>"{row.original.business_name}"</strong>? Hành động này không
+          thể hoàn tác.
+        </Text>
+      ),
+      labels: { confirm: "Xóa doanh nghiệp", cancel: "Hủy" },
+      confirmProps: { color: "red" },
+      onConfirm: async () => {
+        try {
+          await deleteBusinessMutation.mutateAsync(row.original.business_id);
+          notifications.show({
+            title: "Thành công",
+            message: `Đã xóa doanh nghiệp "${row.original.business_name}"`,
+            color: "green",
+          });
+        } catch (error) {
+          notifications.show({
+            title: "Lỗi",
+            message: "Không thể xóa doanh nghiệp. Vui lòng thử lại.",
+            color: "red",
+          });
+        }
+      },
+    });
+  };
+
+  // DELETE action - Bulk delete
+  const openBulkDeleteConfirmModal = (businesses: any[], table: any) => {
+    modals.openConfirmModal({
+      title: "Xác nhận xóa nhiều doanh nghiệp",
+      children: (
+        <Box>
+          <Text mb="md">
+            Bạn có chắc chắn muốn xóa{" "}
+            <strong>{businesses.length} doanh nghiệp</strong> đã chọn?
+          </Text>
+          <Text size="sm" color="dimmed" mb="md">
+            Hành động này không thể hoàn tác. Tất cả dữ liệu liên quan sẽ bị xóa
+            vĩnh viễn.
+          </Text>
+          <Box>
+            <Text size="sm" fw={500} mb="xs">
+              Danh sách doanh nghiệp sẽ bị xóa:
+            </Text>
+            <Box style={{ maxHeight: "200px", overflowY: "auto" }}>
+              {businesses.map((business, index) => (
+                <Text key={index} size="sm" color="dimmed">
+                  • {business.business_name} ({business.business_code})
+                </Text>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      ),
+      labels: {
+        confirm: `Xóa ${businesses.length} doanh nghiệp`,
+        cancel: "Hủy",
+      },
+      confirmProps: { color: "red" },
+      onConfirm: async () => {
+        try {
+          // Xóa từng doanh nghiệp một cách tuần tự
+          for (const business of businesses) {
+            await deleteBusinessMutation.mutateAsync(business.business_id);
+          }
+
+          // Clear table selection
+          table.setRowSelection({});
+
+          notifications.show({
+            title: "Thành công",
+            message: `Đã xóa ${businesses.length} doanh nghiệp`,
+            color: "green",
+          });
+        } catch (error) {
+          notifications.show({
+            title: "Lỗi",
+            message: "Có lỗi xảy ra khi xóa doanh nghiệp. Vui lòng thử lại.",
+            color: "red",
+          });
+        }
+      },
+    });
+  };
+
   const columns = useMemo<MRT_ColumnDef<any>[]>(
     () => [
-      {
-        accessorKey: "business_id",
-        header: "Mã ID",
-        size: 120,
-        enableColumnFilter: false,
-      },
       {
         accessorKey: "business_code",
         header: "Mã số",
@@ -305,16 +423,19 @@ function BusinessTable() {
         enableColumnResizing
         enableDensityToggle={false}
         enableTopToolbar
-        columnFilterDisplayMode={"popover"}
         enableColumnFilters
         enableGlobalFilter
         enableStickyHeader
         enableRowSelection
         enableSelectAll
         localization={MRT_Localization_VI}
+        enableColumnPinning
+        enableRowActions
+        positionActionsColumn="last"
         initialState={{
           pagination: { pageSize: 10, pageIndex: 0 },
           density: "xs",
+          columnPinning: { right: ["mrt-row-actions"] },
         }}
         mantineTableProps={{
           striped: true,
@@ -325,6 +446,63 @@ function BusinessTable() {
         mantineTableContainerProps={{
           style: { maxHeight: "70vh" },
         }}
+        mantineTableBodyCellProps={({ column }) =>
+          column.id === "mrt-row-actions"
+            ? {
+                style: { paddingRight: 24, minWidth: 140, textAlign: "center" },
+              }
+            : {}
+        }
+        mantineTableHeadCellProps={({ column }) =>
+          column.id === "mrt-row-actions"
+            ? { style: { minWidth: 140, textAlign: "center" } }
+            : {}
+        }
+        renderRowActions={({ row }) => (
+          <Flex gap="md" justify="center">
+            <Tooltip label="View">
+              <ActionIcon
+                color="green"
+                variant="light"
+                radius="md"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const businessId = row.original.business_id;
+                  navigate(`/business/${businessId}`);
+                }}
+              >
+                <IconEye size={18} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Edit">
+              <ActionIcon
+                color="blue"
+                variant="light"
+                radius="md"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const businessId = row.original.business_id;
+                  navigate(`/business/${businessId}/edit`);
+                }}
+              >
+                <IconEdit size={18} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Delete">
+              <ActionIcon
+                color="red"
+                variant="light"
+                radius="md"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openDeleteConfirmModal(row);
+                }}
+              >
+                <IconTrash size={18} />
+              </ActionIcon>
+            </Tooltip>
+          </Flex>
+        )}
         renderTopToolbarCustomActions={({ table }) => {
           const hasSelected = table.getSelectedRowModel().rows.length > 0;
           return (
@@ -337,6 +515,9 @@ function BusinessTable() {
                 flexWrap: "wrap",
               }}
             >
+              <Button onClick={() => navigate("/business/add")}>
+                + Thêm doanh nghiệp
+              </Button>
               <Button
                 leftSection={<IconDownload size={16} />}
                 variant="light"
@@ -384,19 +565,24 @@ function BusinessTable() {
               >
                 Xuất hàng được chọn (Excel)
               </Button>
-              <Button onClick={() => navigate("/business/add")}>
-                + Thêm doanh nghiệp
+              <Button
+                leftSection={<IconTrash size={16} />}
+                variant="light"
+                color="red"
+                onClick={() =>
+                  openBulkDeleteConfirmModal(
+                    table.getSelectedRowModel().rows.map((row) => row.original),
+                    table
+                  )
+                }
+                disabled={!hasSelected}
+              >
+                Xóa doanh nghiệp đã chọn (
+                {table.getSelectedRowModel().rows.length})
               </Button>
             </Box>
           );
         }}
-        mantineTableBodyRowProps={({ row }) => ({
-          onClick: () => {
-            const businessId = row.original.business_id;
-            navigate(`/business/${businessId}`);
-          },
-          style: { cursor: "pointer" },
-        })}
       />
     </Box>
   );

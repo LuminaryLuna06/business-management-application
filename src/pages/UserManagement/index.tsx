@@ -12,9 +12,19 @@ import {
   TextInput,
   PasswordInput,
   Select,
+  ActionIcon,
+  Tooltip,
+  Flex,
 } from "@mantine/core";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
-import { IconDownload, IconPlus, IconAlertCircle } from "@tabler/icons-react";
+import {
+  IconDownload,
+  IconPlus,
+  IconAlertCircle,
+  IconEye,
+  IconEdit,
+  IconTrash,
+} from "@tabler/icons-react";
 import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -28,6 +38,7 @@ import {
 import { useForm, yupResolver } from "@mantine/form";
 import * as Yup from "yup";
 import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
 
 const userSchema = Yup.object().shape({
   name: Yup.string().required("Họ tên không được để trống"),
@@ -53,10 +64,16 @@ const editUserSchema = Yup.object().shape({
 export default function UserManagementPage() {
   const { data: users, isLoading, isError, error } = useUsersQuery();
   const [modalOpened, setModalOpened] = useState(false);
+
   const addUserMutation = useAddUserWithAuthMutation({
     onSuccess: () => {
       setModalOpened(false);
       form.reset();
+      notifications.show({
+        title: "Thành công",
+        message: "Đã thêm cán bộ mới thành công!",
+        color: "green",
+      });
     },
   });
 
@@ -83,12 +100,6 @@ export default function UserManagementPage() {
 
   const columns = useMemo<MRT_ColumnDef<StaffUser>[]>(
     () => [
-      {
-        accessorKey: "uid",
-        header: "ID",
-        size: 120,
-        enableColumnFilter: false,
-      },
       {
         accessorKey: "name",
         header: "Họ tên",
@@ -199,12 +210,23 @@ export default function UserManagementPage() {
     onSuccess: () => {
       setEditModalOpened(false);
       editForm.reset();
+      notifications.show({
+        title: "Thành công",
+        message: "Đã cập nhật thông tin cán bộ thành công!",
+        color: "green",
+      });
     },
   });
+
   const deleteUserMutation = useDeleteUserMutation({
     onSuccess: () => {
       setEditModalOpened(false);
       editForm.reset();
+      notifications.show({
+        title: "Thành công",
+        message: "Đã xóa cán bộ thành công!",
+        color: "green",
+      });
     },
   });
 
@@ -251,8 +273,32 @@ export default function UserManagementPage() {
       children: <Text>Bạn có chắc chắn muốn xóa cán bộ này?</Text>,
       labels: { confirm: "Xóa", cancel: "Hủy" },
       confirmProps: { color: "red" },
-      onConfirm: () => deleteUserMutation.mutate(uid),
+      onConfirm: () => {
+        deleteUserMutation.mutate(uid);
+        notifications.show({
+          title: "Thành công",
+          message: "Đã xóa cán bộ thành công!",
+          color: "green",
+        });
+      },
     });
+  };
+
+  // Action handlers for row actions
+  const handleViewUser = (user: StaffUser) => {
+    notifications.show({
+      title: "Thông tin cán bộ",
+      message: `${user.name} - ${user.email}`,
+      color: "blue",
+    });
+  };
+
+  const handleEditUserAction = (user: StaffUser) => {
+    openEditModal(user);
+  };
+
+  const handleDeleteUserAction = (user: StaffUser) => {
+    handleDeleteUser(user.uid);
   };
 
   if (isLoading) {
@@ -289,7 +335,6 @@ export default function UserManagementPage() {
         data={users || []}
         enablePagination
         enableSorting
-        enableColumnResizing
         enableDensityToggle={false}
         enableTopToolbar
         columnFilterDisplayMode="popover"
@@ -298,10 +343,14 @@ export default function UserManagementPage() {
         enableStickyHeader
         enableRowSelection
         enableSelectAll
+        enableColumnPinning
+        enableRowActions
+        positionActionsColumn="last"
         localization={MRT_Localization_VI}
         initialState={{
           pagination: { pageSize: 10, pageIndex: 0 },
           density: "xs",
+          columnPinning: { right: ["mrt-row-actions"] },
         }}
         mantineTableProps={{
           striped: true,
@@ -312,10 +361,61 @@ export default function UserManagementPage() {
         mantineTableContainerProps={{
           style: { maxHeight: "70vh" },
         }}
-        mantineTableBodyRowProps={({ row }) => ({
-          onClick: () => openEditModal(row.original),
-          style: { cursor: "pointer" },
-        })}
+        mantineTableBodyCellProps={({ column }) =>
+          column.id === "mrt-row-actions"
+            ? {
+                style: { paddingRight: 24, minWidth: 140, textAlign: "center" },
+              }
+            : {}
+        }
+        mantineTableHeadCellProps={({ column }) =>
+          column.id === "mrt-row-actions"
+            ? { style: { minWidth: 140, textAlign: "center" } }
+            : {}
+        }
+        renderRowActions={({ row }) => (
+          <Flex gap="md" justify="center">
+            <Tooltip label="Xem thông tin">
+              <ActionIcon
+                color="green"
+                variant="light"
+                radius="md"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewUser(row.original);
+                }}
+              >
+                <IconEye size={18} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Sửa thông tin">
+              <ActionIcon
+                color="blue"
+                variant="light"
+                radius="md"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditUserAction(row.original);
+                }}
+              >
+                <IconEdit size={18} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Xóa cán bộ">
+              <ActionIcon
+                color="red"
+                variant="light"
+                radius="md"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteUserAction(row.original);
+                }}
+              >
+                <IconTrash size={18} />
+              </ActionIcon>
+            </Tooltip>
+          </Flex>
+        )}
         renderTopToolbarCustomActions={({ table }) => {
           const hasSelected = table.getSelectedRowModel().rows.length > 0;
           return (
@@ -395,6 +495,13 @@ export default function UserManagementPage() {
                       for (const row of selected) {
                         await deleteUserMutation.mutateAsync(row.original.uid);
                       }
+                      // Clear table selection after bulk delete
+                      table.setRowSelection({});
+                      notifications.show({
+                        title: "Thành công",
+                        message: `Đã xóa ${selected.length} cán bộ thành công!`,
+                        color: "green",
+                      });
                     },
                   });
                 }}

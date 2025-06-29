@@ -14,6 +14,11 @@ import {
   useMantineColorScheme,
   Skeleton,
   Alert,
+  ActionIcon,
+  Tooltip,
+  Modal,
+  TextInput,
+  Select,
 } from "@mantine/core";
 import { BarChart, PieChart } from "@mantine/charts";
 import {
@@ -23,6 +28,8 @@ import {
   IconCalendar,
   IconAlertCircle,
   IconRefresh,
+  IconEdit,
+  IconTrash,
 } from "@tabler/icons-react";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import { useParams } from "react-router";
@@ -30,9 +37,12 @@ import { useBusinessSubLicenses } from "../../../../tanstack/useLicenseQueries";
 import {
   useInspectionSchedules,
   useViolationDecisions,
+  useDeleteViolationMutation,
 } from "../../../../tanstack/useInspectionQueries";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
+import { violationTypeLabels } from "../../../../types/violationTypeLabels";
+import { notifications } from "@mantine/notifications";
 
 const violationColumns: MRT_ColumnDef<any>[] = [
   {
@@ -49,6 +59,21 @@ const violationColumns: MRT_ColumnDef<any>[] = [
     },
   },
   { accessorKey: "violation_number", header: "Số vi phạm" },
+  {
+    accessorKey: "violation_type",
+    header: "Loại vi phạm",
+    filterVariant: "select",
+    mantineFilterSelectProps: {
+      data: Object.entries(violationTypeLabels).map(([value, label]) => ({
+        value,
+        label,
+      })),
+    },
+    Cell: ({ cell }) => {
+      const value = cell.getValue() as keyof typeof violationTypeLabels;
+      return violationTypeLabels[value] || value;
+    },
+  },
   {
     accessorKey: "violation_status",
     header: "Trạng thái",
@@ -135,6 +160,8 @@ function DashboardPage() {
     isError: isViolationsError,
     refetch: refetchViolations,
   } = useViolationDecisions(businessId || "");
+
+  const deleteViolationMutation = useDeleteViolationMutation(businessId || "");
 
   // Tính toán thống kê giấy phép con
   const licenseStats = useMemo(() => {
@@ -277,6 +304,62 @@ function DashboardPage() {
     ],
     [licenseStats]
   );
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedViolation, setSelectedViolation] = useState<any>(null);
+  const [editForm, setEditForm] = useState<any>({});
+  const [localViolations, setLocalViolations] = useState<any[]>(
+    violations || []
+  );
+
+  // Khi dữ liệu violations thay đổi từ props, cập nhật localViolations
+  useEffect(() => {
+    setLocalViolations(violations || []);
+  }, [violations]);
+
+  // Hàm mở modal sửa
+  const openEditModal = (violation: any) => {
+    setEditForm({ ...violation });
+    setSelectedViolation(violation);
+    setEditModalOpen(true);
+  };
+
+  // Hàm mở modal xóa
+  const openDeleteModal = (violation: any) => {
+    setSelectedViolation(violation);
+    setDeleteModalOpen(true);
+  };
+
+  // Hàm xử lý lưu khi sửa (giả lập, bạn có thể thay bằng API)
+  const handleSaveEdit = () => {
+    setLocalViolations((prev) =>
+      prev.map((v) =>
+        v.violation_number === editForm.violation_number ? { ...editForm } : v
+      )
+    );
+    setEditModalOpen(false);
+  };
+
+  // Hàm xử lý xóa (gọi API thực tế)
+  const handleDelete = async () => {
+    if (!selectedViolation?.id) return;
+    try {
+      await deleteViolationMutation.mutateAsync(selectedViolation.id);
+      notifications.show({
+        title: "Thành công",
+        message: "Đã xóa vi phạm thành công!",
+        color: "green",
+      });
+    } catch (error: any) {
+      notifications.show({
+        title: "Lỗi",
+        message: error?.message || "Xóa vi phạm thất bại!",
+        color: "red",
+      });
+    }
+    setDeleteModalOpen(false);
+  };
 
   // Loading state
   if (isLoadingLicenses || isLoadingInspections || isLoadingViolations) {
@@ -587,7 +670,7 @@ function DashboardPage() {
         </Group>
         <MantineReactTable
           columns={violationColumns}
-          data={violations || []}
+          data={localViolations}
           enablePagination
           enableSorting
           enableDensityToggle={false}
@@ -596,22 +679,141 @@ function DashboardPage() {
           enableColumnFilters
           enableGlobalFilter
           enableStickyHeader
+          enableRowActions
+          positionActionsColumn="last"
+          enableColumnPinning
           localization={MRT_Localization_VI}
           initialState={{
             pagination: { pageSize: 10, pageIndex: 0 },
             density: "xs",
+            columnPinning: { right: ["mrt-row-actions"] },
           }}
-          mantineTableProps={{
-            striped: true,
-            withTableBorder: true,
-            highlightOnHover: true,
-            withColumnBorders: true,
-          }}
+          mantineTableBodyCellProps={({ column }) =>
+            column.id === "mrt-row-actions"
+              ? {
+                  style: {
+                    paddingRight: 24,
+                    minWidth: 80,
+                    textAlign: "center",
+                  },
+                }
+              : {}
+          }
+          mantineTableHeadCellProps={({ column }) =>
+            column.id === "mrt-row-actions"
+              ? { style: { minWidth: 80, textAlign: "center" } }
+              : {}
+          }
+          renderRowActions={({ row }) => (
+            <Group gap="xs" justify="center">
+              <Tooltip label="Sửa">
+                <ActionIcon
+                  color="blue"
+                  variant="light"
+                  onClick={() => openEditModal(row.original)}
+                >
+                  <IconEdit size={18} />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip label="Xóa">
+                <ActionIcon
+                  color="red"
+                  variant="light"
+                  onClick={() => openDeleteModal(row.original)}
+                >
+                  <IconTrash size={18} />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+          )}
           mantineTableContainerProps={{
             style: { maxHeight: "70vh" },
           }}
         />
       </Card>
+      {/* Modal sửa */}
+      <Modal
+        opened={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title="Sửa vi phạm"
+        centered
+      >
+        {editForm && (
+          <Stack>
+            <TextInput
+              label="Số vi phạm"
+              value={editForm.violation_number}
+              onChange={(e) =>
+                setEditForm({ ...editForm, violation_number: e.target.value })
+              }
+            />
+            <TextInput
+              label="Ngày"
+              value={
+                editForm.issue_date
+                  ? new Date(editForm.issue_date).toLocaleDateString("vi-VN")
+                  : ""
+              }
+              readOnly
+            />
+            <Select
+              label="Loại vi phạm"
+              data={Object.entries(violationTypeLabels).map(
+                ([value, label]) => ({ value, label })
+              )}
+              value={editForm.violation_type}
+              onChange={(value) =>
+                setEditForm({ ...editForm, violation_type: value })
+              }
+            />
+            <Select
+              label="Trạng thái"
+              data={[
+                { value: "pending", label: "Chờ xử lý" },
+                { value: "paid", label: "Đã thanh toán" },
+                { value: "dismissed", label: "Đã hủy" },
+              ]}
+              value={editForm.violation_status}
+              onChange={(value) =>
+                setEditForm({ ...editForm, violation_status: value })
+              }
+            />
+            <Select
+              label="Khắc phục"
+              data={[
+                { value: "not_fixed", label: "Chưa khắc phục" },
+                { value: "fixed", label: "Đã khắc phục" },
+                { value: "in_progress", label: "Đang khắc phục" },
+              ]}
+              value={editForm.fix_status}
+              onChange={(value) =>
+                setEditForm({ ...editForm, fix_status: value })
+              }
+            />
+            {/* Thêm các trường khác nếu cần */}
+            <Group justify="flex-end" mt="md">
+              <Button onClick={handleSaveEdit}>Lưu</Button>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
+      {/* Modal xác nhận xóa */}
+      <Modal
+        opened={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        title="Xác nhận xóa vi phạm"
+        centered
+      >
+        <Text>Bạn có chắc chắn muốn xóa vi phạm này?</Text>
+        <Group justify="flex-end" mt="md">
+          <Button color="red" onClick={handleDelete}>
+            Xóa
+          </Button>
+          <Button variant="light" onClick={() => setDeleteModalOpen(false)}>
+            Hủy
+          </Button>
+        </Group>
+      </Modal>
     </Box>
   );
 }

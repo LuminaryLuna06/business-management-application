@@ -9,11 +9,9 @@ import {
   Text,
   Center,
   Loader,
-  ThemeIcon,
-  useMantineColorScheme,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { LineChart } from "@mantine/charts";
+import { LineChart, BarChart } from "@mantine/charts";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import { useMemo } from "react";
 import { violationTypeLabels } from "../../types/violationTypeLabels";
@@ -23,16 +21,6 @@ import { useAllViolationsQuery } from "../../tanstack/useInspectionQueries";
 import { useForm } from "@mantine/form";
 import { useGetAllBusinesses } from "../../tanstack/useBusinessQueries";
 import { useGetAllIndustries } from "../../tanstack/useIndustryQueries";
-import {
-  BarChart as ReBarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  ResponsiveContainer,
-} from "recharts";
-import type { TooltipProps } from "recharts";
 
 // Lấy danh sách phường/xã của Hà Nội
 const hanoi = Array.isArray(tree)
@@ -67,97 +55,8 @@ const violationColumns: MRT_ColumnDef<any>[] = [
 ];
 
 // Custom Tooltip cho Recharts sử dụng Mantine UI
-const CustomTooltip = ({
-  active,
-  payload,
-  label,
-  colorScheme,
-}: TooltipProps<any, any> & { colorScheme: string }) => {
-  if (active && payload && payload.length) {
-    const isDark = colorScheme === "dark";
-    return (
-      <Box
-        bg={isDark ? "#222" : "#fff"}
-        p="md"
-        style={{
-          border: "1px solid #eee",
-          borderRadius: 8,
-          minWidth: 220,
-          boxShadow: "0 2px 8px rgba(34,139,230,0.10)",
-          color: isDark ? "#fff" : "#222",
-        }}
-      >
-        <Text fw={600} mb={8} style={{ color: isDark ? "#fff" : undefined }}>
-          {label}
-        </Text>
-        <Group gap={8} align="center" justify="space-between">
-          <Group gap={8} align="center">
-            <ThemeIcon size={12} radius="xl" color="red" />
-            <Text
-              c="dimmed"
-              fz={14}
-              style={{ color: isDark ? "#eee" : undefined }}
-            >
-              Số lần vi phạm
-            </Text>
-          </Group>
-          <Text fw={700} fz={16} style={{ color: isDark ? "#fff" : undefined }}>
-            {payload[0].value}
-          </Text>
-        </Group>
-      </Box>
-    );
-  }
-  return null;
-};
-
-const CustomTooltip2 = ({
-  active,
-  payload,
-  label,
-  colorScheme,
-}: TooltipProps<any, any> & { colorScheme: string }) => {
-  if (active && payload && payload.length) {
-    const isDark = colorScheme === "dark";
-    return (
-      <Box
-        bg={isDark ? "#222" : "#fff"}
-        p="md"
-        style={{
-          border: "1px solid #eee",
-          borderRadius: 8,
-          minWidth: 220,
-          boxShadow: "0 2px 8px rgba(34,139,230,0.10)",
-          color: isDark ? "#fff" : "#222",
-        }}
-      >
-        <Text fw={600} mb={8} style={{ color: isDark ? "#fff" : undefined }}>
-          {label}
-        </Text>
-        <Group gap={8} align="center" justify="space-between">
-          <Group gap={8} align="center">
-            <ThemeIcon size={12} radius="xl" color="green" />
-            <Text
-              c="dimmed"
-              fz={14}
-              style={{ color: isDark ? "#eee" : undefined }}
-            >
-              Tỉ lệ khắc phục
-            </Text>
-          </Group>
-          <Text fw={700} fz={16} style={{ color: isDark ? "#fff" : undefined }}>
-            {payload[0].value}%
-          </Text>
-        </Group>
-      </Box>
-    );
-  }
-  return null;
-};
 
 function Report() {
-  const { colorScheme } = useMantineColorScheme();
-  const isDark = colorScheme === "dark";
   // Bộ lọc
   const form = useForm({
     initialValues: {
@@ -343,43 +242,21 @@ function Report() {
           <Title order={5} mb="sm">
             Biểu đồ số lần vi phạm
           </Title>
-          <Box style={{ width: "100%", height: 300 }}>
-            <ResponsiveContainer width="100%" height={300}>
-              <ReBarChart
-                data={mostViolated.map((v) => ({
-                  name: violationTypeLabels[v.type as ViolationTypeEnum],
-                  count: v.count,
-                }))}
-                layout="vertical"
-                margin={{ top: 20, left: 5, right: 10, bottom: 20 }}
-                barCategoryGap={20}
-              >
-                <CartesianGrid strokeDasharray="4" horizontal={false} />
-                <XAxis
-                  type="number"
-                  axisLine={false}
-                  tickLine={false}
-                  tickCount={5}
-                  fontSize={12}
-                />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={150}
-                  fontSize={12}
-                  tickMargin={5}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: isDark ? "#dee2e6" : "#222" }}
-                />
-                <Tooltip
-                  content={<CustomTooltip colorScheme={colorScheme} />}
-                  cursor={{ fill: isDark ? "#495057" : "#e9ecef" }}
-                />
-                <Bar dataKey="count" fill="#fa5252" />
-              </ReBarChart>
-            </ResponsiveContainer>
-          </Box>
+          <BarChart
+            h={300}
+            data={mostViolated.map((v) => ({
+              name: violationTypeLabels[v.type as ViolationTypeEnum],
+              count: v.count,
+            }))}
+            dataKey="name"
+            orientation="vertical"
+            series={[
+              { name: "count", color: "#fa5252", label: "Số lần vi phạm" },
+            ]}
+            gridAxis="x"
+            tickLine="y"
+            yAxisProps={{ width: 150 }}
+          />
         </Card>
       </SimpleGrid>
 
@@ -410,45 +287,25 @@ function Report() {
           <Title order={5} mb="sm">
             Biểu đồ tỉ lệ khắc phục
           </Title>
-          <Box style={{ width: "100%", height: 220 }}>
-            <ResponsiveContainer width="100%" height={220}>
-              <ReBarChart
-                data={bestFixed.map((v) => ({
-                  name: violationTypeLabels[v.type as ViolationTypeEnum],
-                  fixRate: Number(((v.fixed / v.count) * 100).toFixed(1)),
-                }))}
-                layout="vertical"
-                margin={{ top: 20, left: 5, right: 10 }}
-                barCategoryGap={10}
-              >
-                <CartesianGrid strokeDasharray="4" horizontal={false} />
-                <XAxis
-                  type="number"
-                  domain={[0, 100]}
-                  axisLine={false}
-                  tickLine={false}
-                  tickCount={6}
-                  fontSize={12}
-                  tickFormatter={(v) => `${v}%`}
-                />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={150}
-                  fontSize={12}
-                  tickMargin={5}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: isDark ? "#dee2e6" : "#222" }}
-                />
-                <Tooltip
-                  content={<CustomTooltip2 colorScheme={colorScheme} />}
-                  cursor={{ fill: isDark ? "#495057" : "#e9ecef" }}
-                />
-                <Bar dataKey="fixRate" fill="#40c057" />
-              </ReBarChart>
-            </ResponsiveContainer>
-          </Box>
+          <BarChart
+            h={220}
+            data={bestFixed.map((v) => ({
+              name: violationTypeLabels[v.type as ViolationTypeEnum],
+              fixRate: Number(((v.fixed / v.count) * 100).toFixed(1)),
+            }))}
+            dataKey="name"
+            orientation="vertical"
+            series={[
+              {
+                name: "fixRate",
+                color: "#40c057",
+                label: "Tỉ lệ khắc phục (%)",
+              },
+            ]}
+            gridAxis="x"
+            tickLine="y"
+            yAxisProps={{ width: 150 }}
+          />
         </Card>{" "}
       </SimpleGrid>
 

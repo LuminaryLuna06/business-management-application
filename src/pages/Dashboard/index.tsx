@@ -9,11 +9,8 @@ import {
   Flex,
   Center,
   Loader,
-  Group,
-  ThemeIcon,
-  useMantineColorScheme,
 } from "@mantine/core";
-import { DonutChart } from "@mantine/charts";
+import { BarChart, DonutChart } from "@mantine/charts";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import { MRT_Localization_VI } from "mantine-react-table/locales/vi/index.cjs";
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
@@ -24,16 +21,6 @@ import {
 import { useGetAllBusinesses } from "../../tanstack/useBusinessQueries";
 import { useGetAllIndustries } from "../../tanstack/useIndustryQueries";
 import { useNavigate } from "react-router-dom";
-import {
-  BarChart as ReBarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  ResponsiveContainer,
-} from "recharts";
-import type { TooltipProps } from "recharts";
 
 const inspectionColumns: MRT_ColumnDef<any>[] = [
   {
@@ -117,55 +104,8 @@ function getTypeChartData(businesses: any[]) {
   return Object.values(typeMap);
 }
 
-// Custom Tooltip cho Recharts sử dụng Mantine UI
-const CustomTooltip = ({
-  active,
-  payload,
-  label,
-  colorScheme,
-}: TooltipProps<any, any> & { colorScheme: string }) => {
-  if (active && payload && payload.length) {
-    const isDark = colorScheme === "dark";
-    return (
-      <Box
-        bg={isDark ? "#222" : "#fff"}
-        p="md"
-        style={{
-          border: "1px solid #eee",
-          borderRadius: 8,
-          minWidth: 220,
-          boxShadow: "0 2px 8px rgba(34,139,230,0.10)",
-          color: isDark ? "#fff" : "#222",
-        }}
-      >
-        <Text fw={600} mb={8} style={{ color: isDark ? "#fff" : undefined }}>
-          {label}
-        </Text>
-        <Group gap={8} align="center" justify="space-between">
-          <Group gap={8} align="center">
-            <ThemeIcon size={12} radius="xl" color="blue" />
-            <Text
-              c="dimmed"
-              fz={14}
-              style={{ color: isDark ? "#eee" : undefined }}
-            >
-              Số lượng
-            </Text>
-          </Group>
-          <Text fw={700} fz={16} style={{ color: isDark ? "#fff" : undefined }}>
-            {payload[0].value}
-          </Text>
-        </Group>
-      </Box>
-    );
-  }
-  return null;
-};
-
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { colorScheme } = useMantineColorScheme();
-  const isDark = colorScheme === "dark";
 
   // Gọi dữ liệu thực
   const {
@@ -371,40 +311,16 @@ export default function Dashboard() {
         <Text fw={600} mb="xs">
           Số lượng DN/HKD theo ngành nghề
         </Text>
-        <Box style={{ width: "100%", height: 500 }}>
-          <ResponsiveContainer width="100%" height={500}>
-            <ReBarChart
-              data={chartByIndustry}
-              layout="vertical"
-              margin={{ top: 20, bottom: 20 }}
-              barCategoryGap={20}
-            >
-              <CartesianGrid strokeDasharray="4" horizontal={false} />
-              <XAxis
-                type="number"
-                axisLine={false}
-                tickLine={false}
-                tickCount={5}
-                fontSize={12}
-              />
-              <YAxis
-                dataKey="industry"
-                type="category"
-                width={150}
-                fontSize={12}
-                tickMargin={5}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: isDark ? "#dee2e6" : "#222" }}
-              />
-              <Tooltip
-                content={<CustomTooltip colorScheme={colorScheme} />}
-                cursor={{ fill: isDark ? "#495057" : "#e9ecef" }}
-              />
-              <Bar dataKey="value" fill="#228be6" />
-            </ReBarChart>
-          </ResponsiveContainer>
-        </Box>
+        <BarChart
+          h={400}
+          data={chartByIndustry}
+          dataKey="industry"
+          orientation="vertical"
+          series={[{ name: "value", color: "#228be6", label: "Số lượng" }]}
+          gridAxis="x"
+          tickLine="y"
+          yAxisProps={{ width: 150 }}
+        />
       </Card>
 
       <Card>

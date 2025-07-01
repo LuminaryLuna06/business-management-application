@@ -28,6 +28,7 @@ import {
   type InspectionSchedule,
   type InspectionReport,
   type ViolationResult,
+  type InspectionBatch,
 } from "../types/schedule";
 import { type SubLicense } from "../types/licenses";
 import type { StaffUser } from "../types/user";
@@ -36,6 +37,7 @@ import { initializeApp, deleteApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { firebaseConfig } from "./firebaseConfig";
 import { type Industry } from "../types/industry";
+import { v4 as uuidv4 } from "uuid";
 
 // Helper function to convert Firestore Timestamp to Date
 const convertTimestamp = (timestamp: any): Date => {
@@ -1130,4 +1132,199 @@ export const deleteIndustry = async (id: string): Promise<void> => {
     console.error("Error deleting industry:", error);
     throw error;
   }
+};
+
+/**
+ * Thêm đợt kiểm tra mới vào collection 'schedule'
+ */
+export const addSchedule = async (batch: InspectionBatch): Promise<string> => {
+  try {
+    const docRef = await addDoc(collection(db, "schedule"), {
+      ...batch,
+      batch_date: Timestamp.fromDate(new Date(batch.batch_date)),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding schedule:", error);
+    throw error;
+  }
+};
+
+/**
+ * Lấy tất cả đợt kiểm tra từ collection 'schedule'
+ */
+export const getAllSchedules = async (): Promise<
+  (InspectionBatch & { id: string })[]
+> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "schedule"));
+    const schedules: (InspectionBatch & { id: string })[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      schedules.push({
+        batch_id: data.batch_id,
+        batch_name: data.batch_name,
+        batch_date: convertTimestamp(data.batch_date),
+        business_type: data.business_type,
+        province: data.province,
+        ward: data.ward,
+        status: data.status,
+        created_by: data.created_by,
+        note: data.note,
+        id: doc.id,
+      });
+    });
+    return schedules;
+  } catch (error) {
+    console.error("Error getting schedules:", error);
+    throw error;
+  }
+};
+
+/**
+ * Tạo đợt kiểm tra mới và tạo hàng loạt lịch kiểm tra cho các doanh nghiệp
+ */
+export const createInspectionBatchAndSchedules = async (
+  batch: Omit<InspectionBatch, "batch_id">,
+  businesses: { business_id: string }[]
+): Promise<string> => {
+  try {
+    const batch_id = uuidv4();
+    await addSchedule({ ...batch, batch_id, batch_date: batch.batch_date });
+    const chunkSize = 500;
+    for (let i = 0; i < businesses.length; i += chunkSize) {
+      const batchWrite = writeBatch(db);
+      const chunk = businesses.slice(i, i + chunkSize);
+      chunk.forEach(({ business_id }) => {
+        const inspectionRef = doc(
+          collection(db, "businesses", business_id, "inspections")
+        );
+        batchWrite.set(inspectionRef, {
+          inspection_id: batch_id,
+          business_id,
+          inspection_date: Timestamp.fromDate(new Date(batch.batch_date)),
+          inspector_status: "pending",
+          inspector_description: batch.batch_description || "",
+        });
+      });
+      await batchWrite.commit();
+    }
+    return batch_id;
+  } catch (error) {
+    console.error("Error creating inspection batch and schedules:", error);
+    throw error;
+  }
+};
+
+/**
+ * Lấy thống kê số lượng hộ và số đã kiểm tra theo inspection_id (batch_id)
+ */
+export const getInspectionStatsByBatchId = async (
+  inspection_id: string
+): Promise<{ total: number; checked: number }> => {
+  try {
+    const q = query(
+      collectionGroup(db, "inspections"),
+      where("inspection_id", "==", inspection_id)
+    );
+    const snapshot = await getDocs(q);
+    let total = 0;
+    let checked = 0;
+    snapshot.forEach((doc) => {
+      total++;
+      const data = doc.data();
+      if (data.inspector_status === "completed") checked++;
+    });
+    return { total, checked };
+  } catch (error) {
+    console.error("Error getting inspection stats by batch id:", error);
+    throw error;
+  }
+};
+
+/**
+ * Lấy thống kê số lượng vi phạm và không vi phạm theo inspection_id (batch_id)
+ */
+export const getViolationStatsByBatchId = async (
+  inspection_id: string
+): Promise<{ violated: number; nonViolated: number }> => {
+  try {
+    // Lấy tất cả violations theo inspection_id
+    const violationQuery = query(
+      collectionGroup(db, "violations"),
+      where("inspection_id", "==", inspection_id)
+    );
+    const violationSnap = await getDocs(violationQuery);
+    const violatedBusinessIds = new Set<string>();
+    violationSnap.forEach((doc) => {
+      const data = doc.data();
+      if (data.business_id) violatedBusinessIds.add(data.business_id);
+    });
+    // Lấy tất cả inspections theo inspection_id
+    const inspectionQuery = query(
+      collectionGroup(db, "inspections"),
+      where("inspection_id", "==", inspection_id)
+    );
+    const inspectionSnap = await getDocs(inspectionQuery);
+    let total = 0;
+    let nonViolated = 0;
+    inspectionSnap.forEach((doc) => {
+      total++;
+      const data = doc.data();
+      if (data.business_id && !violatedBusinessIds.has(data.business_id)) {
+        nonViolated++;
+      }
+    });
+    return { violated: violatedBusinessIds.size, nonViolated };
+  } catch (error) {
+    console.error("Error getting violation stats by batch id:", error);
+    throw error;
+  }
+};
+
+/**
+ * Xóa sạch một đợt kiểm tra: doc trong 'schedule', toàn bộ inspections, violations, reports liên quan inspection_id (batch_id)
+ */
+export const deleteInspectionBatchAndAllLinkedData = async (
+  batchId: string,
+  scheduleDocId?: string
+): Promise<void> => {
+  // 1. Xóa document đợt kiểm tra trong 'schedule'
+  if (scheduleDocId) {
+    await deleteDoc(doc(db, "schedule", scheduleDocId));
+  } else {
+    const q = query(
+      collection(db, "schedule"),
+      where("batch_id", "==", batchId)
+    );
+    const snap = await getDocs(q);
+    for (const d of snap.docs) {
+      await deleteDoc(d.ref);
+    }
+  }
+
+  // Helper để xóa collectionGroup theo batchId
+  const deleteCollectionGroupByBatch = async (colGroup: string) => {
+    const q = query(
+      collectionGroup(db, colGroup),
+      where("inspection_id", "==", batchId)
+    );
+    const snap = await getDocs(q);
+    let batch = writeBatch(db);
+    let opCount = 0;
+    for (const docSnap of snap.docs) {
+      batch.delete(docSnap.ref);
+      opCount++;
+      if (opCount === 500) {
+        await batch.commit();
+        batch = writeBatch(db);
+        opCount = 0;
+      }
+    }
+    if (opCount > 0) await batch.commit();
+  };
+
+  await deleteCollectionGroupByBatch("inspections");
+  await deleteCollectionGroupByBatch("reports");
+  await deleteCollectionGroupByBatch("violations");
 };

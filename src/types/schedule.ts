@@ -1,3 +1,5 @@
+import type { BusinessType } from "./business";
+
 export type InspectionSchedule = {
   inspection_id: string;
   business_id: string;
@@ -11,6 +13,19 @@ export type InspectionReport = {
   inspection_id: string;
   report_description: string;
   report_status: "draft" | "finalized";
+};
+
+export type InspectionBatch = {
+  batch_id: string;
+  batch_name: string;
+  batch_date: Date;
+  batch_description?: string;
+  business_type: BusinessType;
+  province: string;
+  ward: string;
+  status: "scheduled" | "ongoing" | "completed";
+  created_by: string;
+  note?: string;
 };
 
 export enum ViolationTypeEnum {

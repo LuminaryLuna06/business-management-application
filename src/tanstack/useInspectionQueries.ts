@@ -3,6 +3,7 @@ import type {
   InspectionSchedule,
   InspectionReport,
   ViolationResult,
+  InspectionBatch,
 } from "../types/schedule";
 import {
   getInspectionsByBusinessId,
@@ -18,6 +19,12 @@ import {
   getAllViolations,
   deleteInspectionAndLinkedData,
   deleteReportAndLinkedViolations,
+  addSchedule,
+  createInspectionBatchAndSchedules,
+  getInspectionStatsByBatchId,
+  getAllSchedules,
+  getViolationStatsByBatchId,
+  deleteInspectionBatchAndAllLinkedData,
 } from "../firebase/firestoreFunctions";
 
 export function useInspectionSchedules(businessId: string) {
@@ -93,7 +100,13 @@ export function useUpdateInspectionMutation(businessId: string) {
 export function useDeleteInspectionMutation(businessId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({inspectionId, inspectionDocId}: {inspectionId: string, inspectionDocId: string}) =>
+    mutationFn: async ({
+      inspectionId,
+      inspectionDocId,
+    }: {
+      inspectionId: string;
+      inspectionDocId: string;
+    }) =>
       deleteInspectionAndLinkedData(businessId, inspectionId, inspectionDocId),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -200,5 +213,77 @@ export function useAllViolationsQuery() {
     queryFn: getAllViolations,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+  });
+}
+
+export function useAddScheduleMutation() {
+  return useMutation({
+    mutationFn: async (batch: InspectionBatch) => addSchedule(batch),
+  });
+}
+
+export function useCreateInspectionBatchAndSchedulesMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      batch,
+      businesses,
+    }: {
+      batch: Omit<InspectionBatch, "batch_id">;
+      businesses: { business_id: string }[];
+    }) => createInspectionBatchAndSchedules(batch, businesses),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inspection-schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+    },
+  });
+}
+
+export function useInspectionStatsByBatchId(inspection_id: string) {
+  return useQuery<{ total: number; checked: number }>({
+    queryKey: ["inspection-stats", inspection_id],
+    queryFn: () => getInspectionStatsByBatchId(inspection_id),
+    enabled: !!inspection_id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+export function useAllSchedulesQuery() {
+  return useQuery({
+    queryKey: ["schedules"],
+    queryFn: getAllSchedules,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+export function useViolationStatsByBatchId(inspection_id: string) {
+  return useQuery<{ violated: number; nonViolated: number }>({
+    queryKey: ["violation-stats", inspection_id],
+    queryFn: () => getViolationStatsByBatchId(inspection_id),
+    enabled: !!inspection_id,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+export function useDeleteInspectionBatchAndAllLinkedDataMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      batchId,
+      scheduleDocId,
+    }: {
+      batchId: string;
+      scheduleDocId?: string;
+    }) => deleteInspectionBatchAndAllLinkedData(batchId, scheduleDocId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["inspection-schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["violation-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["inspection-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["all-violations"] });
+    },
   });
 }

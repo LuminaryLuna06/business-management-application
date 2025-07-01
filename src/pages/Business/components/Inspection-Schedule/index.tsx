@@ -16,6 +16,7 @@ import {
   Center,
   Loader,
   FileInput,
+  Accordion,
 } from "@mantine/core";
 // import { useDisclosure } from "@mantine/hooks";
 import { useParams } from "react-router-dom";
@@ -597,141 +598,166 @@ function InspectionSchedulePage() {
                           <Text size="sm" fw={500} mb={4}>
                             Quyết định xử phạt:
                           </Text>
-                          {filteredViolations.map((violation, vIdx) => (
-                            <Box
-                              key={vIdx}
-                              p={8}
-                              mb={4}
-                              style={{
-                                border: "1px solid #228be6",
-                                borderRadius: 4,
-                              }}
-                            >
-                              <Group justify="space-between" mb={4}>
-                                <Text size="sm" fw={500}>
-                                  {violation.violation_number}
-                                </Text>
-                                <Group gap={4}>
-                                  <Tooltip label="Sửa quyết định">
-                                    <ActionIcon
-                                      size="xs"
-                                      color="blue"
-                                      variant="light"
-                                      onClick={() => {
-                                        setEditingViolation(violation);
-                                        editViolationForm.setValues({
-                                          violation_number:
-                                            violation.violation_number,
-                                          issue_date: violation.issue_date,
-                                          violation_status:
-                                            violation.violation_status as
-                                              | "pending"
-                                              | "paid"
-                                              | "dismissed",
-                                          fix_status: violation.fix_status as
-                                            | "not_fixed"
-                                            | "fixed"
-                                            | "in_progress",
-                                          officer_signed:
-                                            violation.officer_signed,
-                                          file_link: violation.file_link,
-                                          violation_type:
-                                            violation.violation_type as
-                                              | ViolationTypeEnum.FalseTaxDeclaration
-                                              | ViolationTypeEnum.Other,
-                                        });
-                                        setEditViolationModalOpen(true);
-                                      }}
-                                    >
-                                      <IconEdit size={12} />
-                                    </ActionIcon>
-                                  </Tooltip>
-                                  <Tooltip label="Xóa quyết định">
-                                    <ActionIcon
-                                      size="xs"
-                                      color="red"
-                                      variant="light"
-                                      onClick={() => {
-                                        modals.openConfirmModal({
-                                          title: "Xác nhận xóa quyết định",
-                                          children: (
-                                            <Text>
-                                              Bạn có chắc chắn muốn xóa quyết
-                                              định này?
-                                            </Text>
-                                          ),
-                                          labels: {
-                                            confirm: "Xóa",
-                                            cancel: "Hủy",
-                                          },
-                                          confirmProps: { color: "red" },
-                                          onConfirm: () => {
-                                            deleteViolationMutation.mutate(
-                                              violation.id
-                                            );
-                                            notifications.show({
-                                              title: "Thành công",
-                                              message:
-                                                "Đã xóa quyết định thành công!",
-                                              color: "green",
+                          <Accordion variant="contained" mt={8}>
+                            {filteredViolations.map((violation, vIdx) => (
+                              <Accordion.Item
+                                key={vIdx}
+                                value={`violation-${vIdx}`}
+                              >
+                                <Accordion.Control>
+                                  <Group justify="space-between" align="center">
+                                    <Text size="sm" fw={500}>
+                                      {violation.violation_number}
+                                    </Text>
+                                    <Group gap={4}>
+                                      <Tooltip label="Sửa quyết định">
+                                        <ActionIcon
+                                          size="xs"
+                                          color="blue"
+                                          variant="light"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingViolation(violation);
+                                            editViolationForm.setValues({
+                                              violation_number:
+                                                violation.violation_number,
+                                              issue_date: violation.issue_date,
+                                              violation_status:
+                                                violation.violation_status as
+                                                  | "pending"
+                                                  | "paid"
+                                                  | "dismissed",
+                                              fix_status:
+                                                violation.fix_status as
+                                                  | "not_fixed"
+                                                  | "fixed"
+                                                  | "in_progress",
+                                              officer_signed:
+                                                violation.officer_signed,
+                                              file_link: violation.file_link,
+                                              violation_type:
+                                                violation.violation_type as
+                                                  | ViolationTypeEnum.FalseTaxDeclaration
+                                                  | ViolationTypeEnum.Other,
                                             });
-                                          },
-                                        });
-                                      }}
-                                    >
-                                      <IconTrash size={12} />
-                                    </ActionIcon>
-                                  </Tooltip>
-                                </Group>
-                              </Group>
-                              <Text size="xs">
-                                Loại vi phạm:{" "}
-                                {violationTypeLabels[violation.violation_type]}
-                              </Text>
-                              <Text size="xs">
-                                Ngày ban hành:{" "}
-                                {violation.issue_date instanceof Date
-                                  ? violation.issue_date.toLocaleDateString()
-                                  : violation.issue_date}
-                              </Text>
-                              <Text size="xs">
-                                Trạng thái:{" "}
-                                {violation.violation_status === "pending"
-                                  ? "Chờ xử lý"
-                                  : violation.violation_status === "paid"
-                                  ? "Đã nộp phạt"
-                                  : violation.violation_status === "dismissed"
-                                  ? "Đã miễn"
-                                  : violation.violation_status}
-                              </Text>
-                              <Text size="xs">
-                                Trạng thái khắc phục:{" "}
-                                {violation.fix_status === "not_fixed"
-                                  ? "Chưa khắc phục"
-                                  : violation.fix_status === "in_progress"
-                                  ? "Đang xử lý"
-                                  : violation.fix_status === "fixed"
-                                  ? "Đã khắc phục"
-                                  : violation.fix_status}
-                              </Text>
-                              <Text size="xs">
-                                Cán bộ ký: {violation.officer_signed}
-                              </Text>
-                              {violation.file_link && (
-                                <ActionIcon
-                                  component="a"
-                                  href={violation.file_link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  color="blue"
-                                  variant="subtle"
-                                  title="Mở file trong tab mới"
-                                >
-                                  <IconExternalLink size={18} />
-                                </ActionIcon>
-                              )}
-                            </Box>
-                          ))}
+                                            setEditViolationModalOpen(true);
+                                          }}
+                                        >
+                                          <IconEdit size={12} />
+                                        </ActionIcon>
+                                      </Tooltip>
+                                      <Tooltip label="Xóa quyết định">
+                                        <ActionIcon
+                                          size="xs"
+                                          color="red"
+                                          variant="light"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            modals.openConfirmModal({
+                                              title: "Xác nhận xóa quyết định",
+                                              children: (
+                                                <Text>
+                                                  Bạn có chắc chắn muốn xóa
+                                                  quyết định này?
+                                                </Text>
+                                              ),
+                                              labels: {
+                                                confirm: "Xóa",
+                                                cancel: "Hủy",
+                                              },
+                                              confirmProps: { color: "red" },
+                                              onConfirm: () => {
+                                                deleteViolationMutation.mutate(
+                                                  violation.id
+                                                );
+                                                notifications.show({
+                                                  title: "Thành công",
+                                                  message:
+                                                    "Đã xóa quyết định thành công!",
+                                                  color: "green",
+                                                });
+                                              },
+                                            });
+                                          }}
+                                        >
+                                          <IconTrash size={12} />
+                                        </ActionIcon>
+                                      </Tooltip>
+                                    </Group>
+                                  </Group>
+                                </Accordion.Control>
+                                <Accordion.Panel>
+                                  <Stack gap={8}>
+                                    <Group gap={16}>
+                                      <Text size="xs">
+                                        <strong>Loại vi phạm:</strong>{" "}
+                                        {
+                                          violationTypeLabels[
+                                            violation.violation_type
+                                          ]
+                                        }
+                                      </Text>
+                                      <Text size="xs">
+                                        <strong>Ngày ban hành:</strong>{" "}
+                                        {violation.issue_date instanceof Date
+                                          ? violation.issue_date.toLocaleDateString()
+                                          : violation.issue_date}
+                                      </Text>
+                                    </Group>
+                                    <Group gap={16}>
+                                      <Text size="xs">
+                                        <strong>Trạng thái:</strong>{" "}
+                                        {violation.violation_status ===
+                                        "pending"
+                                          ? "Chờ xử lý"
+                                          : violation.violation_status ===
+                                            "paid"
+                                          ? "Đã nộp phạt"
+                                          : violation.violation_status ===
+                                            "dismissed"
+                                          ? "Đã miễn"
+                                          : violation.violation_status}
+                                      </Text>
+                                      <Text size="xs">
+                                        <strong>Khắc phục:</strong>{" "}
+                                        {violation.fix_status === "not_fixed"
+                                          ? "Chưa khắc phục"
+                                          : violation.fix_status ===
+                                            "in_progress"
+                                          ? "Đang xử lý"
+                                          : violation.fix_status === "fixed"
+                                          ? "Đã khắc phục"
+                                          : violation.fix_status}
+                                      </Text>
+                                    </Group>
+                                    <Text size="xs">
+                                      <strong>Cán bộ ký:</strong>{" "}
+                                      {violation.officer_signed}
+                                    </Text>
+                                    {violation.file_link && (
+                                      <Group gap={8} align="center">
+                                        <Text size="xs">
+                                          <strong>File đính kèm:</strong>
+                                        </Text>
+                                        <ActionIcon
+                                          component="a"
+                                          href={violation.file_link}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          color="blue"
+                                          variant="light"
+                                          size="sm"
+                                          title="Mở file trong tab mới"
+                                        >
+                                          <IconExternalLink size={14} />
+                                        </ActionIcon>
+                                      </Group>
+                                    )}
+                                  </Stack>
+                                </Accordion.Panel>
+                              </Accordion.Item>
+                            ))}
+                          </Accordion>
                         </Box>
                       ) : (
                         <Button

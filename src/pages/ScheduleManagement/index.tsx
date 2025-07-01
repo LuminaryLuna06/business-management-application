@@ -142,7 +142,7 @@ export default function ScheduleManagement() {
           });
           form.reset();
         },
-        onError: (error) => {
+        onError: () => {
           notifications.show({
             title: "Lỗi",
             message: "Tạo lịch kiểm tra thất bại",

@@ -28,6 +28,7 @@ import {
   IconUsers,
   IconTrash,
   IconFolderPlus,
+  IconReportAnalytics,
 } from "@tabler/icons-react";
 import {
   Outlet,
@@ -247,7 +248,20 @@ function HomePage() {
           component={RouterNavLink}
           to={"/report"}
           label="Báo cáo tổng quan"
-          leftSection={<IconHome2 size={16} stroke={1.5} />}
+          leftSection={<IconReportAnalytics size={16} stroke={1.5} />}
+          rightSection={
+            <IconChevronRight
+              size={12}
+              stroke={1.5}
+              className="mantine-rotate-rtl"
+            />
+          }
+        />
+        <NavLink
+          component={RouterNavLink}
+          to={"/schedule-management"}
+          label="Lịch kiểm tra"
+          leftSection={<IconReportAnalytics size={16} stroke={1.5} />}
           rightSection={
             <IconChevronRight
               size={12}

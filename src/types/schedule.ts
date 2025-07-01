@@ -34,6 +34,7 @@ export enum ViolationTypeEnum {
 
 export type ViolationResult = {
   violation_id: string;
+  inspection_id: string;
   report_id: string;
   business_id: string;
   violation_number: string;

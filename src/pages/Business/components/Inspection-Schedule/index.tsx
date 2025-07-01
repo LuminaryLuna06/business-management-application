@@ -295,7 +295,10 @@ function InspectionSchedulePage() {
       labels: { confirm: "Xóa", cancel: "Hủy" },
       confirmProps: { color: "red" },
       onConfirm: () => {
-        deleteInspectionMutation.mutate(inspection.id);
+        deleteInspectionMutation.mutate({
+          inspectionId: inspection.inspection_id,
+          inspectionDocId: inspection.id,
+        });
         notifications.show({
           title: "Thành công",
           message: "Đã xóa lịch kiểm tra thành công!",
@@ -552,7 +555,10 @@ function InspectionSchedulePage() {
                                   labels: { confirm: "Xóa", cancel: "Hủy" },
                                   confirmProps: { color: "red" },
                                   onConfirm: () => {
-                                    deleteReportMutation.mutate(report.id);
+                                    deleteReportMutation.mutate({
+                                      reportId: report.report_id,
+                                      reportDocId: report.id,
+                                    });
                                     notifications.show({
                                       title: "Thành công",
                                       message: "Đã xóa báo cáo thành công!",

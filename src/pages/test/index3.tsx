@@ -322,6 +322,7 @@ const generateMockInspections = (mockBusinesses: any[]) => {
     {
       violation_id: uuidv4(),
       report_id: reports[0].report_id,
+      inspection_id: reports[0].inspection_id,
       business_id:
         inspections.find(
           (ins) => ins.inspection_id === reports[0].inspection_id
@@ -338,6 +339,7 @@ const generateMockInspections = (mockBusinesses: any[]) => {
     {
       violation_id: uuidv4(),
       report_id: reports[1].report_id,
+      inspection_id: reports[1].inspection_id,
       business_id:
         inspections.find(
           (ins) => ins.inspection_id === reports[1].inspection_id
@@ -354,6 +356,7 @@ const generateMockInspections = (mockBusinesses: any[]) => {
     {
       violation_id: uuidv4(),
       report_id: reports[2].report_id,
+      inspection_id: reports[2].inspection_id,
       business_id:
         inspections.find(
           (ins) => ins.inspection_id === reports[2].inspection_id
@@ -370,6 +373,7 @@ const generateMockInspections = (mockBusinesses: any[]) => {
     {
       violation_id: uuidv4(),
       report_id: reports[3].report_id,
+      inspection_id: reports[3].inspection_id,
       business_id:
         inspections.find(
           (ins) => ins.inspection_id === reports[3].inspection_id
@@ -595,6 +599,7 @@ function Index3() {
             const violationData = {
               violation_id: violation.violation_id,
               report_id: violation.report_id,
+              inspection_id: violation.inspection_id,
               business_id: violation.business_id,
               violation_number: violation.violation_number,
               violation_type: violation.violation_type,

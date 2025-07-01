@@ -4,6 +4,7 @@ import {
   getBusinessById,
   deleteBusiness,
   updateBusiness,
+  deleteBusinessWithBatch,
 } from "../firebase/firestoreFunctions";
 
 // Query keys
@@ -41,7 +42,7 @@ export const useDeleteBusiness = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteBusiness,
+    mutationFn: deleteBusinessWithBatch,
     onSuccess: () => {
       // Invalidate và refetch danh sách doanh nghiệp
       queryClient.invalidateQueries({ queryKey: businessKeys.lists() });

@@ -13,6 +13,7 @@ import {
   limit as limitDocs,
   collectionGroup,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import {
@@ -201,6 +202,48 @@ export const deleteBusiness = async (businessId: string): Promise<void> => {
     console.error("Error deleting business:", error);
     throw error;
   }
+};
+
+/**
+ * Xóa doanh nghiệp cùng toàn bộ sub-collection bằng batch
+ */
+export const deleteBusinessWithBatch = async (
+  businessId: string
+): Promise<void> => {
+  const subCollections = [
+    "licenses",
+    "employees",
+    "inspections",
+    "violations",
+    "reports",
+  ];
+
+  for (const subCol of subCollections) {
+    const colRef = collection(db, "businesses", businessId, subCol);
+    const snapshot = await getDocs(colRef);
+
+    if (!snapshot.empty) {
+      let batch = writeBatch(db);
+      let opCount = 0;
+
+      for (const document of snapshot.docs) {
+        batch.delete(doc(db, "businesses", businessId, subCol, document.id));
+        opCount++;
+
+        if (opCount === 500) {
+          await batch.commit();
+          batch = writeBatch(db);
+          opCount = 0;
+        }
+      }
+      if (opCount > 0) {
+        await batch.commit();
+      }
+    }
+  }
+
+  // Xóa document doanh nghiệp chính
+  await deleteDoc(doc(db, "businesses", businessId));
 };
 
 // ===== LICENSE SERVICES =====
@@ -418,20 +461,55 @@ export const updateInspection = async (
 };
 
 /**
- * Xóa lịch kiểm tra
+ * Xóa một lịch kiểm tra và toàn bộ báo cáo, quyết định xử phạt liên quan (theo inspection_id)
  */
-export const deleteInspection = async (
+export const deleteInspectionAndLinkedData = async (
   businessId: string,
-  inspectionId: string
+  inspectionId: string,
+  inspectionDocId: string
 ): Promise<void> => {
-  try {
-    await deleteDoc(
-      doc(db, "businesses", businessId, "inspections", inspectionId)
-    );
-  } catch (error) {
-    console.error("Error deleting inspection:", error);
-    throw error;
+  // 1. Xóa các report liên quan
+  const reportsQuery = query(
+    collection(db, "businesses", businessId, "reports"),
+    where("inspection_id", "==", inspectionId)
+  );
+  const reportsSnap = await getDocs(reportsQuery);
+  let batch = writeBatch(db);
+  let opCount = 0;
+  for (const document of reportsSnap.docs) {
+    batch.delete(doc(db, "businesses", businessId, "reports", document.id));
+    opCount++;
+    if (opCount === 500) {
+      await batch.commit();
+      batch = writeBatch(db);
+      opCount = 0;
+    }
   }
+  if (opCount > 0) await batch.commit();
+
+  // 2. Xóa các violation liên quan
+  const violationsQuery = query(
+    collection(db, "businesses", businessId, "violations"),
+    where("inspection_id", "==", inspectionId)
+  );
+  const violationsSnap = await getDocs(violationsQuery);
+  batch = writeBatch(db);
+  opCount = 0;
+  for (const document of violationsSnap.docs) {
+    batch.delete(doc(db, "businesses", businessId, "violations", document.id));
+    opCount++;
+    if (opCount === 500) {
+      await batch.commit();
+      batch = writeBatch(db);
+      opCount = 0;
+    }
+  }
+  if (opCount > 0) await batch.commit();
+
+  // 3. Xóa document inspection chính
+  await deleteDoc(
+    doc(db, "businesses", businessId, "inspections", inspectionDocId)
+  );
 };
 
 // ===== REPORT SERVICES =====
@@ -513,6 +591,37 @@ export const deleteReport = async (
     console.error("Error deleting report:", error);
     throw error;
   }
+};
+
+/**
+ * Xóa một báo cáo và toàn bộ quyết định xử phạt liên quan (theo report_id)
+ */
+export const deleteReportAndLinkedViolations = async (
+  businessId: string,
+  reportId: string,
+  reportDocId: string
+): Promise<void> => {
+  // 1. Xóa các violation liên quan
+  const violationsQuery = query(
+    collection(db, "businesses", businessId, "violations"),
+    where("report_id", "==", reportId)
+  );
+  const violationsSnap = await getDocs(violationsQuery);
+  let batch = writeBatch(db);
+  let opCount = 0;
+  for (const document of violationsSnap.docs) {
+    batch.delete(doc(db, "businesses", businessId, "violations", document.id));
+    opCount++;
+    if (opCount === 500) {
+      await batch.commit();
+      batch = writeBatch(db);
+      opCount = 0;
+    }
+  }
+  if (opCount > 0) await batch.commit();
+
+  // 2. Xóa document report chính
+  await deleteDoc(doc(db, "businesses", businessId, "reports", reportDocId));
 };
 
 // ===== VIOLATION SERVICES =====

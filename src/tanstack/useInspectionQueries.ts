@@ -14,10 +14,10 @@ import {
   updateInspection,
   updateReport,
   updateViolation,
-  deleteInspection,
-  deleteReport,
   deleteViolation,
   getAllViolations,
+  deleteInspectionAndLinkedData,
+  deleteReportAndLinkedViolations,
 } from "../firebase/firestoreFunctions";
 
 export function useInspectionSchedules(businessId: string) {
@@ -93,8 +93,8 @@ export function useUpdateInspectionMutation(businessId: string) {
 export function useDeleteInspectionMutation(businessId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (inspectionId: string) =>
-      deleteInspection(businessId, inspectionId),
+    mutationFn: async ({inspectionId, inspectionDocId}: {inspectionId: string, inspectionDocId: string}) =>
+      deleteInspectionAndLinkedData(businessId, inspectionId, inspectionDocId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["inspection-schedules", businessId],
@@ -136,7 +136,13 @@ export function useUpdateReportMutation(businessId: string) {
 export function useDeleteReportMutation(businessId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (reportId: string) => deleteReport(businessId, reportId),
+    mutationFn: async ({
+      reportId,
+      reportDocId,
+    }: {
+      reportId: string;
+      reportDocId: string;
+    }) => deleteReportAndLinkedViolations(businessId, reportId, reportDocId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["inspection-reports", businessId],

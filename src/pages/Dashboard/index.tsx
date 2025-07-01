@@ -11,6 +11,7 @@ import {
   Loader,
   Group,
   ThemeIcon,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { DonutChart } from "@mantine/charts";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
@@ -117,30 +118,41 @@ function getTypeChartData(businesses: any[]) {
 }
 
 // Custom Tooltip cho Recharts sử dụng Mantine UI
-const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  colorScheme,
+}: TooltipProps<any, any> & { colorScheme: string }) => {
   if (active && payload && payload.length) {
+    const isDark = colorScheme === "dark";
     return (
       <Box
-        bg="#fff"
+        bg={isDark ? "#222" : "#fff"}
         p="md"
         style={{
           border: "1px solid #eee",
           borderRadius: 8,
           minWidth: 220,
           boxShadow: "0 2px 8px rgba(34,139,230,0.10)",
+          color: isDark ? "#fff" : "#222",
         }}
       >
-        <Text fw={600} mb={8}>
+        <Text fw={600} mb={8} style={{ color: isDark ? "#fff" : undefined }}>
           {label}
         </Text>
         <Group gap={8} align="center" justify="space-between">
           <Group gap={8} align="center">
-            <ThemeIcon size={12} radius="xl" color="red" />
-            <Text c="dimmed" fz={14}>
-              Số lần vi phạm
+            <ThemeIcon size={12} radius="xl" color="blue" />
+            <Text
+              c="dimmed"
+              fz={14}
+              style={{ color: isDark ? "#eee" : undefined }}
+            >
+              Số lượng
             </Text>
           </Group>
-          <Text fw={700} fz={16}>
+          <Text fw={700} fz={16} style={{ color: isDark ? "#fff" : undefined }}>
             {payload[0].value}
           </Text>
         </Group>
@@ -152,6 +164,8 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   // Gọi dữ liệu thực
   const {
@@ -381,8 +395,12 @@ export default function Dashboard() {
                 tickMargin={5}
                 axisLine={false}
                 tickLine={false}
+                tick={{ fill: isDark ? "#dee2e6" : "#222" }}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip
+                content={<CustomTooltip colorScheme={colorScheme} />}
+                cursor={{ fill: isDark ? "#495057" : "#e9ecef" }}
+              />
               <Bar dataKey="value" fill="#228be6" />
             </ReBarChart>
           </ResponsiveContainer>

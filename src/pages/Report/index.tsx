@@ -10,6 +10,7 @@ import {
   Center,
   Loader,
   ThemeIcon,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
 import { LineChart } from "@mantine/charts";
@@ -66,30 +67,41 @@ const violationColumns: MRT_ColumnDef<any>[] = [
 ];
 
 // Custom Tooltip cho Recharts sử dụng Mantine UI
-const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  colorScheme,
+}: TooltipProps<any, any> & { colorScheme: string }) => {
   if (active && payload && payload.length) {
+    const isDark = colorScheme === "dark";
     return (
       <Box
-        bg="#fff"
+        bg={isDark ? "#222" : "#fff"}
         p="md"
         style={{
           border: "1px solid #eee",
           borderRadius: 8,
           minWidth: 220,
           boxShadow: "0 2px 8px rgba(34,139,230,0.10)",
+          color: isDark ? "#fff" : "#222",
         }}
       >
-        <Text fw={600} mb={8}>
+        <Text fw={600} mb={8} style={{ color: isDark ? "#fff" : undefined }}>
           {label}
         </Text>
         <Group gap={8} align="center" justify="space-between">
           <Group gap={8} align="center">
             <ThemeIcon size={12} radius="xl" color="red" />
-            <Text c="dimmed" fz={14}>
+            <Text
+              c="dimmed"
+              fz={14}
+              style={{ color: isDark ? "#eee" : undefined }}
+            >
               Số lần vi phạm
             </Text>
           </Group>
-          <Text fw={700} fz={16}>
+          <Text fw={700} fz={16} style={{ color: isDark ? "#fff" : undefined }}>
             {payload[0].value}
           </Text>
         </Group>
@@ -99,31 +111,42 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
   return null;
 };
 
-const CustomTooltip2 = ({ active, payload, label }: TooltipProps<any, any>) => {
+const CustomTooltip2 = ({
+  active,
+  payload,
+  label,
+  colorScheme,
+}: TooltipProps<any, any> & { colorScheme: string }) => {
   if (active && payload && payload.length) {
+    const isDark = colorScheme === "dark";
     return (
       <Box
-        bg="#fff"
+        bg={isDark ? "#222" : "#fff"}
         p="md"
         style={{
           border: "1px solid #eee",
           borderRadius: 8,
           minWidth: 220,
           boxShadow: "0 2px 8px rgba(34,139,230,0.10)",
+          color: isDark ? "#fff" : "#222",
         }}
       >
-        <Text fw={600} mb={8}>
+        <Text fw={600} mb={8} style={{ color: isDark ? "#fff" : undefined }}>
           {label}
         </Text>
         <Group gap={8} align="center" justify="space-between">
           <Group gap={8} align="center">
             <ThemeIcon size={12} radius="xl" color="green" />
-            <Text c="dimmed" fz={14}>
+            <Text
+              c="dimmed"
+              fz={14}
+              style={{ color: isDark ? "#eee" : undefined }}
+            >
               Tỉ lệ khắc phục
             </Text>
           </Group>
-          <Text fw={700} fz={16}>
-            {payload[0].value} %
+          <Text fw={700} fz={16} style={{ color: isDark ? "#fff" : undefined }}>
+            {payload[0].value}%
           </Text>
         </Group>
       </Box>
@@ -133,6 +156,8 @@ const CustomTooltip2 = ({ active, payload, label }: TooltipProps<any, any>) => {
 };
 
 function Report() {
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
   // Bộ lọc
   const form = useForm({
     initialValues: {
@@ -345,8 +370,12 @@ function Report() {
                   tickMargin={5}
                   axisLine={false}
                   tickLine={false}
+                  tick={{ fill: isDark ? "#dee2e6" : "#222" }}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip
+                  content={<CustomTooltip colorScheme={colorScheme} />}
+                  cursor={{ fill: isDark ? "#495057" : "#e9ecef" }}
+                />
                 <Bar dataKey="count" fill="#fa5252" />
               </ReBarChart>
             </ResponsiveContainer>
@@ -410,8 +439,12 @@ function Report() {
                   tickMargin={5}
                   axisLine={false}
                   tickLine={false}
+                  tick={{ fill: isDark ? "#dee2e6" : "#222" }}
                 />
-                <Tooltip content={<CustomTooltip2 />} />
+                <Tooltip
+                  content={<CustomTooltip2 colorScheme={colorScheme} />}
+                  cursor={{ fill: isDark ? "#495057" : "#e9ecef" }}
+                />
                 <Bar dataKey="fixRate" fill="#40c057" />
               </ReBarChart>
             </ResponsiveContainer>

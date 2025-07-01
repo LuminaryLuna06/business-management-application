@@ -1212,6 +1212,8 @@ function InspectionSchedulePage() {
             if (!businessId || !currentReportId) return;
             const violationData = {
               violation_id: uuidv4(),
+              inspection_id: currentInspectionId,
+              business_id: businessId,
               report_id: currentReportId,
               violation_number: values.violation_number,
               issue_date: values.issue_date,

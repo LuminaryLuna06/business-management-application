@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getAllBusinesses,
   getBusinessById,
-  deleteBusiness,
   updateBusiness,
   deleteBusinessWithBatch,
 } from "../firebase/firestoreFunctions";

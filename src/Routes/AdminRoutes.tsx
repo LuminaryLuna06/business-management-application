@@ -12,6 +12,7 @@ import UserManagement from "../pages/UserManagement";
 import Dashboard from "../pages/Dashboard";
 import Report from "../pages/Report";
 import TestPage from "../pages/test/index2";
+import ScheduleManagement from "../pages/ScheduleManagement";
 
 export default function AdminRoutes() {
   return (
@@ -29,6 +30,7 @@ export default function AdminRoutes() {
           <Route path="licenses" element={<LicensePage />} />
           <Route path="user-management" element={<UserManagement />} />
           <Route path="report" element={<Report />} />
+          <Route path="schedule-management" element={<ScheduleManagement />} />
         </Route>
       </Route>
     </Routes>

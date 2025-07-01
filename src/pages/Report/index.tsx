@@ -6,13 +6,13 @@ import {
   Box,
   Divider,
   Select,
-  Stack,
   Text,
   Center,
   Loader,
+  ThemeIcon,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
-import { BarChart, PieChart, LineChart } from "@mantine/charts";
+import { LineChart } from "@mantine/charts";
 import { MantineReactTable, type MRT_ColumnDef } from "mantine-react-table";
 import { useMemo } from "react";
 import { violationTypeLabels } from "../../types/violationTypeLabels";
@@ -22,6 +22,16 @@ import { useAllViolationsQuery } from "../../tanstack/useInspectionQueries";
 import { useForm } from "@mantine/form";
 import { useGetAllBusinesses } from "../../tanstack/useBusinessQueries";
 import { useGetAllIndustries } from "../../tanstack/useIndustryQueries";
+import {
+  BarChart as ReBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
+import type { TooltipProps } from "recharts";
 
 // Lấy danh sách phường/xã của Hà Nội
 const hanoi = Array.isArray(tree)
@@ -51,9 +61,76 @@ const violationColumns: MRT_ColumnDef<any>[] = [
     accessorKey: "fixRate",
     header: "Tỉ lệ khắc phục (%)",
     Cell: ({ row }) =>
-      ((row.original.fixed / row.original.count) * 100).toFixed(1),
+      Number(((row.original.fixed / row.original.count) * 100).toFixed(1)),
   },
 ];
+
+// Custom Tooltip cho Recharts sử dụng Mantine UI
+const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
+  if (active && payload && payload.length) {
+    return (
+      <Box
+        bg="#fff"
+        p="md"
+        style={{
+          border: "1px solid #eee",
+          borderRadius: 8,
+          minWidth: 220,
+          boxShadow: "0 2px 8px rgba(34,139,230,0.10)",
+        }}
+      >
+        <Text fw={600} mb={8}>
+          {label}
+        </Text>
+        <Group gap={8} align="center" justify="space-between">
+          <Group gap={8} align="center">
+            <ThemeIcon size={12} radius="xl" color="red" />
+            <Text c="dimmed" fz={14}>
+              Số lần vi phạm
+            </Text>
+          </Group>
+          <Text fw={700} fz={16}>
+            {payload[0].value}
+          </Text>
+        </Group>
+      </Box>
+    );
+  }
+  return null;
+};
+
+const CustomTooltip2 = ({ active, payload, label }: TooltipProps<any, any>) => {
+  if (active && payload && payload.length) {
+    return (
+      <Box
+        bg="#fff"
+        p="md"
+        style={{
+          border: "1px solid #eee",
+          borderRadius: 8,
+          minWidth: 220,
+          boxShadow: "0 2px 8px rgba(34,139,230,0.10)",
+        }}
+      >
+        <Text fw={600} mb={8}>
+          {label}
+        </Text>
+        <Group gap={8} align="center" justify="space-between">
+          <Group gap={8} align="center">
+            <ThemeIcon size={12} radius="xl" color="green" />
+            <Text c="dimmed" fz={14}>
+              Tỉ lệ khắc phục
+            </Text>
+          </Group>
+          <Text fw={700} fz={16}>
+            {payload[0].value} %
+          </Text>
+        </Group>
+      </Box>
+    );
+  }
+  return null;
+};
 
 function Report() {
   // Bộ lọc
@@ -126,7 +203,6 @@ function Report() {
       .sort((a, b) => b.fixRate - a.fixRate || b.count - a.count)
       .slice(0, 5);
   }, [violations]);
-  const pieColors = ["#40c057", "#fab005", "#228be6", "#fa5252", "#845ef7"];
 
   // Ghép violation với business để lấy ward, industry
   const violationWithBusiness = useMemo(() => {
@@ -225,7 +301,7 @@ function Report() {
             columns={violationColumns}
             data={mostViolated.map((v) => ({
               ...v,
-              fixRate: (v.fixed / v.count) * 100,
+              fixRate: Number(((v.fixed / v.count) * 100).toFixed(1)),
             }))}
             enablePagination={false}
             enableSorting={false}
@@ -242,22 +318,39 @@ function Report() {
           <Title order={5} mb="sm">
             Biểu đồ số lần vi phạm
           </Title>
-          <BarChart
-            h={300}
-            withRightYAxis
-            withYAxis={false}
-            data={mostViolated.map((v) => ({
-              name: violationTypeLabels[v.type as ViolationTypeEnum],
-              count: v.count,
-            }))}
-            dataKey="name"
-            series={[
-              { name: "count", color: "#fa5252", label: "Số lần vi phạm" },
-            ]}
-            gridAxis="y"
-            tickLine="x"
-            orientation="vertical"
-          />
+          <Box style={{ width: "100%", height: 300 }}>
+            <ResponsiveContainer width="100%" height={300}>
+              <ReBarChart
+                data={mostViolated.map((v) => ({
+                  name: violationTypeLabels[v.type as ViolationTypeEnum],
+                  count: v.count,
+                }))}
+                layout="vertical"
+                margin={{ top: 20, left: 5, right: 10, bottom: 20 }}
+                barCategoryGap={20}
+              >
+                <CartesianGrid strokeDasharray="4" horizontal={false} />
+                <XAxis
+                  type="number"
+                  axisLine={false}
+                  tickLine={false}
+                  tickCount={5}
+                  fontSize={12}
+                />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={150}
+                  fontSize={12}
+                  tickMargin={5}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="count" fill="#fa5252" />
+              </ReBarChart>
+            </ResponsiveContainer>
+          </Box>
         </Card>
       </SimpleGrid>
 
@@ -271,7 +364,7 @@ function Report() {
             columns={violationColumns}
             data={bestFixed.map((v) => ({
               ...v,
-              fixRate: (v.fixed / v.count) * 100,
+              fixRate: Number(((v.fixed / v.count) * 100).toFixed(1)),
             }))}
             enablePagination={false}
             enableSorting={false}
@@ -288,33 +381,41 @@ function Report() {
           <Title order={5} mb="sm">
             Biểu đồ tỉ lệ khắc phục
           </Title>
-          <Group align="flex-start" gap="md">
-            <PieChart
-              h={220}
-              data={bestFixed.map((v, i) => ({
-                name: violationTypeLabels[v.type as ViolationTypeEnum],
-                value: (v.fixed / v.count) * 100,
-                color: pieColors[i % pieColors.length],
-              }))}
-              withLabels
-              withTooltip
-            />
-            <Stack>
-              {bestFixed.map((v, i) => (
-                <Group key={v.type} gap={6}>
-                  <Box
-                    w={14}
-                    h={14}
-                    bg={pieColors[i % pieColors.length]}
-                    style={{ borderRadius: 3 }}
-                  />
-                  <Text size="sm">
-                    {violationTypeLabels[v.type as ViolationTypeEnum]}
-                  </Text>
-                </Group>
-              ))}
-            </Stack>
-          </Group>
+          <Box style={{ width: "100%", height: 220 }}>
+            <ResponsiveContainer width="100%" height={220}>
+              <ReBarChart
+                data={bestFixed.map((v) => ({
+                  name: violationTypeLabels[v.type as ViolationTypeEnum],
+                  fixRate: Number(((v.fixed / v.count) * 100).toFixed(1)),
+                }))}
+                layout="vertical"
+                margin={{ top: 20, left: 5, right: 10 }}
+                barCategoryGap={10}
+              >
+                <CartesianGrid strokeDasharray="4" horizontal={false} />
+                <XAxis
+                  type="number"
+                  domain={[0, 100]}
+                  axisLine={false}
+                  tickLine={false}
+                  tickCount={6}
+                  fontSize={12}
+                  tickFormatter={(v) => `${v}%`}
+                />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={150}
+                  fontSize={12}
+                  tickMargin={5}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip content={<CustomTooltip2 />} />
+                <Bar dataKey="fixRate" fill="#40c057" />
+              </ReBarChart>
+            </ResponsiveContainer>
+          </Box>
         </Card>{" "}
       </SimpleGrid>
 

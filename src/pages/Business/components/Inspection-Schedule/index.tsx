@@ -45,7 +45,6 @@ import {
   IconDownload,
   IconEdit,
   IconTrash,
-  IconEye,
   IconPlus,
   IconAlertCircle,
   IconExternalLink,
@@ -256,19 +255,6 @@ function InspectionSchedulePage() {
       },
     },
   ];
-
-  // Action handlers
-  const handleViewInspection = (
-    inspection: InspectionSchedule & { id: string }
-  ) => {
-    notifications.show({
-      title: "Thông tin lịch kiểm tra",
-      message: `${
-        inspection.inspector_description
-      } - ${inspection.inspection_date.toLocaleDateString()}`,
-      color: "blue",
-    });
-  };
 
   const handleEditInspection = (
     inspection: InspectionSchedule & { id: string }
@@ -782,19 +768,6 @@ function InspectionSchedulePage() {
         }}
         renderRowActions={({ row }) => (
           <Flex gap="md" justify="center">
-            <Tooltip label="Xem thông tin">
-              <ActionIcon
-                color="green"
-                variant="light"
-                radius="md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewInspection(row.original);
-                }}
-              >
-                <IconEye size={18} />
-              </ActionIcon>
-            </Tooltip>
             <Tooltip label="Sửa thông tin">
               <ActionIcon
                 color="blue"

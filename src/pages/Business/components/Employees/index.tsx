@@ -290,17 +290,6 @@ function Employees() {
     saveAs(blob, `nhan-vien.xlsx`);
   };
 
-  // Action handlers
-  const handleViewEmployee = (employee: Worker & { id: string }) => {
-    notifications.show({
-      title: "Thông tin nhân viên",
-      message: `${employee.worker_name} - ${
-        employee.gender === Gender.Male ? "Nam" : "Nữ"
-      }`,
-      color: "blue",
-    });
-  };
-
   const handleEditEmployee = (employee: Worker & { id: string }) => {
     setEditingEmployee(employee);
     editForm.setValues({
@@ -430,30 +419,17 @@ function Employees() {
         mantineTableBodyCellProps={({ column }) =>
           column.id === "mrt-row-actions"
             ? {
-                style: { paddingRight: 24, minWidth: 140, textAlign: "center" },
+                style: { paddingRight: 24, minWidth: 110, textAlign: "center" },
               }
             : {}
         }
         mantineTableHeadCellProps={({ column }) =>
           column.id === "mrt-row-actions"
-            ? { style: { minWidth: 140, textAlign: "center" } }
+            ? { style: { minWidth: 110, textAlign: "center" } }
             : {}
         }
         renderRowActions={({ row }) => (
           <Flex gap="md" justify="center">
-            <Tooltip label="Xem thông tin">
-              <ActionIcon
-                color="green"
-                variant="light"
-                radius="md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewEmployee(row.original as Worker & { id: string });
-                }}
-              >
-                <IconEye size={18} />
-              </ActionIcon>
-            </Tooltip>
             <Tooltip label="Sửa thông tin">
               <ActionIcon
                 color="blue"

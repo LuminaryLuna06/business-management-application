@@ -188,18 +188,6 @@ function SubLicenses() {
     validate: yupResolver(schema),
   });
 
-  // Action handlers
-  const handleViewLicense = (license: License & { id: string }) => {
-    const licenseName =
-      (allSubLicenses || []).find((gpc) => gpc.id === license.license_id)
-        ?.name || license.license_id;
-    notifications.show({
-      title: "Thông tin giấy phép",
-      message: `${licenseName} - ${license.license_number}`,
-      color: "blue",
-    });
-  };
-
   const handleEditLicense = (values: typeof editForm.values) => {
     if (!editingLicense) return;
     updateMutation.mutate({
@@ -419,30 +407,17 @@ function SubLicenses() {
         mantineTableBodyCellProps={({ column }) =>
           column.id === "mrt-row-actions"
             ? {
-                style: { paddingRight: 24, minWidth: 140, textAlign: "center" },
+                style: { paddingRight: 24, minWidth: 80, textAlign: "center" },
               }
             : {}
         }
         mantineTableHeadCellProps={({ column }) =>
           column.id === "mrt-row-actions"
-            ? { style: { minWidth: 140, textAlign: "center" } }
+            ? { style: { minWidth: 80, textAlign: "center" } }
             : {}
         }
         renderRowActions={({ row }) => (
           <Flex gap="md" justify="center">
-            <Tooltip label="Xem thông tin">
-              <ActionIcon
-                color="green"
-                variant="light"
-                radius="md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleViewLicense(row.original);
-                }}
-              >
-                <IconEye size={18} />
-              </ActionIcon>
-            </Tooltip>
             <Tooltip label="Sửa thông tin">
               <ActionIcon
                 color="blue"

@@ -77,7 +77,6 @@ const scheduleSchema = Yup.object().shape({
 
 const editSchema = Yup.object().shape({
   batch_name: Yup.string().required("Nhập tên đợt kiểm tra"),
-  batch_description: Yup.string().required("Nhập mô tả lịch kiểm tra"),
   batch_date: Yup.date()
     .typeError("Chọn ngày kiểm tra")
     .required("Chọn ngày kiểm tra"),
@@ -238,8 +237,7 @@ export default function ScheduleManagement() {
     if (selectedBatch) {
       editForm.setValues({
         batch_name: selectedBatch.batch_name || "",
-        batch_description:
-          selectedBatch.batch_description || selectedBatch.note || "",
+        batch_description: selectedBatch.batch_description || "",
         batch_date:
           selectedBatch.batch_date instanceof Date
             ? selectedBatch.batch_date
@@ -532,7 +530,6 @@ export default function ScheduleManagement() {
             {...form.getInputProps("batch_description")}
             mb="md"
             placeholder="Kiểm tra..."
-            required
             error={form.errors.batch_description}
             autosize
             minRows={2}

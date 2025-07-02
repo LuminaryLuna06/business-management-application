@@ -1379,7 +1379,7 @@ export const updateInspectionBatchAndSchedules = async (
       let opCount = 0;
       for (const docSnap of inspectionsSnap.docs) {
         const updateFields: any = {};
-        if (batchData.batch_description !== undefined) {
+        if (batchData.batch_description !== "") {
           updateFields.inspector_description = batchData.batch_description;
         }
         if (batchData.batch_date !== undefined) {

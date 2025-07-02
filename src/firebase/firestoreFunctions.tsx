@@ -1328,3 +1328,79 @@ export const deleteInspectionBatchAndAllLinkedData = async (
   await deleteCollectionGroupByBatch("reports");
   await deleteCollectionGroupByBatch("violations");
 };
+
+/**
+ * Cập nhật thông tin đợt kiểm tra trong collection 'schedule'
+ */
+export const updateInspectionBatch = async (
+  scheduleDocId: string,
+  batchData: Partial<InspectionBatch>
+): Promise<void> => {
+  try {
+    const updateData: any = { ...batchData };
+    if (batchData.batch_date) {
+      updateData.batch_date = Timestamp.fromDate(
+        new Date(batchData.batch_date)
+      );
+    }
+    await setDoc(doc(db, "schedule", scheduleDocId), updateData, {
+      merge: true,
+    });
+  } catch (error) {
+    console.error("Error updating inspection batch:", error);
+    throw error;
+  }
+};
+
+/**
+ * Cập nhật thông tin đợt kiểm tra và toàn bộ inspections liên quan
+ */
+export const updateInspectionBatchAndSchedules = async (
+  scheduleDocId: string,
+  batchData: Partial<InspectionBatch>
+): Promise<void> => {
+  try {
+    // 1. Cập nhật document đợt kiểm tra
+    await updateInspectionBatch(scheduleDocId, batchData);
+
+    // 2. Lấy batch_id từ document đã cập nhật
+    const batchDoc = await getDoc(doc(db, "schedule", scheduleDocId));
+    const batchId = batchDoc.data()?.batch_id;
+
+    if (batchId) {
+      // 3. Cập nhật các trường liên quan trong tất cả inspections có inspection_id = batchId
+      const inspectionsQuery = query(
+        collectionGroup(db, "inspections"),
+        where("inspection_id", "==", batchId)
+      );
+      const inspectionsSnap = await getDocs(inspectionsQuery);
+
+      let batch = writeBatch(db);
+      let opCount = 0;
+      for (const docSnap of inspectionsSnap.docs) {
+        const updateFields: any = {};
+        if (batchData.batch_description !== undefined) {
+          updateFields.inspector_description = batchData.batch_description;
+        }
+        if (batchData.batch_date !== undefined) {
+          updateFields.inspection_date = Timestamp.fromDate(
+            new Date(batchData.batch_date)
+          );
+        }
+        if (Object.keys(updateFields).length > 0) {
+          batch.update(docSnap.ref, updateFields);
+          opCount++;
+          if (opCount === 500) {
+            await batch.commit();
+            batch = writeBatch(db);
+            opCount = 0;
+          }
+        }
+      }
+      if (opCount > 0) await batch.commit();
+    }
+  } catch (error) {
+    console.error("Error updating inspection batch and schedules:", error);
+    throw error;
+  }
+};

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   Select,
@@ -38,6 +38,7 @@ import {
   useAllSchedulesQuery,
   useViolationStatsByBatchId,
   useDeleteInspectionBatchAndAllLinkedDataMutation,
+  useUpdateInspectionBatchAndSchedulesMutation,
 } from "../../tanstack/useInspectionQueries";
 
 const businessTypeOptions = [
@@ -66,11 +67,24 @@ const statusOptions = [
 
 const scheduleSchema = Yup.object().shape({
   batchName: Yup.string().required("Nhập tên đợt kiểm tra"),
+  batch_description: Yup.string().required("Nhập mô tả lịch kiểm tra"),
   createdBy: Yup.string().required("Nhập người tạo"),
   date: Yup.date()
     .typeError("Chọn ngày kiểm tra")
     .required("Chọn ngày kiểm tra"),
   ward: Yup.array().of(Yup.string()).min(1, "Chọn ít nhất 1 phường/xã"),
+});
+
+const editSchema = Yup.object().shape({
+  batch_name: Yup.string().required("Nhập tên đợt kiểm tra"),
+  batch_description: Yup.string().required("Nhập mô tả lịch kiểm tra"),
+  batch_date: Yup.date()
+    .typeError("Chọn ngày kiểm tra")
+    .required("Chọn ngày kiểm tra"),
+  created_by: Yup.string().required("Nhập người tạo"),
+  status: Yup.mixed()
+    .oneOf(statusOptions.map((s) => s.value))
+    .required("Chọn trạng thái"),
 });
 
 export default function ScheduleManagement() {
@@ -106,10 +120,10 @@ export default function ScheduleManagement() {
   });
 
   const handleOpenCreateModal = () => {
-    setModalOpen(true);
+    setEditModalOpen(true);
   };
   const handleCreateSchedule = () => {
-    setModalOpen(false);
+    setEditModalOpen(false);
     setConfirmOpen(true);
   };
   const createBatchMutation = useCreateInspectionBatchAndSchedulesMutation();
@@ -188,7 +202,7 @@ export default function ScheduleManagement() {
     return matchType && matchProvince && matchWard;
   });
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   // Lấy batch_id nếu có (giả sử selectedBatch có batch_id hoặc id)
@@ -205,6 +219,37 @@ export default function ScheduleManagement() {
 
   // Lấy docId của schedule nếu có
   const scheduleDocId = (selectedBatch as any)?.id;
+
+  const updateBatchAndSchedulesMutation =
+    useUpdateInspectionBatchAndSchedulesMutation();
+  const editForm = useForm({
+    initialValues: {
+      batch_name: "",
+      batch_description: "",
+      batch_date: null as Date | null,
+      created_by: "",
+      status: statusOptions[0].value,
+    },
+    validate: yupResolver(editSchema),
+  });
+
+  // Khi chọn batch mới, cập nhật lại form chỉnh sửa
+  useEffect(() => {
+    if (selectedBatch) {
+      editForm.setValues({
+        batch_name: selectedBatch.batch_name || "",
+        batch_description:
+          selectedBatch.batch_description || selectedBatch.note || "",
+        batch_date:
+          selectedBatch.batch_date instanceof Date
+            ? selectedBatch.batch_date
+            : null,
+        created_by: selectedBatch.created_by || "",
+        status: selectedBatch.status || statusOptions[0].value,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBatch]);
 
   if (schedulesLoading)
     return <Box p="md">Đang tải danh sách đợt kiểm tra...</Box>;
@@ -239,13 +284,18 @@ export default function ScheduleManagement() {
             w={300}
           />
           {selectedBatch && (
-            <Button
-              color="red"
-              variant="outline"
-              onClick={() => setDeleteModalOpen(true)}
-            >
-              Xóa đợt kiểm tra
-            </Button>
+            <>
+              <Button variant="default" onClick={() => setEditModalOpen(true)}>
+                Chỉnh sửa đợt kiểm tra
+              </Button>
+              <Button
+                color="red"
+                variant="outline"
+                onClick={() => setDeleteModalOpen(true)}
+              >
+                Xóa đợt kiểm tra
+              </Button>
+            </>
           )}
         </Group>
       </Group>
@@ -455,8 +505,8 @@ export default function ScheduleManagement() {
           </Button>
         </Group>
         <Modal
-          opened={modalOpen}
-          onClose={() => setModalOpen(false)}
+          opened={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
           title="Tạo lịch kiểm tra"
           centered
         >
@@ -472,6 +522,7 @@ export default function ScheduleManagement() {
             label="Lịch kiểm tra"
             value={form.values.date}
             onChange={(val) => form.setFieldValue("date", val)}
+            required
             placeholder="Chọn ngày"
             mb="md"
             error={form.errors.date}
@@ -481,6 +532,7 @@ export default function ScheduleManagement() {
             {...form.getInputProps("batch_description")}
             mb="md"
             placeholder="Kiểm tra..."
+            required
             error={form.errors.batch_description}
             autosize
             minRows={2}
@@ -513,7 +565,7 @@ export default function ScheduleManagement() {
             >
               Tiếp tục
             </Button>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>
+            <Button variant="outline" onClick={() => setEditModalOpen(false)}>
               Hủy
             </Button>
           </Group>
@@ -581,6 +633,105 @@ export default function ScheduleManagement() {
             Xác nhận xóa
           </Button>
           <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>
+            Hủy
+          </Button>
+        </Group>
+      </Modal>
+
+      {/* Modal chỉnh sửa đợt kiểm tra */}
+      <Modal
+        opened={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        title="Chỉnh sửa đợt kiểm tra"
+        centered
+      >
+        <TextInput
+          label="Tên đợt kiểm tra"
+          {...editForm.getInputProps("batch_name")}
+          mb="md"
+          required
+          error={editForm.errors.batch_name}
+        />
+        <DateInput
+          label="Ngày kiểm tra"
+          value={editForm.values.batch_date}
+          onChange={(val) => editForm.setFieldValue("batch_date", val)}
+          mb="md"
+          required
+          error={editForm.errors.batch_date}
+        />
+        <TextInput
+          label="Người tạo"
+          {...editForm.getInputProps("created_by")}
+          mb="md"
+          required
+          error={editForm.errors.created_by}
+        />
+        <Select
+          label="Trạng thái"
+          data={statusOptions}
+          value={editForm.values.status}
+          onChange={(val) => val && editForm.setFieldValue("status", val)}
+          mb="md"
+          required
+          error={editForm.errors.status}
+        />
+        <Textarea
+          label="Mô tả lịch kiểm tra"
+          {...editForm.getInputProps("batch_description")}
+          mb="md"
+          autosize
+          minRows={2}
+          maxRows={6}
+          required
+          error={editForm.errors.batch_description}
+        />
+        <Group mt="md">
+          <Button
+            onClick={() => {
+              if (!selectedBatch) return;
+              if (!editForm.validate().hasErrors) {
+                updateBatchAndSchedulesMutation.mutate(
+                  {
+                    scheduleDocId: selectedBatch.id,
+                    batchData: {
+                      batch_name: editForm.values.batch_name,
+                      batch_description: editForm.values.batch_description,
+                      batch_date: editForm.values.batch_date || undefined,
+                      created_by: editForm.values.created_by,
+                      status: editForm.values.status as
+                        | "scheduled"
+                        | "ongoing"
+                        | "completed",
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      setEditModalOpen(false);
+                      notifications.show({
+                        title: "Đã cập nhật đợt kiểm tra",
+                        message:
+                          "Thông tin và ngày kiểm tra đã được cập nhật cho toàn bộ lịch kiểm tra.",
+                        color: "green",
+                      });
+                    },
+                    onError: () => {
+                      notifications.show({
+                        title: "Lỗi cập nhật",
+                        message:
+                          "Không thể cập nhật đợt kiểm tra. Vui lòng thử lại!",
+                        color: "red",
+                      });
+                    },
+                  }
+                );
+              }
+            }}
+            loading={updateBatchAndSchedulesMutation.status === "pending"}
+          >
+            Lưu thay đổi
+          </Button>
+          <Button variant="outline" onClick={() => setEditModalOpen(false)}>
             Hủy
           </Button>
         </Group>

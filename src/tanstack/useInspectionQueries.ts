@@ -25,6 +25,8 @@ import {
   getAllSchedules,
   getViolationStatsByBatchId,
   deleteInspectionBatchAndAllLinkedData,
+  updateInspectionBatch,
+  updateInspectionBatchAndSchedules,
 } from "../firebase/firestoreFunctions";
 
 export function useInspectionSchedules(businessId: string) {
@@ -284,6 +286,39 @@ export function useDeleteInspectionBatchAndAllLinkedDataMutation() {
       queryClient.invalidateQueries({ queryKey: ["violation-stats"] });
       queryClient.invalidateQueries({ queryKey: ["inspection-stats"] });
       queryClient.invalidateQueries({ queryKey: ["all-violations"] });
+    },
+  });
+}
+
+export function useUpdateInspectionBatchMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      scheduleDocId,
+      batchData,
+    }: {
+      scheduleDocId: string;
+      batchData: Partial<InspectionBatch>;
+    }) => updateInspectionBatch(scheduleDocId, batchData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+    },
+  });
+}
+
+export function useUpdateInspectionBatchAndSchedulesMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      scheduleDocId,
+      batchData,
+    }: {
+      scheduleDocId: string;
+      batchData: Partial<InspectionBatch>;
+    }) => updateInspectionBatchAndSchedules(scheduleDocId, batchData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["schedules"] });
+      queryClient.invalidateQueries({ queryKey: ["inspection-schedules"] });
     },
   });
 }
